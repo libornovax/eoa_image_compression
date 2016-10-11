@@ -14,11 +14,31 @@ set ( EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/bin )
 set ( CMAKE_CXX_FLAGS "-g -std=c++11" )
 set ( DEBUG_MODE ON )
 
-file ( GLOB MY_HEADERS src/*.h )
-file ( GLOB MY_SOURCES src/*.cpp )
+
+FIND_PACKAGE ( OpenCV 2.4 REQUIRED )
+IF ( OpenCV_FOUND )
+    MESSAGE ( STATUS "OpenCV was found." )
+ELSE ( OpenCV_FOUND )
+    MESSAGE ( FATAL_ERROR "OpenCV was not found." )
+ENDIF ( OpenCV_FOUND )
+
+
+INCLUDE_DIRECTORIES ( src
+                      ${OpenCV_INCLUDE_DIR} )
+
+file ( GLOB MY_HEADERS src/*.h
+                       src/shapes/*.h
+                       src/components/*.h )
+file ( GLOB MY_SOURCES src/*.cpp
+                       src/shapes/*.cpp
+                       src/components/*.cpp )
 
 add_executable ( compress
     ${MY_HEADERS}
     ${MY_SOURCES}
+)
+
+target_link_libraries ( compress
+    ${OpenCV_LIBS}
 )
 
