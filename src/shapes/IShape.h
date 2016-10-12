@@ -6,6 +6,7 @@
 #ifndef ISHAPE_H
 #define ISHAPE_H
 
+#include <string>
 #include <assert.h>
 #include "components/IVisitor.h"
 
@@ -13,6 +14,10 @@
 namespace eic {
 
 
+/**
+ * @brief The IShape class
+ * Base class for all shape classes, wich can compose the final image
+ */
 class IShape
 {
 public:
@@ -20,7 +25,22 @@ public:
     IShape (int r, int g, int b/*, int a*/);
 
 
+    /**
+     * @brief Mutates the parameters with some random disturbance
+     */
+    virtual void mutate ();
+
+    /**
+     * @brief Accept method from the visitor design pattern
+     */
     virtual void accept (IVisitor &visitor) const = 0;
+
+    /**
+     * @brief Writes all parameters to a string
+     * @return A string representation of the shape (solely for debug purposes)
+     */
+    virtual std::string print () const;
+
 
 protected:
 

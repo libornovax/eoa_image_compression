@@ -6,6 +6,7 @@
 #ifndef CIRCLE_H
 #define CIRCLE_H
 
+#include <memory>
 #include <opencv2/core/core.hpp>
 #include "IShape.h"
 
@@ -19,8 +20,20 @@ public:
 
     Circle (int r, int g, int b/*, int a*/, int radius, const cv::Point2i &center);
 
+    /**
+     * @brief Generates a circle with random parameters (for initialization)
+     * @param image_size Size of the image we are composing
+     * @return A new Circle instance
+     */
+    static std::shared_ptr<Circle> randomCircle (const cv::Size &image_size);
+
+
+    virtual void mutate () override final;
 
     virtual void accept (IVisitor &visitor) const override final;
+
+    virtual std::string print () const override final;
+
 
 private:
 

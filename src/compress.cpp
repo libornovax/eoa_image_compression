@@ -15,10 +15,16 @@
 
 int main (int argc, char* argv[])
 {
+    cv::Size image_size(40, 40);
     eic::Chromozome ch;
-    ch.emplace_back(new eic::Circle(10, 10, 10, 50, cv::Point2i(0,0)));
-    ch.emplace_back(new eic::Circle(0, 255, 128, 10, cv::Point2i(20,20)));
-    ch.emplace_back(new eic::Circle(0, 0, 0, 15, cv::Point2i(40,40)));
+    ch.push_back(eic::Circle::randomCircle(image_size));
+    ch.push_back(eic::Circle::randomCircle(image_size));
+    ch.push_back(eic::Circle::randomCircle(image_size));
+
+    for (auto shape: ch)
+    {
+        std::cout << shape->print() << std::endl;
+    }
 
     eic::Renderer r(cv::Size(40, 40));
     r.render(ch);

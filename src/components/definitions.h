@@ -8,6 +8,7 @@
 
 #include <vector>
 #include <memory>
+#include <random>
 #include "shapes/IShape.h"
 
 
@@ -15,7 +16,7 @@ namespace eic {
 
 
 // Chromozome is just a vector of shapes
-typedef std::vector<std::unique_ptr<IShape>> Chromozome;
+typedef std::vector<std::shared_ptr<IShape>> Chromozome;
 
 
 }
