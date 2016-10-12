@@ -34,6 +34,8 @@ public:
 
     virtual std::string print () const override final;
 
+    virtual int getRadius () const final;
+    virtual const cv::Point& getCenter () const final;
 
 private:
 

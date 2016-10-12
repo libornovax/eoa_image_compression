@@ -1,3 +1,8 @@
+//
+// Libor Novak
+// 10/12/2016
+//
+
 #ifndef UTILS_H
 #define UTILS_H
 

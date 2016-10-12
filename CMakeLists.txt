@@ -1,8 +1,8 @@
 cmake_minimum_required ( VERSION 2.6 )
 
 # GCC is also in Courseware...
-SET ( CMAKE_CXX_COMPILER "g++-5.2.0" )
-SET ( CMAKE_C_COMPILER "gcc-5.2.0" )
+#SET ( CMAKE_CXX_COMPILER "g++-5.2.0" )
+#SET ( CMAKE_C_COMPILER "gcc-5.2.0" )
 
 
 ## ---------------------------------------- START PROJECT ---------------------------------------- ##

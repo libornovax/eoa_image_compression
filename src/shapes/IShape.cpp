@@ -41,6 +41,26 @@ std::string IShape::print () const
 }
 
 
+int IShape::getR () const
+{
+    return this->_r;
+}
+
+
+int IShape::getG () const
+{
+    return this->_g;
+}
+
+
+int IShape::getB () const
+{
+    return this->_b;
+}
+
+
+// -----------------------------------------  PROTECTED METHODS  ----------------------------------------- //
+
 void IShape::_check () const
 {
     assert(this->_r >= 0);

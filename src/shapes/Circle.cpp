@@ -57,12 +57,26 @@ void Circle::accept (IVisitor &visitor) const
 
 std::string Circle::print () const
 {
-    std::string output = "CIRCLE {";
+    std::string output = "CIRCLE { ";
     output += IShape::print() + ", ";
     output += "radius: " + std::to_string(this->_radius) + ", ";
     output += "center: [" + std::to_string(this->_center.x) + ", " + std::to_string(this->_center.y) + "]";
+    output += " }";
     return output;
 }
+
+
+int Circle::getRadius () const
+{
+    return this->_radius;
+}
+
+
+const cv::Point& Circle::getCenter () const
+{
+    return this->_center;
+}
+
 
 
 // ------------------------------------------  PRIVATE METHODS  ------------------------------------------ //

@@ -41,6 +41,10 @@ public:
      */
     virtual std::string print () const;
 
+    virtual int getR () const final;
+    virtual int getG () const final;
+    virtual int getB () const final;
+
 
 protected:
 
