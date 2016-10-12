@@ -32,9 +32,22 @@ const std::vector<cv::Mat> Renderer::render (const Chromozome &ch)
 
 void Renderer::visit (const Circle &circle)
 {
-    cv::circle(this->_channels[0], circle.getCenter(), circle.getRadius(), cv::Scalar(circle.getR()), -1);
-    cv::circle(this->_channels[1], circle.getCenter(), circle.getRadius(), cv::Scalar(circle.getG()), -1);
-    cv::circle(this->_channels[2], circle.getCenter(), circle.getRadius(), cv::Scalar(circle.getB()), -1);
+    double alpha = double(circle.getA()) / 100.0;
+
+    cv::Mat overlayr;
+    this->_channels[0].copyTo(overlayr);
+    cv::circle(overlayr, circle.getCenter(), circle.getRadius(), cv::Scalar(circle.getR()), -1);
+    cv::addWeighted(overlayr, alpha, this->_channels[0], 1-alpha, 0, this->_channels[0]);
+
+    cv::Mat overlayg;
+    this->_channels[1].copyTo(overlayg);
+    cv::circle(overlayg, circle.getCenter(), circle.getRadius(), cv::Scalar(circle.getG()), -1);
+    cv::addWeighted(overlayg, alpha, this->_channels[1], 1-alpha, 0, this->_channels[1]);
+
+    cv::Mat overlayb;
+    this->_channels[2].copyTo(overlayb);
+    cv::circle(overlayb, circle.getCenter(), circle.getRadius(), cv::Scalar(circle.getB()), -1);
+    cv::addWeighted(overlayb, alpha, this->_channels[2], 1-alpha, 0, this->_channels[2]);
 }
 
 
@@ -45,7 +58,7 @@ void Renderer::_reset ()
     for (cv::Mat &channel: this->_channels)
     {
         // Set the whole image to black
-        channel = cv::Mat(this->_image_size, CV_8UC1, cv::Scalar(0));
+        channel = cv::Mat(this->_image_size, CV_8UC1, cv::Scalar(255));
     }
 }
 

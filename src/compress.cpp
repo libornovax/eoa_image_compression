@@ -19,7 +19,7 @@ int main (int argc, char* argv[])
 {
     cv::Size image_size(400, 400);
     eic::Chromozome ch;
-    for (int i = 0; i < 100; ++i)
+    for (int i = 0; i < 10; ++i)
     {
         ch.push_back(eic::Circle::randomCircle(image_size));
     }

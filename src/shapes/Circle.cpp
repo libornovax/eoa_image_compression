@@ -7,8 +7,8 @@
 namespace eic {
 
 
-Circle::Circle (int r, int g, int b/*, int a*/, int radius, const cv::Point2i &center)
-    : IShape(r, g, b/*, a*/),
+Circle::Circle (int r, int g, int b, int a, int radius, const cv::Point2i &center)
+    : IShape(r, g, b, a),
       _radius(radius),
       _center(center)
 {
@@ -23,6 +23,9 @@ std::shared_ptr<Circle> Circle::randomCircle (const cv::Size &image_size)
     int g = dist(RGen::mt());
     int b = dist(RGen::mt());
 
+    std::uniform_int_distribution<int> dista(0, 100);
+    int a = dista(RGen::mt());
+
     std::uniform_int_distribution<int> distr(1, std::max(image_size.width, image_size.height)/2);
     int radius = distr(RGen::mt());
 
@@ -31,7 +34,7 @@ std::shared_ptr<Circle> Circle::randomCircle (const cv::Size &image_size)
     int x = distcx(RGen::mt());
     int y = distcy(RGen::mt());
 
-    return std::make_shared<Circle>(r, g, b, radius, cv::Point(x, y));
+    return std::make_shared<Circle>(r, g, b, a, radius, cv::Point(x, y));
 }
 
 

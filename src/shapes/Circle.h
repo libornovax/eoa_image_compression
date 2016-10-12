@@ -18,7 +18,7 @@ class Circle : public IShape
 {
 public:
 
-    Circle (int r, int g, int b/*, int a*/, int radius, const cv::Point2i &center);
+    Circle (int r, int g, int b, int a, int radius, const cv::Point2i &center);
 
     /**
      * @brief Generates a circle with random parameters (for initialization)

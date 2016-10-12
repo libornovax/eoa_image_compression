@@ -22,7 +22,7 @@ class IShape
 {
 public:
 
-    IShape (int r, int g, int b/*, int a*/);
+    IShape (int r, int g, int b, int a);
 
 
     /**
@@ -44,6 +44,7 @@ public:
     virtual int getR () const final;
     virtual int getG () const final;
     virtual int getB () const final;
+    virtual int getA () const final;
 
 
 protected:
@@ -58,7 +59,7 @@ protected:
     int _r; // red
     int _g; // green
     int _b; // blue
-//    int _a; // alpha
+    int _a; // alpha [0,100] %
 
 };
 
