@@ -6,8 +6,6 @@
 // This is code for EOA course at CTU in Prague.
 //
 
-#define _GLIBCXX_USE_CXX11_ABI 0
-
 #include <iostream>
 #include <memory>
 #include <opencv2/highgui/highgui.hpp>
