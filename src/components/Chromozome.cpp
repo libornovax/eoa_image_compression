@@ -1,6 +1,8 @@
 #include "Chromozome.h"
 
 #include "Renderer.h"
+#include "Config.h"
+#include "shapes/Circle.h"
 
 
 namespace eic {
@@ -20,6 +22,27 @@ Chromozome Chromozome::clone () const
     for (auto &shape: this->_chromozome)
     {
         ch._chromozome.push_back(shape->clone());
+    }
+
+    return ch;
+}
+
+
+Chromozome Chromozome::randomChromozome (const cv::Size &image_size)
+{
+    Chromozome ch;
+
+    for (int i = 0; i < Config::getParams().chromozome_length; ++i)
+    {
+        switch (Config::getParams().shape_type) {
+        case ShapeType::CIRCLE:
+            ch._chromozome.push_back(Circle::randomCircle(image_size));
+            break;
+        default:
+            std::cout << "ERROR: Unknown shape type " << int(Config::getParams().shape_type) << std::endl;
+            exit(EXIT_FAILURE);
+            break;
+        }
     }
 
     return ch;
