@@ -1,8 +1,5 @@
 #include "IShape.h"
 
-#include "components/RGen.h"
-#include "components/utils.h"
-
 
 namespace eic {
 
@@ -14,26 +11,6 @@ IShape::IShape (int r, int g, int b, int a)
       _a(a)
 {
     this->_check();
-}
-
-
-void IShape::mutate ()
-{
-    // Probability of mutation
-    std::uniform_real_distribution<double> distp(0.0, 1.0);
-
-    std::normal_distribution<double> dist(0, 10); // mean, stddev
-    if (distp(RGen::mt()) < 0.2) this->_r += dist(RGen::mt());
-    if (distp(RGen::mt()) < 0.2) this->_g += dist(RGen::mt());
-    if (distp(RGen::mt()) < 0.2) this->_b += dist(RGen::mt());
-    if (distp(RGen::mt()) < 0.2) this->_a += dist(RGen::mt());
-
-    // Correct the values to be in the interval [0,255]
-    this->_r = utils::clip(this->_r, 0, 255);
-    this->_g = utils::clip(this->_g, 0, 255);
-    this->_b = utils::clip(this->_b, 0, 255);
-    // Correct the value to be in the interval [0,100]
-    this->_a = utils::clip(this->_a, 0, 100);
 }
 
 

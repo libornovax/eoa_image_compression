@@ -1,7 +1,6 @@
 #include "Circle.h"
 
 #include "components/RGen.h"
-#include "components/utils.h"
 
 
 namespace eic {
@@ -44,27 +43,7 @@ std::shared_ptr<Circle> Circle::randomCircle (const cv::Size &image_size)
 }
 
 
-void Circle::mutate ()
-{
-    // Probability of mutation
-    std::uniform_real_distribution<double> distp(0.0, 1.0);
-
-    std::normal_distribution<double> distr (0, 5); // mean, stddev
-    if (distp(RGen::mt()) < 0.2) this->_radius += distr(RGen::mt());
-    this->_radius = utils::clip(this->_radius, 0, 10000); // Must be positive
-
-    std::normal_distribution<double> distc (0, 10); // mean, stddev
-    if (distp(RGen::mt()) < 0.2)
-    {
-        this->_center.x += distc(RGen::mt());
-        this->_center.y += distc(RGen::mt());
-    }
-
-    IShape::mutate();
-}
-
-
-void Circle::accept (IVisitor &visitor) const
+void Circle::accept (IVisitor &visitor)
 {
     visitor.visit(*this);
 }

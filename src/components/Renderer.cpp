@@ -1,6 +1,7 @@
 #include "Renderer.h"
 
 #include <opencv2/imgproc/imgproc.hpp>
+#include "Chromozome.h"
 #include "shapes/Circle.h"
 
 
@@ -16,22 +17,29 @@ Renderer::Renderer (const cv::Size &image_size)
 }
 
 
-const std::vector<cv::Mat> Renderer::render (const Chromozome &ch)
+const std::vector<cv::Mat> Renderer::render (Chromozome &ch)
 {
-    // Reset all channels to 0 and the correct size
-    this->_reset();
-
-    for (auto &shape: ch.chromozome())
-    {
-        // Render each shape
-        shape->accept(*this);
-    }
+    // Triger rendering of the chromozome -> visit it
+    ch.accept(*this);
 
     return this->_channels;
 }
 
 
-void Renderer::visit (const Circle &circle)
+void Renderer::visit (Chromozome &chromozome)
+{
+    // Reset all channels to 0 and the correct size
+    this->_reset();
+
+    for (auto &shape: chromozome.chromozome())
+    {
+        // Render each shape
+        shape->accept(*this);
+    }
+}
+
+
+void Renderer::visit (Circle &circle)
 {
     double alpha = double(circle.getA()) / 100.0;
 

@@ -21,6 +21,7 @@ namespace eic {
  */
 class IShape
 {
+    friend class Mutator;
 public:
 
     IShape (int r, int g, int b, int a);
@@ -29,14 +30,9 @@ public:
 
 
     /**
-     * @brief Mutates the parameters with some random disturbance
-     */
-    virtual void mutate ();
-
-    /**
      * @brief Accept method from the visitor design pattern
      */
-    virtual void accept (IVisitor &visitor) const = 0;
+    virtual void accept (IVisitor &visitor) = 0;
 
     /**
      * @brief Writes all parameters to a string

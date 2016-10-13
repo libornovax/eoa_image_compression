@@ -39,9 +39,9 @@ public:
     double getDifference () const;
 
     /**
-     * @brief Mutate the chromozome (invokes mutation of each shape)
+     * @brief Accept method from the visitor design pattern
      */
-    void mutate ();
+    void accept (IVisitor &visitor);
 
 
 private:

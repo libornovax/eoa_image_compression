@@ -67,12 +67,9 @@ double Chromozome::getDifference () const
 }
 
 
-void Chromozome::mutate ()
+void Chromozome::accept (IVisitor &visitor)
 {
-    for (auto &shape: this->_chromozome)
-    {
-        shape->mutate();
-    }
+    visitor.visit(*this);
 }
 
 

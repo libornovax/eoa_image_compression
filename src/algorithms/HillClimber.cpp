@@ -1,5 +1,6 @@
 #include "HillClimber.h"
 
+#include "Mutator.h"
 #include "shapes/Circle.h"
 
 
@@ -22,10 +23,13 @@ Chromozome HillClimber::run ()
         this->_best_chromozome.chromozome().push_back(eic::Circle::randomCircle(this->_target[0].size()));
     }
 
+    Mutator mut;
+
     for (int i = 0; i < 1000; ++i)
     {
         Chromozome cloned = this->_best_chromozome.clone();
-        cloned.mutate();
+        // Mutate the chromozome
+        cloned.accept(mut);
 
         if (cloned.computeDifference(this->_target) < this->_best_chromozome.getDifference())
         {
