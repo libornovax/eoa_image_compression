@@ -6,6 +6,8 @@
 #ifndef UTILS_H
 #define UTILS_H
 
+#include "RGen.h"
+
 
 namespace eic {
 namespace utils {
@@ -22,6 +24,13 @@ template<typename T>
 T clip (const T &n, const T &min, const T &max)
 {
     return std::min(std::max(n, min), max);
+}
+
+
+bool makeMutation (double p)
+{
+    static std::uniform_real_distribution<double> dist(0.0, 1.0);
+    return dist(RGen::mt()) <= p;
 }
 
 

@@ -38,6 +38,6 @@ hill_climber:
 # Mutator is a common structure, which takes care of mutating the chromozome and the shapes, which
 # represent the image
 mutator:
-    shape_mutation_prob: 0.1
+    shape_mutation_prob: 0.5
 
 

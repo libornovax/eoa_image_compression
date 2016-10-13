@@ -4,6 +4,7 @@
 #include "components/RGen.h"
 #include "shapes/Circle.h"
 #include "components/Chromozome.h"
+#include "components/Config.h"
 
 
 namespace eic {
@@ -20,7 +21,10 @@ void Mutator::visit (Chromozome &chromozome)
     for (size_t i = 0; i < chromozome.size(); ++i)
     {
         // Invoke mutation of each shape
-        chromozome[i]->accept(*this);
+        if (utils::makeMutation(Config::getParams().mutator.shape_mutation_prob))
+        {
+            chromozome[i]->accept(*this);
+        }
     }
 }
 
