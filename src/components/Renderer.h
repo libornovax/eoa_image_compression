@@ -8,7 +8,7 @@
 
 #include <opencv2/core/core.hpp>
 #include <iostream>
-#include "definitions.h"
+#include "Chromozome.h"
 #include "IVisitor.h"
 
 

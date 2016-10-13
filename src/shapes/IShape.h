@@ -8,6 +8,7 @@
 
 #include <string>
 #include <assert.h>
+#include <memory>
 #include "components/IVisitor.h"
 
 
@@ -23,6 +24,8 @@ class IShape
 public:
 
     IShape (int r, int g, int b, int a);
+
+    virtual std::shared_ptr<IShape> clone () const = 0;
 
 
     /**

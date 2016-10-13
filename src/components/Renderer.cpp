@@ -1,5 +1,6 @@
 #include "Renderer.h"
 
+#include <opencv2/imgproc/imgproc.hpp>
 #include "shapes/Circle.h"
 
 
@@ -20,7 +21,7 @@ const std::vector<cv::Mat> Renderer::render (const Chromozome &ch)
     // Reset all channels to 0 and the correct size
     this->_reset();
 
-    for (auto &shape: ch)
+    for (auto &shape: ch.chromozome())
     {
         // Render each shape
         shape->accept(*this);

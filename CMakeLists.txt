@@ -15,7 +15,7 @@ set ( CMAKE_CXX_FLAGS "-g -std=c++11" )
 set ( DEBUG_MODE ON )
 
 
-FIND_PACKAGE ( OpenCV 2.4 REQUIRED )
+FIND_PACKAGE ( OpenCV 3.1 REQUIRED )
 IF ( OpenCV_FOUND )
     MESSAGE ( STATUS "OpenCV was found." )
 ELSE ( OpenCV_FOUND )
@@ -28,10 +28,12 @@ INCLUDE_DIRECTORIES ( src
 
 file ( GLOB MY_HEADERS src/*.h
                        src/shapes/*.h
-                       src/components/*.h )
+                       src/components/*.h
+                       src/algorithms/*.h )
 file ( GLOB MY_SOURCES src/*.cpp
                        src/shapes/*.cpp
-                       src/components/*.cpp )
+                       src/components/*.cpp
+                       src/algorithms/*.cpp )
 
 add_executable ( compress
     ${MY_HEADERS}

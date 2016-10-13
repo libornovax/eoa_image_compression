@@ -16,6 +16,12 @@ Circle::Circle (int r, int g, int b, int a, int radius, const cv::Point2i &cente
 }
 
 
+std::shared_ptr<IShape> Circle::clone () const
+{
+    return std::make_shared<Circle>(this->_r, this->_g, this->_b, this->_a, this->_radius, this->_center);
+}
+
+
 std::shared_ptr<Circle> Circle::randomCircle (const cv::Size &image_size)
 {
     std::uniform_int_distribution<int> dist(0, 255);
@@ -40,13 +46,19 @@ std::shared_ptr<Circle> Circle::randomCircle (const cv::Size &image_size)
 
 void Circle::mutate ()
 {
+    // Probability of mutation
+    std::uniform_real_distribution<double> distp(0.0, 1.0);
+
     std::normal_distribution<double> distr (0, 5); // mean, stddev
-    this->_radius += distr(RGen::mt());
+    if (distp(RGen::mt()) < 0.2) this->_radius += distr(RGen::mt());
     this->_radius = utils::clip(this->_radius, 0, 10000); // Must be positive
 
     std::normal_distribution<double> distc (0, 10); // mean, stddev
-    this->_center.x += distc(RGen::mt());
-    this->_center.y += distc(RGen::mt());
+    if (distp(RGen::mt()) < 0.2)
+    {
+        this->_center.x += distc(RGen::mt());
+        this->_center.y += distc(RGen::mt());
+    }
 
     IShape::mutate();
 }

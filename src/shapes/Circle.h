@@ -20,6 +20,8 @@ public:
 
     Circle (int r, int g, int b, int a, int radius, const cv::Point2i &center);
 
+    virtual std::shared_ptr<IShape> clone () const override final;
+
     /**
      * @brief Generates a circle with random parameters (for initialization)
      * @param image_size Size of the image we are composing
