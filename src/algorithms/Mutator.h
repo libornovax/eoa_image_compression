@@ -1,3 +1,8 @@
+//
+// Libor Novak
+// 10/13/2016
+//
+
 #ifndef MUTATOR_H
 #define MUTATOR_H
 

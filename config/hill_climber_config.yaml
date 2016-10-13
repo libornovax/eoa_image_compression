@@ -1,0 +1,40 @@
+#
+# Libor Novak
+# 10/13/2016
+#
+# Config file for EOA image compression with the Hill Climber algorithm
+#
+
+####################################################################################################
+#######################################  GLOBAL PARAMETERS  ########################################
+####################################################################################################
+
+# Image that will be approximated with the compression algorithm
+path_image: "test.jpg"
+
+# Length of the chromozome, that will represent the image (number of shapes)
+chromozome_length: 50
+
+# Type of shape to be used in the chromozome
+shape_type: 1  # 1 = Circle
+
+# Which algorithm will be used for compression
+algorithm: 1  # 1 = HillClimber
+
+
+####################################################################################################
+######################################  ALGORITHM PARAMETERS  ######################################
+####################################################################################################
+
+# Parameters of the Hill Climber algorithm
+hill_climber:
+    # Number of iterations (mutations) to be tried in one hill climb run
+    num_iterations: 1000
+
+
+# Mutator is a common structure, which takes care of mutating the chromozome and the shapes, which
+# represent the image
+mutator:
+    shape_mutation_prob: 0.1
+
+

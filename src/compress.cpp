@@ -15,10 +15,24 @@
 #include "shapes/Circle.h"
 #include "components/Renderer.h"
 #include "algorithms/HillClimber.h"
+#include "components/Config.h"
 
 
 int main (int argc, char* argv[])
 {
+    if (argc != 2)
+    {
+        std::cout << "ERROR: Missing config file!" << std::endl;
+        std::cout << "Usage: ./compress path/to/some_config.yaml" << std::endl;
+        return EXIT_FAILURE;
+    }
+
+    // Load the config file
+    std::string path_config(argv[1]);
+    eic::Config::loadParams(path_config);
+
+
+
     cv::Mat image = cv::imread("test.jpg", CV_LOAD_IMAGE_COLOR);
     cv::Size image_size = image.size();
 
@@ -71,5 +85,5 @@ int main (int argc, char* argv[])
     cv::waitKey();
 
 
-	return 0;
+    return EXIT_SUCCESS;
 }
