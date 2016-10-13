@@ -31,10 +31,10 @@ void Renderer::visit (Chromozome &chromozome)
     // Reset all channels to 0 and the correct size
     this->_reset();
 
-    for (auto &shape: chromozome.chromozome())
+    for (size_t i = 0; i < chromozome.size(); ++i)
     {
         // Render each shape
-        shape->accept(*this);
+        chromozome[i]->accept(*this);
     }
 }
 

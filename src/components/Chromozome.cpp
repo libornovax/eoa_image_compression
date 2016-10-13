@@ -49,15 +49,17 @@ Chromozome Chromozome::randomChromozome (const cv::Size &image_size)
 }
 
 
-std::vector<std::shared_ptr<IShape>>& Chromozome::chromozome ()
+size_t Chromozome::size () const
 {
-    return this->_chromozome;
+    return this->_chromozome.size();
 }
 
 
-const std::vector<std::shared_ptr<IShape>>& Chromozome::chromozome () const
+std::shared_ptr<IShape>& Chromozome::operator[] (size_t i)
 {
-    return this->_chromozome;
+    assert(i < this->_chromozome.size());
+
+    return this->_chromozome[i];
 }
 
 
@@ -72,7 +74,7 @@ double Chromozome::computeDifference (const std::vector<cv::Mat> &target)
 
     // Compute pixel-wise difference
     this->_difference = 0;
-    for (int i = 0; i < target.size(); ++i)
+    for (size_t i = 0; i < target.size(); ++i)
     {
         cv::Mat diff;
         cv::absdiff(target[i], channels[i], diff);

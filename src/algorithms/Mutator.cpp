@@ -17,10 +17,10 @@ Mutator::Mutator ()
 
 void Mutator::visit (Chromozome &chromozome)
 {
-    for (auto &shape: chromozome.chromozome())
+    for (size_t i = 0; i < chromozome.size(); ++i)
     {
         // Invoke mutation of each shape
-        shape->accept(*this);
+        chromozome[i]->accept(*this);
     }
 }
 
