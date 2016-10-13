@@ -39,6 +39,7 @@ struct HillClimberParams
 struct ConfigParams
 {
     std::string path_image;
+    std::string path_out;
     int chromozome_length;
     ShapeType shape_type;
     AlgorithmType algorithm;
@@ -53,9 +54,22 @@ class Config
 {
 public:
 
+    /**
+     * @brief Returns the loaded configuration parameters
+     * @return Structure with config parameters
+     */
     static const ConfigParams& getParams ();
 
+    /**
+     * @brief Loads parameters from a config YAML file
+     * @param path_config Path to the config YAML file
+     */
     static void loadParams (const std::string &path_config);
+
+    /**
+     * @brief Print the parameters to std::cout
+     */
+    static void print ();
 
 
 private:

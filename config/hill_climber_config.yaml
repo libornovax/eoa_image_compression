@@ -12,6 +12,9 @@
 # Image that will be approximated with the compression algorithm
 path_image: "test.jpg"
 
+# Path to the folder with output and approximaged image
+path_out: "."
+
 # Length of the chromozome, that will represent the image (number of shapes)
 chromozome_length: 50
 
