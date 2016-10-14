@@ -31,7 +31,7 @@ Chromozome HillClimber::run ()
         if (cloned.computeDifference(this->_target) < this->_best_chromozome.getDifference())
         {
             // Replace the best chromozome, this one is better
-            std::cout << "[" << i << "] Lowest difference: " << cloned.getDifference() << std::endl;
+            std::cout << "[" << i << "] Lowest difference: " << cloned.getDifference() << " (" << cloned.size() << ")" << std::endl;
             this->_best_chromozome = cloned;
         }
     }
