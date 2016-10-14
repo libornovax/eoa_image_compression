@@ -7,6 +7,7 @@
 //
 
 #include <iostream>
+#include <fstream>
 #include <memory>
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
@@ -47,6 +48,18 @@ void runCompression ()
         exit(EXIT_FAILURE);
         break;
     }
+
+
+    // Save the resulting shapes to a file
+    std::ofstream outfile(eic::Config::getParams().path_out + "/representation.txt");
+    if (outfile)
+    {
+        for (int i = 0; i < result.size(); ++i)
+        {
+            outfile << result[i]->print() << std::endl;
+        }
+    }
+    outfile.close();
 
 
     // Show the final approximated image
