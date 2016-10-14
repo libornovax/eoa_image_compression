@@ -1,6 +1,8 @@
 #include "HillClimber.h"
 
+#include "Mutator.h"
 #include "shapes/Circle.h"
+#include "components/Config.h"
 
 
 namespace eic {
@@ -16,16 +18,15 @@ HillClimber::HillClimber (const std::vector<cv::Mat> &target)
 
 Chromozome HillClimber::run ()
 {
-    // TODO!! This must be done differently!
-    for (int i = 0; i < 100; ++i)
-    {
-        this->_best_chromozome.chromozome().push_back(eic::Circle::randomCircle(this->_target[0].size()));
-    }
+    // Initialize with a random chromozome
+    this->_best_chromozome = Chromozome::randomChromozome(this->_target[0].size());
 
-    for (int i = 0; i < 1000; ++i)
+    Mutator mut(this->_target[0].size());
+    for (int i = 0; i < Config::getParams().hill_climber.num_iterations; ++i)
     {
         Chromozome cloned = this->_best_chromozome.clone();
-        cloned.mutate();
+        // Mutate the chromozome
+        cloned.accept(mut);
 
         if (cloned.computeDifference(this->_target) < this->_best_chromozome.getDifference())
         {

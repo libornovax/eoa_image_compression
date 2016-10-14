@@ -21,11 +21,29 @@ public:
 
     Chromozome ();
 
+    /**
+     * @brief Makes a deep copy of the chromozome and all its shapes
+     * @return New Chromozome instance
+     */
     Chromozome clone () const;
 
+    /**
+     * @brief Generates a random chromozome according to settings
+     * @param image_size Size of an image that is being approximated
+     * @return New Chromozome instance
+     */
+    static Chromozome randomChromozome (const cv::Size &image_size);
 
-    std::vector<std::shared_ptr<IShape>>& chromozome ();
-    const std::vector<std::shared_ptr<IShape>>& chromozome () const;
+
+    /**
+     * @brief Length of the chromozome (number of shapes)
+     */
+    size_t size () const;
+
+    /**
+     * @brief Returns pointer to one shape in the chromozome
+     */
+    std::shared_ptr<IShape>& operator[] (size_t i);
 
     /**
      * @brief Computes the difference of the image represented by the chromozome and the target image
@@ -39,9 +57,9 @@ public:
     double getDifference () const;
 
     /**
-     * @brief Mutate the chromozome (invokes mutation of each shape)
+     * @brief Accept method from the visitor design pattern
      */
-    void mutate ();
+    void accept (IVisitor &visitor);
 
 
 private:

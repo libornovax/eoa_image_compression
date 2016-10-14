@@ -1,0 +1,61 @@
+#
+# Libor Novak
+# 10/13/2016
+#
+# Config file for EOA image compression with the Hill Climber algorithm
+#
+
+####################################################################################################
+#######################################  GLOBAL PARAMETERS  ########################################
+####################################################################################################
+
+# Image that will be approximated with the compression algorithm
+path_image: "test.jpg"
+
+# Path to the folder with output and approximaged image
+path_out: "."
+
+# Length of the chromozome, that will represent the image (number of shapes)
+chromozome_length: 50
+
+# Type of shape to be used in the chromozome
+shape_type: 1  # 1 = Circle
+
+# Which algorithm will be used for compression
+algorithm: 1  # 1 = HillClimber
+
+
+####################################################################################################
+######################################  ALGORITHM PARAMETERS  ######################################
+####################################################################################################
+
+# Parameters of the Hill Climber algorithm
+hill_climber:
+    # Number of iterations (mutations) to be tried in one hill climb run
+    num_iterations: 10000
+
+
+# Mutator is a common structure, which takes care of mutating the chromozome and the shapes, which
+# represent the image
+mutator:
+    # Probability of the whole shape being mutated at all
+    shape_mutation_prob: 0.1
+
+    # Probability that a color (the alpha) channel will be mutated
+    color_mutation_prob: 0.1
+    alpha_mutation_prob: 0.1
+    # Standard deviation of the mutation for color and alpha channels
+    color_mutation_stddev: 10
+    alpha_mutation_stddev: 3
+
+    # Probability of a position (point) being mutated
+    position_mutation_prob: 0.05
+    # Standard deviation of the position mutation
+    position_mutation_stddev: 20
+    # Probability of a position (point) being completely randomly reinitialized
+    position_reinitialization_prob: 0.005
+
+    # CIRCLE specific
+    radius_mutation_prob: 0.05
+    radius_mutation_sdtddev: 5
+

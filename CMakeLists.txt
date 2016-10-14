@@ -42,5 +42,6 @@ add_executable ( compress
 
 target_link_libraries ( compress
     ${OpenCV_LIBS}
+    yaml-cpp
 )
 

@@ -8,7 +8,6 @@
 
 #include <opencv2/core/core.hpp>
 #include <iostream>
-#include "Chromozome.h"
 #include "IVisitor.h"
 
 
@@ -27,17 +26,23 @@ public:
 
 
     /**
-     * @brief Triggers rendering of the whole image from the given Chromozome
+     * @brief Triggers rendering of the whole image and returns it
      * @param ch Chromozome (image representation) to be rendered
      * @return 3 channels representing the rendered image
      */
-    const std::vector<cv::Mat> render (const Chromozome &ch);
+    const std::vector<cv::Mat> render (Chromozome &ch);
+
+    /**
+     * @brief Triggers the rendering of the whole chromozome
+     * @param chromozome Chromozome to be rendered
+     */
+    virtual void visit (Chromozome &chromozome) override final;
 
     /**
      * @brief Renders a Circle into the current image
      * @param circle Circle to be rendered
      */
-    virtual void visit (const Circle &circle) override final;
+    virtual void visit (Circle &circle) override final;
 
 
 private:

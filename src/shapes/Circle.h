@@ -16,6 +16,7 @@ namespace eic {
 
 class Circle : public IShape
 {
+    friend class Mutator;
 public:
 
     Circle (int r, int g, int b, int a, int radius, const cv::Point2i &center);
@@ -30,9 +31,7 @@ public:
     static std::shared_ptr<Circle> randomCircle (const cv::Size &image_size);
 
 
-    virtual void mutate () override final;
-
-    virtual void accept (IVisitor &visitor) const override final;
+    virtual void accept (IVisitor &visitor) override final;
 
     virtual std::string print () const override final;
 

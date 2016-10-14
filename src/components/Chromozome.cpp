@@ -1,6 +1,8 @@
 #include "Chromozome.h"
 
 #include "Renderer.h"
+#include "Config.h"
+#include "shapes/Circle.h"
 
 
 namespace eic {
@@ -26,15 +28,38 @@ Chromozome Chromozome::clone () const
 }
 
 
-std::vector<std::shared_ptr<IShape>>& Chromozome::chromozome ()
+Chromozome Chromozome::randomChromozome (const cv::Size &image_size)
 {
-    return this->_chromozome;
+    Chromozome ch;
+
+    for (int i = 0; i < Config::getParams().chromozome_length; ++i)
+    {
+        switch (Config::getParams().shape_type) {
+        case ShapeType::CIRCLE:
+            ch._chromozome.push_back(Circle::randomCircle(image_size));
+            break;
+        default:
+            std::cout << "ERROR: Unknown shape type " << int(Config::getParams().shape_type) << std::endl;
+            exit(EXIT_FAILURE);
+            break;
+        }
+    }
+
+    return ch;
 }
 
 
-const std::vector<std::shared_ptr<IShape>>& Chromozome::chromozome () const
+size_t Chromozome::size () const
 {
-    return this->_chromozome;
+    return this->_chromozome.size();
+}
+
+
+std::shared_ptr<IShape>& Chromozome::operator[] (size_t i)
+{
+    assert(i < this->_chromozome.size());
+
+    return this->_chromozome[i];
 }
 
 
@@ -49,7 +74,7 @@ double Chromozome::computeDifference (const std::vector<cv::Mat> &target)
 
     // Compute pixel-wise difference
     this->_difference = 0;
-    for (int i = 0; i < target.size(); ++i)
+    for (size_t i = 0; i < target.size(); ++i)
     {
         cv::Mat diff;
         cv::absdiff(target[i], channels[i], diff);
@@ -67,12 +92,9 @@ double Chromozome::getDifference () const
 }
 
 
-void Chromozome::mutate ()
+void Chromozome::accept (IVisitor &visitor)
 {
-    for (auto &shape: this->_chromozome)
-    {
-        shape->mutate();
-    }
+    visitor.visit(*this);
 }
 
 

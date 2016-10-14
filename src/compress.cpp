@@ -7,6 +7,7 @@
 //
 
 #include <iostream>
+#include <fstream>
 #include <memory>
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
@@ -15,61 +16,85 @@
 #include "shapes/Circle.h"
 #include "components/Renderer.h"
 #include "algorithms/HillClimber.h"
+#include "components/Config.h"
 
 
-int main (int argc, char* argv[])
+void runCompression ()
 {
-    cv::Mat image = cv::imread("test.jpg", CV_LOAD_IMAGE_COLOR);
+    cv::Mat image = cv::imread(eic::Config::getParams().path_image, CV_LOAD_IMAGE_COLOR);
     cv::Size image_size = image.size();
 
-//    cv::cvtColor(image, image, CV_BGR2RGB);
+//    cv::cvtColor(image, image, CV_BGR2RGB); // This is how it should really be
     std::vector<cv::Mat> image_channels;
     cv::split(image, image_channels);
+
 
     cv::imshow("original", image);
     cv::waitKey(1);
 
 
-    eic::HillClimber hc(image_channels);
-    eic::Chromozome result = hc.run();
+    // Compress the image
+    eic::Chromozome result;
+    switch (eic::Config::getParams().algorithm)
+    {
+    case eic::AlgorithmType::HILL_CLIMBER:
+        {
+            eic::HillClimber hc(image_channels);
+            result = hc.run();
+        }
+        break;
+    default:
+        std::cout << "ERROR: Unsupported algorithm!" << std::endl;
+        exit(EXIT_FAILURE);
+        break;
+    }
 
 
+    // Save the resulting shapes to a file
+    std::ofstream outfile(eic::Config::getParams().path_out + "/representation.txt");
+    if (outfile)
+    {
+        for (int i = 0; i < result.size(); ++i)
+        {
+            outfile << result[i]->print() << std::endl;
+        }
+    }
+    outfile.close();
 
 
-
-
-
-
-
-
-
-//    eic::Chromozome ch;
-//    for (int i = 0; i < 100; ++i)
-//    {
-//        ch.chromozome().push_back(eic::Circle::randomCircle(image_size));
-//    }
-
-////    for (auto shape: ch)
-////    {
-////        std::cout << shape->print() << std::endl;
-////    }
-
+    // Show the final approximated image
+    // Render it
     eic::Renderer r(image_size);
-
-//    auto start = std::chrono::system_clock::now();
     const std::vector<cv::Mat> channels = r.render(result);
-//    auto end = std::chrono::system_clock::now();
 
-//    std::cout << "Elapsed: " << double(std::chrono::duration_cast<std::chrono::milliseconds>(end-start).count()) << " milliseconds" << std::endl;
-//    std::cout << "Difference: " << result.getDifference() << std::endl;
-
+    // Merge the channels to one image
     cv::Mat approximation;
     cv::merge(channels, approximation);
+//    cv::cvtColor(approximation, approximation, CV_RGB2BGR); // This is how it should really be
 
+    cv::imwrite(eic::Config::getParams().path_out + "/approximation.jpg", approximation);
     cv::imshow("approximation", approximation);
-    cv::imwrite("approximation.jpg", approximation);
     cv::waitKey();
+}
 
 
-	return 0;
+int main (int argc, char* argv[])
+{
+    if (argc != 2)
+    {
+        std::cout << "ERROR: Missing config file!" << std::endl;
+        std::cout << "Usage: ./compress path/to/some_config.yaml" << std::endl;
+        return EXIT_FAILURE;
+    }
+
+    // Load the config file
+    std::string path_config(argv[1]);
+    eic::Config::loadParams(path_config);
+    eic::Config::print();
+
+
+    runCompression();
+
+
+    return EXIT_SUCCESS;
 }
