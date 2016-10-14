@@ -41,6 +41,12 @@ public:
     size_t size () const;
 
     /**
+     * @brief Adds a new random shape to the chromozome
+     * @param image_size Size of an image that is being approximated
+     */
+    void addRandomShape (const cv::Size &image_size);
+
+    /**
      * @brief Returns pointer to one shape in the chromozome
      */
     std::shared_ptr<IShape>& operator[] (size_t i);

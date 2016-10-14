@@ -31,20 +31,10 @@ Chromozome Chromozome::clone () const
 Chromozome Chromozome::randomChromozome (const cv::Size &image_size)
 {
     Chromozome ch;
-
     for (int i = 0; i < Config::getParams().chromozome_length; ++i)
     {
-        switch (Config::getParams().shape_type) {
-        case ShapeType::CIRCLE:
-            ch._chromozome.push_back(Circle::randomCircle(image_size));
-            break;
-        default:
-            std::cout << "ERROR: Unknown shape type " << int(Config::getParams().shape_type) << std::endl;
-            exit(EXIT_FAILURE);
-            break;
-        }
+        ch.addRandomShape(image_size);
     }
-
     return ch;
 }
 
@@ -52,6 +42,20 @@ Chromozome Chromozome::randomChromozome (const cv::Size &image_size)
 size_t Chromozome::size () const
 {
     return this->_chromozome.size();
+}
+
+
+void Chromozome::addRandomShape (const cv::Size &image_size)
+{
+    switch (Config::getParams().shape_type) {
+    case ShapeType::CIRCLE:
+        this->_chromozome.push_back(Circle::randomCircle(image_size));
+        break;
+    default:
+        std::cout << "ERROR: Unknown shape type " << int(Config::getParams().shape_type) << std::endl;
+        exit(EXIT_FAILURE);
+        break;
+    }
 }
 
 
