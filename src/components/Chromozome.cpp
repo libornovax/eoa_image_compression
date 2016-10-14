@@ -1,5 +1,6 @@
 #include "Chromozome.h"
 
+#include <chrono>
 #include "Renderer.h"
 #include "Config.h"
 #include "shapes/Circle.h"
@@ -74,7 +75,15 @@ double Chromozome::computeDifference (const std::vector<cv::Mat> &target)
 
     // Render the image
     Renderer renderer(target[0].size());
+#ifdef MEASURE_TIME
+    auto start = std::chrono::high_resolution_clock::now();
+#endif
     const std::vector<cv::Mat> channels = renderer.render(*this);
+#ifdef MEASURE_TIME
+    auto end = std::chrono::high_resolution_clock::now();
+    std::cout << "Rendering time: " << std::chrono::duration_cast<std::chrono::milliseconds>(end-start).count() << " ms" << std::endl;
+#endif
+
 
     // Compute pixel-wise difference
     this->_difference = 0;
