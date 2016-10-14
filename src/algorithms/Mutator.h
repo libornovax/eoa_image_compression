@@ -6,6 +6,7 @@
 #ifndef MUTATOR_H
 #define MUTATOR_H
 
+#include <opencv2/core/core.hpp>
 #include "components/IVisitor.h"
 #include "shapes/IShape.h"
 
@@ -17,7 +18,7 @@ class Mutator : public IVisitor
 {
 public:
 
-    Mutator ();
+    Mutator (const cv::Size &image_size);
 
 
     /**
@@ -38,6 +39,10 @@ private:
      * @param shape
      */
     void _mutateIShape (IShape &shape) const;
+
+
+    // -------------------------------------  PRIVATE MEMBERS  ------------------------------------- //
+    cv::Size _image_size;
 
 };
 

@@ -28,10 +28,10 @@ std::shared_ptr<Circle> Circle::randomCircle (const cv::Size &image_size)
     int g = dist(RGen::mt());
     int b = dist(RGen::mt());
 
-    std::uniform_int_distribution<int> dista(0, 100);
+    std::uniform_int_distribution<int> dista(30, 60);
     int a = dista(RGen::mt());
 
-    std::uniform_int_distribution<int> distr(1, std::max(image_size.width, image_size.height)/2);
+    std::uniform_int_distribution<int> distr(1, std::min(image_size.width, image_size.height)/4);
     int radius = distr(RGen::mt());
 
     std::uniform_int_distribution<int> distcx(0, image_size.width);

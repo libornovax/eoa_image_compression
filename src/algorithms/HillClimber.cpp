@@ -21,7 +21,7 @@ Chromozome HillClimber::run ()
     // Initialize with a random chromozome
     this->_best_chromozome = Chromozome::randomChromozome(this->_target[0].size());
 
-    Mutator mut;
+    Mutator mut(this->_target[0].size());
     for (int i = 0; i < Config::getParams().hill_climber.num_iterations; ++i)
     {
         Chromozome cloned = this->_best_chromozome.clone();

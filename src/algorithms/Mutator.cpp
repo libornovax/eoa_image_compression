@@ -10,7 +10,8 @@
 namespace eic {
 
 
-Mutator::Mutator ()
+Mutator::Mutator (const cv::Size &image_size)
+    : _image_size(image_size)
 {
 
 }
@@ -31,18 +32,28 @@ void Mutator::visit (Chromozome &chromozome)
 
 void Mutator::visit (Circle &circle)
 {
-    // Probability of mutation
-    std::uniform_real_distribution<double> distp(0.0, 1.0);
-
-    std::normal_distribution<double> distr (0, 5); // mean, stddev
-    if (distp(RGen::mt()) < 0.2) circle._radius += distr(RGen::mt());
-    circle._radius = utils::clip(circle._radius, 0, 10000); // Must be positive
-
-    std::normal_distribution<double> distc (0, 10); // mean, stddev
-    if (distp(RGen::mt()) < 0.2)
+    if (utils::makeMutation(Config::getParams().mutator.radius_mutation_prob))
     {
-        circle._center.x += distc(RGen::mt());
-        circle._center.y += distc(RGen::mt());
+        // Mutate the radius
+        std::normal_distribution<double> dist (0, Config::getParams().mutator.radius_mutation_sdtddev);
+        circle._radius += dist(RGen::mt());
+        circle._radius = utils::clip(circle._radius, 1, 10000); // Must be positive
+    }
+
+    if (utils::makeMutation(Config::getParams().mutator.position_reinitialization_prob))
+    {
+        // Generate a completely new position for the center
+        std::uniform_int_distribution<int> distcx(0, this->_image_size.width);
+        std::uniform_int_distribution<int> distcy(0, this->_image_size.height);
+        circle._center.x = distcx(RGen::mt());
+        circle._center.y = distcy(RGen::mt());
+    }
+    else if (utils::makeMutation(Config::getParams().mutator.position_mutation_prob))
+    {
+        // Mutate the position of the center
+        std::normal_distribution<double> dist (0, Config::getParams().mutator.position_mutation_stddev);
+        circle._center.x += dist(RGen::mt());
+        circle._center.y += dist(RGen::mt());
     }
 
     this->_mutateIShape(circle);
@@ -51,21 +62,30 @@ void Mutator::visit (Circle &circle)
 
 void Mutator::_mutateIShape (IShape &shape) const
 {
-    // Probability of mutation
-    std::uniform_real_distribution<double> distp(0.0, 1.0);
+    std::normal_distribution<double> distc(0, Config::getParams().mutator.color_mutation_stddev);
+    if (utils::makeMutation(Config::getParams().mutator.color_mutation_prob))
+    {
+        shape._r += distc(RGen::mt());
+        shape._r = utils::clip(shape._r, 0, 255);
+    }
+    if (utils::makeMutation(Config::getParams().mutator.color_mutation_prob))
+    {
+        shape._g += distc(RGen::mt());
+        shape._g = utils::clip(shape._g, 0, 255);
+    }
+    if (utils::makeMutation(Config::getParams().mutator.color_mutation_prob))
+    {
+        shape._b += distc(RGen::mt());
+        shape._b = utils::clip(shape._b, 0, 255);
+    }
 
-    std::normal_distribution<double> dist(0, 10); // mean, stddev
-    if (distp(RGen::mt()) < 0.2) shape._r += dist(RGen::mt());
-    if (distp(RGen::mt()) < 0.2) shape._g += dist(RGen::mt());
-    if (distp(RGen::mt()) < 0.2) shape._b += dist(RGen::mt());
-    if (distp(RGen::mt()) < 0.2) shape._a += dist(RGen::mt());
-
-    // Correct the values to be in the interval [0,255]
-    shape._r = utils::clip(shape._r, 0, 255);
-    shape._g = utils::clip(shape._g, 0, 255);
-    shape._b = utils::clip(shape._b, 0, 255);
-    // Correct the value to be in the interval [0,100]
-    shape._a = utils::clip(shape._a, 0, 100);
+    if (utils::makeMutation(Config::getParams().mutator.alpha_mutation_prob))
+    {
+        // Mutate the value of the alpha channel
+        std::normal_distribution<double> dista(0, Config::getParams().mutator.alpha_mutation_stddev);
+        shape._a += dista(RGen::mt());
+        shape._a = utils::clip(shape._a, 30, 60);
+    }
 }
 
 
