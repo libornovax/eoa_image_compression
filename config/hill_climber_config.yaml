@@ -42,7 +42,7 @@ hill_climber:
 # represent the image
 mutator:
     # Probability of the whole shape being mutated at all
-    shape_mutation_prob: 0.5
+    shape_mutation_prob: 0.4
 
     # Probability that a color (the alpha) channel will be mutated
     color_mutation_prob: 0.1

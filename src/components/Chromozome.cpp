@@ -51,6 +51,9 @@ size_t Chromozome::size () const
 
 void Chromozome::addRandomShape (const cv::Size &image_size)
 {
+    // All shapes in the current chromozome will be old ones
+    for (auto &shape: this->_chromozome) shape->setOld();
+
     // Do not add anything if it is long enough
     if (this->_chromozome.size() >= Config::getParams().chromozome_length) return;
 

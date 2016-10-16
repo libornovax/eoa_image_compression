@@ -8,7 +8,8 @@ IShape::IShape (int r, int g, int b, int a)
     : _r(r),
       _g(g),
       _b(b),
-      _a(a)
+      _a(a),
+      _is_new(true)
 {
     this->_check();
 }
@@ -22,6 +23,18 @@ std::string IShape::print () const
     output += std::to_string(this->_b) + ", ";
     output += std::to_string(this->_a) + ")";
     return output;
+}
+
+
+bool IShape::isNew () const
+{
+    return this->_is_new;
+}
+
+
+void IShape::setOld ()
+{
+    this->_is_new = false;
 }
 
 

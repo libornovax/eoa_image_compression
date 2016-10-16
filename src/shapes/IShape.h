@@ -40,6 +40,16 @@ public:
      */
     virtual std::string print () const;
 
+    /**
+     * @brief Returns true if it is the last added shape
+     */
+    virtual bool isNew () const final;
+
+    /**
+     * @brief Sets this shape to be an old one
+     */
+    virtual void setOld () final;
+
     virtual int getR () const final;
     virtual int getG () const final;
     virtual int getB () const final;
@@ -60,6 +70,7 @@ protected:
     int _b; // blue
     int _a; // alpha [0,100] %
 
+    bool _is_new;
 };
 
 

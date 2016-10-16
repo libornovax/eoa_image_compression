@@ -21,9 +21,14 @@ void Mutator::visit (Chromozome &chromozome)
 {
     for (size_t i = 0; i < chromozome.size(); ++i)
     {
-        // Invoke mutation of each shape
-        if (utils::makeMutation(Config::getParams().mutator.shape_mutation_prob))
+        if (chromozome[i]->isNew())
         {
+            // This is a new shape in the chromozome, it should mutate every time to be settled faster
+            chromozome[i]->accept(*this);
+        }
+        else if (utils::makeMutation(Config::getParams().mutator.shape_mutation_prob))
+        {
+            // Invoke mutation of the shape
             chromozome[i]->accept(*this);
         }
     }
