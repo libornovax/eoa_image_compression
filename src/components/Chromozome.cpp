@@ -92,7 +92,8 @@ double Chromozome::computeDifference (const std::vector<cv::Mat> &target)
     for (size_t i = 0; i < target.size(); ++i)
     {
         cv::Mat diff;
-        cv::absdiff(target[i], channels[i], diff);
+        cv::subtract(target[i], channels[i], diff, cv::noArray(), CV_32FC1);
+        cv::pow(diff, 2, diff);
         cv::Scalar total = cv::sum(diff);
         this->_difference += total[0];
     }
