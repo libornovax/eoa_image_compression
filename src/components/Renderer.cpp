@@ -1,5 +1,6 @@
 #include "Renderer.h"
 
+#include <chrono>
 #include <opencv2/imgproc/imgproc.hpp>
 #include "Chromozome.h"
 #include "shapes/Circle.h"
@@ -11,12 +12,17 @@ namespace {
 
     void drawLine (cv::Mat &image, int row, int x1, int x2, int color, double alpha)
     {
-        int xmin = std::max(0, x1);
-        int xmax = std::min(image.cols-1, x2);
+        // Cut the coordinates if they do not fit inside of the image
+        const int xmin = std::max(0, x1);
+        const int xmax = std::min(image.cols-1, x2);
 
-        for (int j = xmin; j <= xmax; ++j)
+        uchar* ptr_row_x_min = image.ptr() + row*image.step + xmin;
+        uchar* ptr_row_x_max = image.ptr() + row*image.step + xmax;
+        const int pix_size = int(image.elemSize());
+
+        for (; ptr_row_x_min <= ptr_row_x_max; ptr_row_x_min += pix_size)
         {
-            image.at<uchar>(row, j) = (1-alpha)*image.at<uchar>(row, j) + alpha*color;
+            *ptr_row_x_min = uchar((1-alpha)*(*ptr_row_x_min) + alpha*color);
         }
     }
 
@@ -82,8 +88,19 @@ Renderer::Renderer (const cv::Size &image_size)
 
 const std::vector<cv::Mat> Renderer::render (Chromozome &ch)
 {
+#ifdef MEASURE_TIME
+    static int time_total = 0;
+    static int count = 0;
+    auto start = std::chrono::high_resolution_clock::now();
+#endif
     // Triger rendering of the chromozome -> visit it
     ch.accept(*this);
+#ifdef MEASURE_TIME
+    auto end = std::chrono::high_resolution_clock::now();
+    count++;
+    time_total += int(std::chrono::duration_cast<std::chrono::milliseconds>(end-start).count());
+    std::cout << "Rendering time: " << double(time_total)/count << " ms" << std::endl;
+#endif
 
     return this->_channels;
 }
