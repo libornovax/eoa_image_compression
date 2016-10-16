@@ -15,6 +15,7 @@ set ( CMAKE_CXX_FLAGS "-g -std=c++11 -O3" )
 set ( DEBUG_MODE ON )
 
 #add_definitions ( -DMEASURE_TIME )
+#add_definitions ( -DRENDER_AVERAGE )
 
 
 FIND_PACKAGE ( OpenCV 3.1 REQUIRED )
