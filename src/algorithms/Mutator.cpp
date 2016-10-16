@@ -37,7 +37,7 @@ void Mutator::visit (Circle &circle)
         // Mutate the radius
         std::normal_distribution<double> dist (0, Config::getParams().mutator.radius_mutation_sdtddev);
         circle._radius += dist(RGen::mt());
-        circle._radius = utils::clip(circle._radius, 1, 10000); // Must be positive
+        circle._radius = utils::clip(circle._radius, 2, 10000); // Must be positive
     }
 
     if (utils::makeMutation(Config::getParams().mutator.position_reinitialization_prob))
@@ -54,6 +54,8 @@ void Mutator::visit (Circle &circle)
         std::normal_distribution<double> dist (0, Config::getParams().mutator.position_mutation_stddev);
         circle._center.x += dist(RGen::mt());
         circle._center.y += dist(RGen::mt());
+        circle._center.x = utils::clip(circle._center.x, -circle._radius, this->_image_size.width+circle._radius);
+        circle._center.y = utils::clip(circle._center.y, -circle._radius, this->_image_size.height+circle._radius);
     }
 
     this->_mutateIShape(circle);
@@ -84,7 +86,7 @@ void Mutator::_mutateIShape (IShape &shape) const
         // Mutate the value of the alpha channel
         std::normal_distribution<double> dista(0, Config::getParams().mutator.alpha_mutation_stddev);
         shape._a += dista(RGen::mt());
-        shape._a = utils::clip(shape._a, 30, 60);
+        shape._a = utils::clip(shape._a, 20, 80);
     }
 }
 
