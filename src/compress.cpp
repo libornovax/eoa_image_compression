@@ -11,7 +11,6 @@
 #include <memory>
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
-#include <chrono>
 
 #include "shapes/Circle.h"
 #include "components/Renderer.h"

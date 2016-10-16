@@ -14,6 +14,8 @@ set ( EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/bin )
 set ( CMAKE_CXX_FLAGS "-g -std=c++11" )
 set ( DEBUG_MODE ON )
 
+#add_definitions ( -DMEASURE_TIME )
+
 
 FIND_PACKAGE ( OpenCV 3.1 REQUIRED )
 IF ( OpenCV_FOUND )

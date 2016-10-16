@@ -76,6 +76,7 @@ double Chromozome::computeDifference (const std::vector<cv::Mat> &target)
     Renderer renderer(target[0].size());
     const std::vector<cv::Mat> channels = renderer.render(*this);
 
+
     // Compute pixel-wise difference
     this->_difference = 0;
     for (size_t i = 0; i < target.size(); ++i)
