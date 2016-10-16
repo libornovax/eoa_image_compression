@@ -42,15 +42,28 @@ Chromozome HillClimber::run ()
             this->_best_chromozome.computeDifference(this->_target);
         }
 
-        Chromozome cloned = this->_best_chromozome.clone();
-        // Mutate the chromozome
-        cloned.accept(mut);
+        // Generate n mutated chromozomes and select the best one from them - Steepest Ascent Hill Climb
+        double min_difference = this->_best_chromozome.getDifference();
+        int best = -1;
+        std::vector<Chromozome> cloned_chromozomes(Config::getParams().hill_climber.pool_size);
+        for (int c = 0; c < cloned_chromozomes.size(); ++c)
+        {
+            cloned_chromozomes[c] = this->_best_chromozome.clone();
+            cloned_chromozomes[c].accept(mut);
 
-        if (cloned.computeDifference(this->_target) < this->_best_chromozome.getDifference())
+            if (cloned_chromozomes[c].computeDifference(this->_target) < min_difference)
+            {
+                // This one is the best - save it
+                min_difference = cloned_chromozomes[c].getDifference();
+                best = c;
+            }
+        }
+
+        if (best >= 0)
         {
             // Replace the best chromozome, this one is better
-            std::cout << "[" << i << "] Lowest difference: " << cloned.getDifference() << " (" << cloned.size() << ")" << std::endl;
-            this->_best_chromozome = cloned;
+            std::cout << "[" << i << "] Lowest difference: " << cloned_chromozomes[best].getDifference() << " (" << cloned_chromozomes[best].size() << ")" << std::endl;
+            this->_best_chromozome = cloned_chromozomes[best];
         }
     }
 

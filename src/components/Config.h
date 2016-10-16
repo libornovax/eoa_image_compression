@@ -46,6 +46,7 @@ struct HillClimberParams
 {
     int num_iterations;
     double shape_add_prob;
+    int pool_size;
 };
 
 

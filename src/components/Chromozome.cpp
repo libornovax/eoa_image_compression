@@ -32,7 +32,7 @@ Chromozome Chromozome::clone () const
 Chromozome Chromozome::randomChromozome (const cv::Size &image_size)
 {
     // Length to which the chromozome is initialized (default is 5)
-    int init_length = std::min(5, Config::getParams().chromozome_length);
+    int init_length = std::min(10, Config::getParams().chromozome_length);
 
     Chromozome ch;
     for (int i = 0; i < init_length; ++i)

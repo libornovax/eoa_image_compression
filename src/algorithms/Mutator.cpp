@@ -91,7 +91,7 @@ void Mutator::_mutateIShape (IShape &shape) const
         // Mutate the value of the alpha channel
         std::normal_distribution<double> dista(0, Config::getParams().mutator.alpha_mutation_stddev);
         shape._a += dista(RGen::mt());
-        shape._a = utils::clip(shape._a, 20, 80);
+        shape._a = utils::clip(shape._a, 30, 60);
     }
 }
 
