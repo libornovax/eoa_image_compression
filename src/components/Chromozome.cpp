@@ -1,5 +1,6 @@
 #include "Chromozome.h"
 
+#include <opencv2/imgproc/imgproc.hpp>
 #include "Renderer.h"
 #include "Config.h"
 #include "shapes/Circle.h"
@@ -30,8 +31,11 @@ Chromozome Chromozome::clone () const
 
 Chromozome Chromozome::randomChromozome (const cv::Size &image_size)
 {
+    // Length to which the chromozome is initialized (default is 5)
+    int init_length = std::min(5, Config::getParams().chromozome_length);
+
     Chromozome ch;
-    for (int i = 0; i < Config::getParams().chromozome_length; ++i)
+    for (int i = 0; i < init_length; ++i)
     {
         ch.addRandomShape(image_size);
     }
@@ -47,6 +51,9 @@ size_t Chromozome::size () const
 
 void Chromozome::addRandomShape (const cv::Size &image_size)
 {
+    // Do not add anything if it is long enough
+    if (this->_chromozome.size() >= Config::getParams().chromozome_length) return;
+
     switch (Config::getParams().shape_type) {
     case ShapeType::CIRCLE:
         this->_chromozome.push_back(Circle::randomCircle(image_size));
@@ -94,6 +101,21 @@ double Chromozome::computeDifference (const std::vector<cv::Mat> &target)
 double Chromozome::getDifference () const
 {
     return this->_difference;
+}
+
+
+cv::Mat Chromozome::asImage (const cv::Size &image_size)
+{
+    // Render the image represented by this chromozome
+    eic::Renderer r(image_size);
+    const std::vector<cv::Mat> channels = r.render(*this);
+
+    // Merge the channels to a 3 channel cv::Mat
+    cv::Mat image;
+    cv::merge(channels, image);
+    cv::cvtColor(image, image, CV_RGB2BGR);
+
+    return image;
 }
 
 

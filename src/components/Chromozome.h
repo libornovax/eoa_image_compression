@@ -62,6 +62,8 @@ public:
      */
     double getDifference () const;
 
+    cv::Mat asImage (const cv::Size &image_size);
+
     /**
      * @brief Accept method from the visitor design pattern
      */

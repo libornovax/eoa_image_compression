@@ -27,11 +27,12 @@ T clip (const T &n, const T &min, const T &max)
 }
 
 
-bool makeMutation (double p)
-{
-    static std::uniform_real_distribution<double> dist(0.0, 1.0);
-    return dist(RGen::mt()) <= p;
-}
+/**
+ * @brief Randomly returns true with the given probability p
+ * @param p Probability of returning true
+ * @return true/false
+ */
+bool makeMutation (double p);
 
 
 }

@@ -45,6 +45,7 @@ struct MutatorParams
 struct HillClimberParams
 {
     int num_iterations;
+    double shape_add_prob;
 };
 
 

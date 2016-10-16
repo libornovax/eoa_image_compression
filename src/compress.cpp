@@ -8,7 +8,6 @@
 
 #include <iostream>
 #include <fstream>
-#include <memory>
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
 
@@ -23,13 +22,12 @@ void runCompression ()
     cv::Mat image = cv::imread(eic::Config::getParams().path_image, CV_LOAD_IMAGE_COLOR);
     cv::Size image_size = image.size();
 
-//    cv::cvtColor(image, image, CV_BGR2RGB); // This is how it should really be
-    std::vector<cv::Mat> image_channels;
-    cv::split(image, image_channels);
-
-
     cv::imshow("original", image);
     cv::waitKey(1);
+
+    cv::cvtColor(image, image, CV_BGR2RGB);
+    std::vector<cv::Mat> image_channels;
+    cv::split(image, image_channels);
 
 
     // Compress the image
@@ -62,16 +60,9 @@ void runCompression ()
 
 
     // Show the final approximated image
-    // Render it
-    eic::Renderer r(image_size);
-    const std::vector<cv::Mat> channels = r.render(result);
+    cv::Mat approximation = result.asImage(image_size);
 
-    // Merge the channels to one image
-    cv::Mat approximation;
-    cv::merge(channels, approximation);
-//    cv::cvtColor(approximation, approximation, CV_RGB2BGR); // This is how it should really be
-
-    cv::imwrite(eic::Config::getParams().path_out + "/approximation.jpg", approximation);
+    cv::imwrite(eic::Config::getParams().path_out + "/approximation.png", approximation);
     cv::imshow("approximation", approximation);
     cv::waitKey();
 }
