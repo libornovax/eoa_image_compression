@@ -28,7 +28,7 @@ public:
     /**
      * @brief Triggers rendering of the whole image and returns it
      * @param ch Chromozome (image representation) to be rendered
-     * @return 3 channels representing the rendered image
+     * @return Vector of three CV_8UC1 matrices representing RGB channels of the image
      */
     const std::vector<cv::Mat> render (Chromozome &ch);
 
@@ -51,6 +51,12 @@ private:
      * @brief Resets all channels of the image
      */
     void _reset ();
+
+    /**
+     * @brief Returns the rendered RGB channels
+     * @return Vector of three CV_8UC1 matrices representing RGB channels of the image
+     */
+    std::vector<cv::Mat> _getRenderedChannels ();
 
 
     // -------------------------------------  PRIVATE MEMBERS  ------------------------------------- //
