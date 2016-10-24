@@ -37,8 +37,9 @@ private:
     /**
      * @brief Mutates members common to all shapes - colors
      * @param shape
+     * @param mutated_feature Id of the feature to be mutated
      */
-    void _mutateIShape (IShape &shape) const;
+    void _mutateIShape (IShape &shape, int mutated_feature) const;
 
 
     // -------------------------------------  PRIVATE MEMBERS  ------------------------------------- //
