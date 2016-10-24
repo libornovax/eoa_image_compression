@@ -25,6 +25,11 @@ Chromozome HillClimber::run ()
     // Initialize with a random chromozome
     this->_best_chromozome = Chromozome::randomChromozome(image_size);
 
+    {
+        cv::Mat image = this->_best_chromozome.asImage(image_size);
+        cv::imwrite(eic::Config::getParams().path_out + "/initialization.png", image);
+    }
+
     Mutator mut(image_size);
     int last_save = 0;
     for (int i = 0; i < Config::getParams().hill_climber.num_iterations; ++i)
