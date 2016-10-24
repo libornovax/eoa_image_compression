@@ -22,9 +22,30 @@ void Mutator::visit (Chromozome &chromozome)
 {
     for (size_t i = 0; i < chromozome.size(); ++i)
     {
-        // Invoke mutation of the shape
-        chromozome[i]->accept(*this);
+        if (utils::makeMutation(Config::getParams().mutator.shape_mutation_prob))
+        {
+            // Invoke mutation of the shape
+            chromozome[i]->accept(*this);
+        }
     }
+
+#ifndef RENDER_AVERAGE
+    // If we are rendering an ordered chromozome we also want to be able to change the order of the shapes
+    // in the chromozome
+    std::uniform_int_distribution<int> distch(0, chromozome.size()-1);
+
+    for (size_t i = 0; i < chromozome.size(); ++i)
+    {
+        if (utils::makeMutation(Config::getParams().mutator.shape_reorder_prob))
+        {
+            // Switch this shape with one on a different randomly selected position
+            int replacee = distch(RGen::mt());
+            auto tmp = chromozome[i];
+            chromozome[i] = chromozome[replacee];
+            chromozome[replacee] = tmp;
+        }
+    }
+#endif
 }
 
 

@@ -27,6 +27,7 @@ enum class AlgorithmType
 struct MutatorParams
 {
     double shape_mutation_prob;
+    double shape_reorder_prob;
 
     double color_mutation_prob;
     double alpha_mutation_prob;

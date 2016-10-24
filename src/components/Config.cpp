@@ -28,6 +28,7 @@ void Config::loadParams (const std::string &path_config)
     // Mutator settings
     YAML::Node mutator = config["mutator"];
     Config::_getInstance()._params.mutator.shape_mutation_prob = mutator["shape_mutation_prob"].as<double>();
+    Config::_getInstance()._params.mutator.shape_reorder_prob = mutator["shape_reorder_prob"].as<double>();
     Config::_getInstance()._params.mutator.color_mutation_prob = mutator["color_mutation_prob"].as<double>();
     Config::_getInstance()._params.mutator.alpha_mutation_prob = mutator["alpha_mutation_prob"].as<double>();
     Config::_getInstance()._params.mutator.color_mutation_stddev = mutator["color_mutation_stddev"].as<double>();
@@ -60,6 +61,7 @@ void Config::print ()
     std::cout << "================================  MUTATOR  =================================" << std::endl;
 
     std::cout << "shape_mutation_prob:            " << Config::_getInstance()._params.mutator.shape_mutation_prob << std::endl;
+    std::cout << "shape_reorder_prob:             " << Config::_getInstance()._params.mutator.shape_reorder_prob << std::endl;
     std::cout << "color_mutation_prob:            " << Config::_getInstance()._params.mutator.color_mutation_prob << std::endl;
     std::cout << "alpha_mutation_prob:            " << Config::_getInstance()._params.mutator.alpha_mutation_prob << std::endl;
     std::cout << "color_mutation_stddev:          " << Config::_getInstance()._params.mutator.color_mutation_stddev << std::endl;
