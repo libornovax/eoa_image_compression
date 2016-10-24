@@ -27,7 +27,7 @@ Chromozome HillClimber::run ()
 
     {
         cv::Mat image = this->_best_chromozome.asImage(image_size);
-        cv::imwrite(eic::Config::getParams().path_out + "/initialization.png", image);
+        cv::imwrite(eic::Config::getParams().path_out + "/approx_0.png", image);
     }
 
     Mutator mut(image_size);
