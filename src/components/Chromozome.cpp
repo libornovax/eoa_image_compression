@@ -31,11 +31,8 @@ Chromozome Chromozome::clone () const
 
 Chromozome Chromozome::randomChromozome (const cv::Size &image_size)
 {
-    // Length to which the chromozome is initialized (default is 5)
-    int init_length = std::min(10, Config::getParams().chromozome_length);
-
     Chromozome ch;
-    for (int i = 0; i < init_length; ++i)
+    for (int i = 0; i < Config::getParams().chromozome_length; ++i)
     {
         ch.addRandomShape(image_size);
     }
@@ -51,12 +48,6 @@ size_t Chromozome::size () const
 
 void Chromozome::addRandomShape (const cv::Size &image_size)
 {
-    // All shapes in the current chromozome will be old ones
-    for (auto &shape: this->_chromozome) shape->setOld();
-
-    // Do not add anything if it is long enough
-    if (this->_chromozome.size() >= Config::getParams().chromozome_length) return;
-
     switch (Config::getParams().shape_type) {
     case ShapeType::CIRCLE:
         this->_chromozome.push_back(Circle::randomCircle(image_size));

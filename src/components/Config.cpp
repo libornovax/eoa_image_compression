@@ -41,7 +41,6 @@ void Config::loadParams (const std::string &path_config)
     // HillClimber settings
     YAML::Node hc = config["hill_climber"];
     Config::_getInstance()._params.hill_climber.num_iterations = hc["num_iterations"].as<int>();
-    Config::_getInstance()._params.hill_climber.shape_add_prob = hc["shape_add_prob"].as<double>();
     Config::_getInstance()._params.hill_climber.pool_size = hc["pool_size"].as<int>();
 }
 
@@ -75,7 +74,6 @@ void Config::print ()
     {
         std::cout << "==============================  HILL CLIMBER  ==============================" << std::endl;
         std::cout << "num_iterations:                 " << Config::_getInstance()._params.hill_climber.num_iterations << std::endl;
-        std::cout << "shape_add_prob:                 " << Config::_getInstance()._params.hill_climber.shape_add_prob << std::endl;
         std::cout << "pool_size:                      " << Config::_getInstance()._params.hill_climber.pool_size << std::endl;
     }
 
