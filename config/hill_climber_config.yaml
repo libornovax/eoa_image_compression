@@ -11,9 +11,11 @@
 
 # Image that will be approximated with the compression algorithm
 path_image: "/Users/libornovak/Data/eoa_image_compression/images/mona_lisa_face.jpg"
+# path_image: "/Users/libornovak/Data/eoa_image_compression/images/bottle.jpg"
 
 # Path to the folder with output and approximaged image
-path_out: "/Users/libornovak/Data/eoa_image_compression/results/20161024/mona_lisa_face/"
+path_out: "/Users/libornovak/Data/eoa_image_compression/results/20161027/mona_lisa_face/"
+# path_out: "/Users/libornovak/Data/eoa_image_compression/results/20161024/bottle/"
 
 # Length of the chromozome, that will represent the image (number of shapes)
 chromozome_length: 200

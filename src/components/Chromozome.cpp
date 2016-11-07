@@ -102,7 +102,7 @@ double Chromozome::getDifference () const
 cv::Mat Chromozome::asImage (const cv::Size &image_size)
 {
     // Render the image represented by this chromozome
-    eic::Renderer r(image_size);
+    Renderer r(image_size);
     const std::vector<cv::Mat> channels = r.render(*this);
 
     // Merge the channels to a 3 channel cv::Mat
