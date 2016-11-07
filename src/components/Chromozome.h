@@ -23,16 +23,16 @@ public:
 
     /**
      * @brief Makes a deep copy of the chromozome and all its shapes
-     * @return New Chromozome instance
+     * @return Shared pointer to a new Chromozome instance
      */
-    Chromozome clone () const;
+    std::shared_ptr<Chromozome> clone () const;
 
     /**
      * @brief Generates a random chromozome according to settings
      * @param image_size Size of an image that is being approximated
-     * @return New Chromozome instance
+     * @return Shared pointer to a new Chromozome instance
      */
-    static Chromozome randomChromozome (const cv::Size &image_size);
+    static std::shared_ptr<Chromozome> randomChromozome (const cv::Size &image_size);
 
 
     /**

@@ -36,7 +36,7 @@ private:
     // Target image channels, which we want to represent
     const std::vector<cv::Mat> _target;
     // Best chromozome that we found so far
-    Chromozome _best_chromozome;
+    std::shared_ptr<Chromozome> _best_chromozome;
 
 };
 
