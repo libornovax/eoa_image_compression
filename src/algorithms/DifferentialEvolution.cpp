@@ -4,7 +4,6 @@
 #include <random>
 #include <opencv2/highgui/highgui.hpp>
 #include "entities/Mutator.h"
-#include "shapes/Circle.h"
 #include "components/Config.h"
 #include "components/utils.h"
 #include "entities/DifferentialCrossover.h"

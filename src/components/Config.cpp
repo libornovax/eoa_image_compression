@@ -58,6 +58,14 @@ void Config::loadParams (const std::string &path_config)
         YAML::Node dc = config["differential_crossover"];
         Config::_getInstance()._params.differential_crossover.shape_crossover_prob = dc["shape_crossover_prob"].as<double>();
     }
+
+    // ClassicEA settings
+    if (Config::_getInstance()._params.algorithm == AlgorithmType::CLASSIC_EA)
+    {
+        YAML::Node ea = config["classic_ea"];
+        Config::_getInstance()._params.classic_ea.num_epochs = ea["num_epochs"].as<int>();
+        Config::_getInstance()._params.classic_ea.population_size = ea["population_size"].as<int>();
+    }
 }
 
 
@@ -93,8 +101,7 @@ void Config::print ()
         std::cout << "num_iterations:                 " << Config::_getInstance()._params.hill_climber.num_iterations << std::endl;
         std::cout << "pool_size:                      " << Config::_getInstance()._params.hill_climber.pool_size << std::endl;
     }
-
-    if (Config::_getInstance()._params.algorithm == AlgorithmType::DIFFERENTIAL_EVOLUTION)
+    else if (Config::_getInstance()._params.algorithm == AlgorithmType::DIFFERENTIAL_EVOLUTION)
     {
         std::cout << "=========================  DIFFERENTIAL EVOLUTION  =========================" << std::endl;
         std::cout << "num_epochs:                     " << Config::_getInstance()._params.differential_evolution.num_epochs << std::endl;
@@ -102,6 +109,12 @@ void Config::print ()
 
         std::cout << "=========================  DIFFERENTIAL CROSSOVER  =========================" << std::endl;
         std::cout << "shape_crossover_prob:           " << Config::_getInstance()._params.differential_crossover.shape_crossover_prob << std::endl;
+    }
+    else if (Config::_getInstance()._params.algorithm == AlgorithmType::CLASSIC_EA)
+    {
+        std::cout << "=====================  CLASSIC EVOLUTIONARY ALGORITHM  =====================" << std::endl;
+        std::cout << "num_epochs:                     " << Config::_getInstance()._params.classic_ea.num_epochs << std::endl;
+        std::cout << "population_size:                " << Config::_getInstance()._params.classic_ea.population_size << std::endl;
     }
 
 
