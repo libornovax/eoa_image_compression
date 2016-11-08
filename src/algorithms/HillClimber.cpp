@@ -1,7 +1,7 @@
 #include "HillClimber.h"
 
 #include <opencv2/highgui/highgui.hpp>
-#include "Mutator.h"
+#include "entities/Mutator.h"
 #include "shapes/Circle.h"
 #include "components/Config.h"
 #include "components/utils.h"

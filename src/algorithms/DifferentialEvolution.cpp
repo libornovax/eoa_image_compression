@@ -3,11 +3,11 @@
 #include <algorithm>
 #include <random>
 #include <opencv2/highgui/highgui.hpp>
-#include "Mutator.h"
+#include "entities/Mutator.h"
 #include "shapes/Circle.h"
 #include "components/Config.h"
 #include "components/utils.h"
-#include "DifferentialCrossover.h"
+#include "entities/DifferentialCrossover.h"
 
 
 namespace eic {

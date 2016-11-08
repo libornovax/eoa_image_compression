@@ -32,11 +32,13 @@ INCLUDE_DIRECTORIES ( src
 file ( GLOB MY_HEADERS src/*.h
                        src/shapes/*.h
                        src/components/*.h
-                       src/algorithms/*.h )
+                       src/algorithms/*.h
+                       src/algorithms/entities/*.h )
 file ( GLOB MY_SOURCES src/*.cpp
                        src/shapes/*.cpp
                        src/components/*.cpp
-                       src/algorithms/*.cpp )
+                       src/algorithms/*.cpp
+                       src/algorithms/entities/*.cpp )
 
 add_executable ( compress
     ${MY_HEADERS}
