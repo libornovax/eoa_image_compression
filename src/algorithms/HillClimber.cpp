@@ -26,7 +26,7 @@ Chromozome HillClimber::run ()
     this->_best_chromozome = Chromozome::randomChromozome(image_size);
 
     {
-        cv::Mat image = this->_best_chromozome.asImage(image_size);
+        cv::Mat image = this->_best_chromozome->asImage(image_size);
         cv::imwrite(eic::Config::getParams().path_out + "/approx_0.png", image);
     }
 
@@ -35,18 +35,18 @@ Chromozome HillClimber::run ()
     for (int i = 0; i < Config::getParams().hill_climber.num_iterations; ++i)
     {        
         // Generate n mutated chromozomes and select the best one from them - Steepest Ascent Hill Climb
-        double min_difference = this->_best_chromozome.getDifference();
+        double min_difference = this->_best_chromozome->getDifference();
         int best = -1;
-        std::vector<Chromozome> cloned_chromozomes(Config::getParams().hill_climber.pool_size);
+        std::vector<std::shared_ptr<Chromozome>> cloned_chromozomes(Config::getParams().hill_climber.pool_size);
         for (int c = 0; c < cloned_chromozomes.size(); ++c)
         {
-            cloned_chromozomes[c] = this->_best_chromozome.clone();
-            cloned_chromozomes[c].accept(mut);
+            cloned_chromozomes[c] = this->_best_chromozome->clone();
+            cloned_chromozomes[c]->accept(mut);
 
-            if (cloned_chromozomes[c].computeDifference(this->_target) < min_difference)
+            if (cloned_chromozomes[c]->computeDifference(this->_target) < min_difference)
             {
                 // This one is the best - save it
-                min_difference = cloned_chromozomes[c].getDifference();
+                min_difference = cloned_chromozomes[c]->getDifference();
                 best = c;
             }
         }
@@ -54,20 +54,20 @@ Chromozome HillClimber::run ()
         if (best >= 0)
         {
             // Replace the best chromozome, this one is better
-            std::cout << "[" << i << "] Lowest difference: " << cloned_chromozomes[best].getDifference() << " (" << cloned_chromozomes[best].size() << ")" << std::endl;
+            std::cout << "[" << i << "] Lowest difference: " << cloned_chromozomes[best]->getDifference() << " (" << cloned_chromozomes[best]->size() << ")" << std::endl;
             this->_best_chromozome = cloned_chromozomes[best];
 
             // Save the current image
             if (i-last_save > 200)
             {
                 last_save = i;
-                cv::Mat image = this->_best_chromozome.asImage(image_size);
+                cv::Mat image = this->_best_chromozome->asImage(image_size);
                 cv::imwrite(eic::Config::getParams().path_out + "/approx_" + std::to_string(i) + ".png", image);
             }
         }
     }
 
-    return this->_best_chromozome.clone();
+    return *this->_best_chromozome->clone();
 }
 
 

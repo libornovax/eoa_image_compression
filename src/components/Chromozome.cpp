@@ -16,25 +16,25 @@ Chromozome::Chromozome()
 }
 
 
-Chromozome Chromozome::clone () const
+std::shared_ptr<Chromozome> Chromozome::clone () const
 {
-    Chromozome ch;
+    auto ch = std::make_shared<Chromozome>();
 
     for (auto &shape: this->_chromozome)
     {
-        ch._chromozome.push_back(shape->clone());
+        ch->_chromozome.push_back(shape->clone());
     }
 
     return ch;
 }
 
 
-Chromozome Chromozome::randomChromozome (const cv::Size &image_size)
+std::shared_ptr<Chromozome> Chromozome::randomChromozome (const cv::Size &image_size)
 {
-    Chromozome ch;
+    auto ch = std::make_shared<Chromozome>();
     for (int i = 0; i < Config::getParams().chromozome_length; ++i)
     {
-        ch.addRandomShape(image_size);
+        ch->addRandomShape(image_size);
     }
     return ch;
 }

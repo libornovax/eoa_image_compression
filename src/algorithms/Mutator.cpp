@@ -94,6 +94,8 @@ void Mutator::visit (Circle &circle)
 }
 
 
+// ------------------------------------------  PRIVATE METHODS  ------------------------------------------ //
+
 void Mutator::_mutateIShape (IShape &shape, int mutated_feature) const
 {
     std::normal_distribution<double> distc(0, Config::getParams().mutator.color_mutation_stddev);

@@ -1,8 +1,8 @@
 #
 # Libor Novak
-# 10/13/2016
+# 11/07/2016
 #
-# Config file for EOA image compression with the Hill Climber algorithm
+# Config file for EOA image compression with the Differential Evolution algorithm
 #
 
 ####################################################################################################
@@ -11,11 +11,9 @@
 
 # Image that will be approximated with the compression algorithm
 path_image: "/Users/libornovak/Data/eoa_image_compression/images/mona_lisa_face.jpg"
-# path_image: "/Users/libornovak/Data/eoa_image_compression/images/bottle.jpg"
 
 # Path to the folder with output and approximaged image
 path_out: "/Users/libornovak/Data/eoa_image_compression/results/20161107/mona_lisa_face/"
-# path_out: "/Users/libornovak/Data/eoa_image_compression/results/20161024/bottle/"
 
 # Length of the chromozome, that will represent the image (number of shapes)
 chromozome_length: 200
@@ -24,19 +22,25 @@ chromozome_length: 200
 shape_type: 1  # 1 = Circle
 
 # Which algorithm will be used for compression
-algorithm: 1  # 1 = HillClimber, 2 = DifferentialEvolution
+algorithm: 2  # 1 = HillClimber, 2 = DifferentialEvolution
 
 
 ####################################################################################################
 ######################################  ALGORITHM PARAMETERS  ######################################
 ####################################################################################################
 
-# Parameters of the Steepest Ascent Hill Climber algorithm
-hill_climber:
-    # Number of iterations (mutations) to be tried in one hill climb run
-    num_iterations: 50000
-    # Number of solutions to select from in each iteration
-    pool_size: 10
+# Parameters of the differential evolution algorithm
+differential_evolution:
+    # Number of epochs of the differential evolution
+    num_epochs: 50000
+    # Number of chromozomes in the population
+    population_size: 10
+
+
+# Parameters of the differential crossover operation
+differential_crossover:
+    # Probability of a single shape in a chromozome being affected by the crossover
+    shape_crossover_prob: 0.05
 
 
 # Mutator is a common structure, which takes care of mutating the chromozome and the shapes, which
