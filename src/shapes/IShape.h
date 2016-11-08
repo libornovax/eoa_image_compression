@@ -22,6 +22,7 @@ namespace eic {
 class IShape
 {
     friend class Mutator;
+    friend class DifferentialCrossover;
 public:
 
     IShape (int r, int g, int b, int a);

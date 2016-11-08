@@ -1,0 +1,71 @@
+#
+# Libor Novak
+# 11/07/2016
+#
+# Config file for EOA image compression with the Differential Evolution algorithm
+#
+
+####################################################################################################
+#######################################  GLOBAL PARAMETERS  ########################################
+####################################################################################################
+
+# Image that will be approximated with the compression algorithm
+path_image: "/Users/libornovak/Data/eoa_image_compression/images/mona_lisa_face.jpg"
+
+# Path to the folder with output and approximaged image
+path_out: "/Users/libornovak/Data/eoa_image_compression/results/20161107/mona_lisa_face/"
+
+# Length of the chromozome, that will represent the image (number of shapes)
+chromozome_length: 200
+
+# Type of shape to be used in the chromozome
+shape_type: 1  # 1 = Circle
+
+# Which algorithm will be used for compression
+algorithm: 2  # 1 = HillClimber, 2 = DifferentialEvolution
+
+
+####################################################################################################
+######################################  ALGORITHM PARAMETERS  ######################################
+####################################################################################################
+
+# Parameters of the differential evolution algorithm
+differential_evolution:
+    # Number of epochs of the differential evolution
+    num_epochs: 50000
+    # Number of chromozomes in the population
+    population_size: 10
+
+
+# Parameters of the differential crossover operation
+differential_crossover:
+    # Probability of a single shape in a chromozome being affected by the crossover
+    shape_crossover_prob: 0.05
+
+
+# Mutator is a common structure, which takes care of mutating the chromozome and the shapes, which
+# represent the image
+mutator:
+    # Probability of the whole shape being mutated at all
+    shape_mutation_prob: 0.05
+    # Probability of a shape to switch its position in the chromozome with another shape
+    shape_reorder_prob: 0.001
+
+    # Probability that a color (the alpha) channel will be mutated
+    color_mutation_prob: 0.1
+    alpha_mutation_prob: 0.1
+    # Standard deviation of the mutation for color and alpha channels
+    color_mutation_stddev: 10
+    alpha_mutation_stddev: 8
+
+    # Probability of a position (point) being mutated
+    position_mutation_prob: 0.1
+    # Standard deviation of the position mutation
+    position_mutation_stddev: 10
+    # Probability of a position (point) being completely randomly reinitialized
+    position_reinitialization_prob: 0.05
+
+    # CIRCLE specific
+    radius_mutation_prob: 0.1
+    radius_mutation_sdtddev: 5
+

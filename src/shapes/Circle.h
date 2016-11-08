@@ -17,6 +17,7 @@ namespace eic {
 class Circle : public IShape
 {
     friend class Mutator;
+    friend class DifferentialCrossover;
 public:
 
     Circle (int r, int g, int b, int a, int radius, const cv::Point2i &center);

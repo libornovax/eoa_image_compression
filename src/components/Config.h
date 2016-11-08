@@ -20,7 +20,8 @@ enum class ShapeType
 
 enum class AlgorithmType
 {
-    HILL_CLIMBER = 1
+    HILL_CLIMBER            = 1,
+    DIFFERENTIAL_EVOLUTION  = 2
 };
 
 
@@ -50,6 +51,19 @@ struct HillClimberParams
 };
 
 
+struct DifferentialEvolutionParams
+{
+    int num_epochs;
+    int population_size;
+};
+
+
+struct DifferentialCrossoverParams
+{
+    double shape_crossover_prob;
+};
+
+
 struct ConfigParams
 {
     std::string path_image;
@@ -60,6 +74,8 @@ struct ConfigParams
 
     MutatorParams mutator;
     HillClimberParams hill_climber;
+    DifferentialEvolutionParams differential_evolution;
+    DifferentialCrossoverParams differential_crossover;
 };
 
 

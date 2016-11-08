@@ -40,9 +40,24 @@ void Config::loadParams (const std::string &path_config)
     Config::_getInstance()._params.mutator.radius_mutation_sdtddev = mutator["radius_mutation_sdtddev"].as<double>();
 
     // HillClimber settings
-    YAML::Node hc = config["hill_climber"];
-    Config::_getInstance()._params.hill_climber.num_iterations = hc["num_iterations"].as<int>();
-    Config::_getInstance()._params.hill_climber.pool_size = hc["pool_size"].as<int>();
+    if (Config::_getInstance()._params.algorithm == AlgorithmType::HILL_CLIMBER)
+    {
+        YAML::Node hc = config["hill_climber"];
+        Config::_getInstance()._params.hill_climber.num_iterations = hc["num_iterations"].as<int>();
+        Config::_getInstance()._params.hill_climber.pool_size = hc["pool_size"].as<int>();
+    }
+
+    // DifferentialEvolution settings
+    if (Config::_getInstance()._params.algorithm == AlgorithmType::DIFFERENTIAL_EVOLUTION)
+    {
+        YAML::Node de = config["differential_evolution"];
+        Config::_getInstance()._params.differential_evolution.num_epochs = de["num_epochs"].as<int>();
+        Config::_getInstance()._params.differential_evolution.population_size = de["population_size"].as<int>();
+
+        // DifferentialCrossover settings
+        YAML::Node dc = config["differential_crossover"];
+        Config::_getInstance()._params.differential_crossover.shape_crossover_prob = dc["shape_crossover_prob"].as<double>();
+    }
 }
 
 
@@ -77,6 +92,16 @@ void Config::print ()
         std::cout << "==============================  HILL CLIMBER  ==============================" << std::endl;
         std::cout << "num_iterations:                 " << Config::_getInstance()._params.hill_climber.num_iterations << std::endl;
         std::cout << "pool_size:                      " << Config::_getInstance()._params.hill_climber.pool_size << std::endl;
+    }
+
+    if (Config::_getInstance()._params.algorithm == AlgorithmType::DIFFERENTIAL_EVOLUTION)
+    {
+        std::cout << "=========================  DIFFERENTIAL EVOLUTION  =========================" << std::endl;
+        std::cout << "num_epochs:                     " << Config::_getInstance()._params.differential_evolution.num_epochs << std::endl;
+        std::cout << "population_size:                " << Config::_getInstance()._params.differential_evolution.population_size << std::endl;
+
+        std::cout << "=========================  DIFFERENTIAL CROSSOVER  =========================" << std::endl;
+        std::cout << "shape_crossover_prob:           " << Config::_getInstance()._params.differential_crossover.shape_crossover_prob << std::endl;
     }
 
 
