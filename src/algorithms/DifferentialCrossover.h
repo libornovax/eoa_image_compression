@@ -14,6 +14,11 @@
 namespace eic {
 
 
+/**
+ * @brief The DifferentialCrossover class
+ * Performs differential crossover in the following manner: For each shape (circle) in the chromozome finds
+ * the closest one in all chromozomes performing the crossover and does x = x1 + (x2-x3) operation
+ */
 class DifferentialCrossover : public IVisitor
 {
 public:
