@@ -50,6 +50,7 @@ public:
      * @brief Returns pointer to one shape in the chromozome
      */
     std::shared_ptr<IShape>& operator[] (size_t i);
+    const std::shared_ptr<IShape>& operator[] (size_t i) const;
 
     /**
      * @brief Computes the difference of the image represented by the chromozome and the target image

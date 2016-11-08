@@ -60,6 +60,15 @@ std::string Circle::print () const
 }
 
 
+bool Circle::contains (const cv::Point &p) const
+{
+    // Compute the distance of the point from the center and compare with radius
+    double d = (this->_center.x-p.x)*(this->_center.x-p.x) + (this->_center.y-p.y)*(this->_center.y-p.y);
+
+    return (d < this->_radius*this->_radius);
+}
+
+
 int Circle::getRadius () const
 {
     return this->_radius;

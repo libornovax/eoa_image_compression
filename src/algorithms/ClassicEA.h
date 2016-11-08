@@ -34,6 +34,8 @@ public:
 
 private:
 
+    std::shared_ptr<Chromozome> _tournamentSelection ();
+
 
     // -------------------------------------  PRIVATE MEMBERS  ------------------------------------- //
     // Target image channels, which we want to represent

@@ -69,6 +69,7 @@ struct ClassicEAParams
 {
     int num_epochs;
     int population_size;
+    int tournament_size;
 };
 
 

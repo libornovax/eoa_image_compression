@@ -68,6 +68,14 @@ std::shared_ptr<IShape>& Chromozome::operator[] (size_t i)
 }
 
 
+const std::shared_ptr<IShape>& Chromozome::operator[] (size_t i) const
+{
+    assert(i < this->_chromozome.size());
+
+    return this->_chromozome[i];
+}
+
+
 double Chromozome::computeDifference (const std::vector<cv::Mat> &target)
 {
     assert(target.size() == 3);

@@ -65,6 +65,7 @@ void Config::loadParams (const std::string &path_config)
         YAML::Node ea = config["classic_ea"];
         Config::_getInstance()._params.classic_ea.num_epochs = ea["num_epochs"].as<int>();
         Config::_getInstance()._params.classic_ea.population_size = ea["population_size"].as<int>();
+        Config::_getInstance()._params.classic_ea.tournament_size = ea["tournament_size"].as<int>();
     }
 }
 
@@ -115,6 +116,7 @@ void Config::print ()
         std::cout << "=====================  CLASSIC EVOLUTIONARY ALGORITHM  =====================" << std::endl;
         std::cout << "num_epochs:                     " << Config::_getInstance()._params.classic_ea.num_epochs << std::endl;
         std::cout << "population_size:                " << Config::_getInstance()._params.classic_ea.population_size << std::endl;
+        std::cout << "tournament_size:                " << Config::_getInstance()._params.classic_ea.tournament_size << std::endl;
     }
 
 
