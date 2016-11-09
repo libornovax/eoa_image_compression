@@ -12,36 +12,30 @@
 namespace eic {
 
 
-ClassicEA::ClassicEA (const std::vector<cv::Mat> &target)
+ClassicEA::ClassicEA (const std::shared_ptr<Target> &target)
     : _target(target)
 {
-    assert(target.size() == 3);
-    assert(target[0].size() == target[1].size() && target[0].size() == target[2].size());
+
 }
 
 
-Chromozome ClassicEA::run ()
+std::shared_ptr<Chromozome> ClassicEA::run ()
 {
-    cv::Size image_size = this->_target[0].size();
-
-
     // Initialize the population
     for (int i = 0; i < Config::getParams().classic_ea.population_size; ++i)
     {
-        this->_population.push_back(Chromozome::randomChromozome(image_size));
-        // Compute the score of each chromozome
-        this->_population.back()->computeDifference(this->_target);
+        this->_population.push_back(Chromozome::randomChromozome(this->_target));
     }
 
     this->_best_chromozome = this->_population[0];
     {
-        cv::Mat image = this->_best_chromozome->asImage(image_size);
+        cv::Mat image = this->_best_chromozome->asImage();
         cv::imwrite(eic::Config::getParams().path_out + "/approx_0.png", image);
     }
 
 
     // Run the evolution
-    Mutator mutator(image_size);
+    Mutator mutator(this->_target->image_size);
     int last_save = 0;
     for (int e = 0; e < Config::getParams().classic_ea.num_epochs; ++e)
     {
@@ -72,36 +66,28 @@ Chromozome ClassicEA::run ()
             // Crossover
             if (utils::makeMutation(Config::getParams().classic_ea.crossover_prob))
             {
-                OnePointCrossover crossover(image_size, this->_population[i2]);
+                OnePointCrossover crossover(this->_population[i2]);
                 offspring->accept(crossover); // offspring is the editted chromozome
             }
 
             // Mutation
             offspring->accept(mutator);
 
-            offspring->computeDifference(this->_target);
+            // Put the offspring into the new population
+            new_population[i] = offspring;
 
-            // Replace the current individual in the population only if the offspring is better
-            if (offspring->getDifference() < this->_population[i]->getDifference())
-            {
-                new_population[i] = offspring;
-            }
-            else
-            {
-                new_population[i] = this->_population[i];
-            }
 
             // Check if this individual is not the best one so far
-            if (offspring->getDifference() < this->_best_chromozome->getDifference())
+            if (offspring->getFitness() < this->_best_chromozome->getFitness())
             {
-                std::cout << "[" << e << "] New best difference: " << offspring->getDifference() << std::endl;
+                std::cout << "[" << e << "] New best difference: " << offspring->getFitness() << std::endl;
                 this->_best_chromozome = offspring;
 
                 // Save the current image
                 if (e-last_save > 100)
                 {
                     last_save = e;
-                    cv::Mat image = this->_best_chromozome->asImage(image_size);
+                    cv::Mat image = this->_best_chromozome->asImage();
                     cv::imwrite(eic::Config::getParams().path_out + "/approx_" + std::to_string(e) + ".png", image);
                 }
             }
@@ -111,7 +97,7 @@ Chromozome ClassicEA::run ()
         this->_population = new_population;
     }
 
-    return *this->_best_chromozome->clone();
+    return this->_best_chromozome->clone();
 }
 
 
@@ -139,7 +125,7 @@ int ClassicEA::_tournamentSelection(int exclude_idx)
     std::vector<std::pair<int, double>> selected;
     for (int i = 0; i < Config::getParams().classic_ea.tournament_size; ++i)
     {
-        selected.emplace_back(idxs[i], this->_population[idxs[i]]->getDifference());
+        selected.emplace_back(idxs[i], this->_population[idxs[i]]->getFitness());
     }
 
     // Order them by ascending difference

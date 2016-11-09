@@ -11,8 +11,7 @@
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
 
-#include "shapes/Circle.h"
-#include "components/Renderer.h"
+#include "components/target.h"
 #include "algorithms/HillClimber.h"
 #include "algorithms/ClassicEA.h"
 #include "components/Config.h"
@@ -21,29 +20,30 @@
 void runCompression ()
 {
     cv::Mat image = cv::imread(eic::Config::getParams().path_image, CV_LOAD_IMAGE_COLOR);
-    cv::Size image_size = image.size();
 
     cv::imshow("original", image);
     cv::waitKey(1);
 
     cv::cvtColor(image, image, CV_BGR2RGB);
-    std::vector<cv::Mat> image_channels;
-    cv::split(image, image_channels);
+
+    auto target = std::make_shared<eic::Target>();
+    cv::split(image, target->channels);
+    target->image_size = image.size();
 
 
     // Compress the image
-    eic::Chromozome result;
+    std::shared_ptr<eic::Chromozome> result;
     switch (eic::Config::getParams().algorithm)
     {
     case eic::AlgorithmType::HILL_CLIMBER:
         {
-            eic::HillClimber hc(image_channels);
+            eic::HillClimber hc(target);
             result = hc.run();
         }
         break;
     case eic::AlgorithmType::CLASSIC_EA:
         {
-            eic::ClassicEA ea(image_channels);
+            eic::ClassicEA ea(target);
             result = ea.run();
         }
         break;
@@ -58,16 +58,16 @@ void runCompression ()
     std::ofstream outfile(eic::Config::getParams().path_out + "/representation.txt");
     if (outfile)
     {
-        for (int i = 0; i < result.size(); ++i)
+        for (int i = 0; i < result->size(); ++i)
         {
-            outfile << result[i]->print() << std::endl;
+            outfile << result->operator [](i)->print() << std::endl;
         }
     }
     outfile.close();
 
 
     // Show the final approximated image
-    cv::Mat approximation = result.asImage(image_size);
+    cv::Mat approximation = result->asImage();
 
     cv::imwrite(eic::Config::getParams().path_out + "/approximation.png", approximation);
     cv::imshow("approximation", approximation);

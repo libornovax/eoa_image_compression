@@ -13,18 +13,20 @@
 namespace eic {
 
 
-OnePointCrossover::OnePointCrossover (const cv::Size &image_size, const std::shared_ptr<Chromozome> &x)
-    : _image_size(image_size),
-      _x(x)
+OnePointCrossover::OnePointCrossover (const std::shared_ptr<Chromozome> &x)
+    : _x(x)
 {
 }
 
 
 void OnePointCrossover::visit (Chromozome &chromozome)
 {
+    chromozome.setDirty();
+
     // Select a random position in the image
-    std::uniform_int_distribution<int> distx(0, this->_image_size.width);
-    std::uniform_int_distribution<int> disty(0, this->_image_size.height);
+    cv::Size image_size = chromozome.getTarget()->image_size;
+    std::uniform_int_distribution<int> distx(0, image_size.width);
+    std::uniform_int_distribution<int> disty(0, image_size.height);
 
     cv::Point position(distx(RGen::mt()), disty(RGen::mt()));
 

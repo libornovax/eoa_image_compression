@@ -20,6 +20,8 @@ Mutator::Mutator (const cv::Size &image_size)
 
 void Mutator::visit (Chromozome &chromozome)
 {
+    chromozome.setDirty();
+
     for (size_t i = 0; i < chromozome.size(); ++i)
     {
         if (utils::makeMutation(Config::getParams().mutator.shape_mutation_prob))

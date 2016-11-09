@@ -10,6 +10,7 @@
 #include <memory>
 #include <opencv2/core/core.hpp>
 #include "shapes/IShape.h"
+#include "target.h"
 
 
 namespace eic {
@@ -19,7 +20,7 @@ class Chromozome
 {
 public:
 
-    Chromozome ();
+    Chromozome (const std::shared_ptr<Target> &target);
 
     /**
      * @brief Makes a deep copy of the chromozome and all its shapes
@@ -32,7 +33,7 @@ public:
      * @param image_size Size of an image that is being approximated
      * @return Shared pointer to a new Chromozome instance
      */
-    static std::shared_ptr<Chromozome> randomChromozome (const cv::Size &image_size);
+    static std::shared_ptr<Chromozome> randomChromozome (const std::shared_ptr<Target> &target);
 
 
     /**
@@ -44,7 +45,7 @@ public:
      * @brief Adds a new random shape to the chromozome
      * @param image_size Size of an image that is being approximated
      */
-    void addRandomShape (const cv::Size &image_size);
+    void addRandomShape ();
 
     /**
      * @brief Returns pointer to one shape in the chromozome
@@ -56,14 +57,19 @@ public:
      * @brief Computes the difference of the image represented by the chromozome and the target image
      * @return Difference, the lower, the better
      */
-    double computeDifference (const std::vector<cv::Mat> &target);
+    double getFitness ();
 
     /**
-     * @brief Returns the latest computed difference
+     * @brief Triggers fitness recomputation in the next getFitness() call
      */
-    double getDifference () const;
+    void setDirty ();
 
-    cv::Mat asImage (const cv::Size &image_size);
+    const std::shared_ptr<Target>& getTarget () const;
+
+    /**
+     * @brief Renders the chromozome
+     */
+    cv::Mat asImage ();
 
     /**
      * @brief Accept method from the visitor design pattern
@@ -76,7 +82,11 @@ private:
     // -------------------------------------  PRIVATE MEMBERS  ------------------------------------- //
     std::vector<std::shared_ptr<IShape>> _chromozome;
     // Last computed difference from the target image
-    double _difference;
+    double _fitness;
+    // Whether the chromozome was touched and fitness needs recomputation
+    bool _dirty;
+    // Target image that we want to represent
+    const std::shared_ptr<Target> _target;
 
 };
 

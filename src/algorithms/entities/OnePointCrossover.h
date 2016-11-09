@@ -24,7 +24,7 @@ class OnePointCrossover : public IVisitor
 {
 public:
 
-    OnePointCrossover (const cv::Size &image_size, const std::shared_ptr<Chromozome> &x);
+    OnePointCrossover (const std::shared_ptr<Chromozome> &x);
 
 
     /**
@@ -50,7 +50,6 @@ private:
 
 
     // -------------------------------------  PRIVATE MEMBERS  ------------------------------------- //
-    cv::Size _image_size;
     // Chomozome, which will be used for the crossover
     const std::shared_ptr<Chromozome> _x;
 

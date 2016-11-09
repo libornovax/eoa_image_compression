@@ -9,8 +9,10 @@
 namespace eic {
 
 
-Chromozome::Chromozome()
-    : _difference(DBL_MAX)
+Chromozome::Chromozome(const std::shared_ptr<Target> &target)
+    : _fitness(DBL_MAX),
+      _dirty(true),
+      _target(target)
 {
 
 }
@@ -18,7 +20,7 @@ Chromozome::Chromozome()
 
 std::shared_ptr<Chromozome> Chromozome::clone () const
 {
-    auto ch = std::make_shared<Chromozome>();
+    auto ch = std::make_shared<Chromozome>(this->_target);
 
     for (auto &shape: this->_chromozome)
     {
@@ -29,13 +31,10 @@ std::shared_ptr<Chromozome> Chromozome::clone () const
 }
 
 
-std::shared_ptr<Chromozome> Chromozome::randomChromozome (const cv::Size &image_size)
+std::shared_ptr<Chromozome> Chromozome::randomChromozome (const std::shared_ptr<Target> &target)
 {
-    auto ch = std::make_shared<Chromozome>();
-    for (int i = 0; i < Config::getParams().chromozome_length; ++i)
-    {
-        ch->addRandomShape(image_size);
-    }
+    auto ch = std::make_shared<Chromozome>(target);
+    for (int i = 0; i < Config::getParams().chromozome_length; ++i) ch->addRandomShape();
     return ch;
 }
 
@@ -46,11 +45,13 @@ size_t Chromozome::size () const
 }
 
 
-void Chromozome::addRandomShape (const cv::Size &image_size)
+void Chromozome::addRandomShape ()
 {
+    this->setDirty();
+
     switch (Config::getParams().shape_type) {
     case ShapeType::CIRCLE:
-        this->_chromozome.push_back(Circle::randomCircle(image_size));
+        this->_chromozome.push_back(Circle::randomCircle(this->_target->image_size));
         break;
     default:
         std::cout << "ERROR: Unknown shape type " << int(Config::getParams().shape_type) << std::endl;
@@ -62,6 +63,8 @@ void Chromozome::addRandomShape (const cv::Size &image_size)
 
 std::shared_ptr<IShape>& Chromozome::operator[] (size_t i)
 {
+    this->setDirty();
+
     assert(i < this->_chromozome.size());
 
     return this->_chromozome[i];
@@ -76,41 +79,54 @@ const std::shared_ptr<IShape>& Chromozome::operator[] (size_t i) const
 }
 
 
-double Chromozome::computeDifference (const std::vector<cv::Mat> &target)
+double Chromozome::getFitness ()
 {
-    assert(target.size() == 3);
-    assert(target[0].size() == target[1].size() && target[0].size() == target[2].size());
-
-    // Render the image
-    Renderer renderer(target[0].size());
-    const std::vector<cv::Mat> channels = renderer.render(*this);
-
-
-    // Compute pixel-wise difference
-    this->_difference = 0;
-    for (size_t i = 0; i < target.size(); ++i)
+    if (this->_dirty)
     {
-        cv::Mat diff;
-        cv::subtract(target[i], channels[i], diff, cv::noArray(), CV_32FC1);
-        cv::pow(diff, 2, diff);
-        cv::Scalar total = cv::sum(diff);
-        this->_difference += total[0];
+        // The chromozome was editted - we need to recompute the fitness
+
+        assert(this->_target->channels.size() == 3);
+        assert(this->_target->channels[0].size() == this->_target->channels[1].size() && this->_target->channels[0].size() == this->_target->channels[2].size());
+
+        // Render the image
+        Renderer renderer(this->_target->image_size);
+        const std::vector<cv::Mat> channels = renderer.render(*this);
+
+        // Compute pixel-wise difference
+        this->_fitness = 0;
+        for (size_t i = 0; i < 3; ++i)
+        {
+            cv::Mat diff;
+            cv::subtract(this->_target->channels[i], channels[i], diff, cv::noArray(), CV_32FC1);
+            cv::pow(diff, 2, diff);
+            cv::Scalar total = cv::sum(diff);
+            this->_fitness += total[0];
+        }
+
+        // Just rendered and computed fitness
+        this->_dirty = false;
     }
 
-    return this->_difference;
+    return this->_fitness;
 }
 
 
-double Chromozome::getDifference () const
+void Chromozome::setDirty ()
 {
-    return this->_difference;
+    this->_dirty = true;
 }
 
 
-cv::Mat Chromozome::asImage (const cv::Size &image_size)
+const std::shared_ptr<Target>& Chromozome::getTarget () const
+{
+    return this->_target;
+}
+
+
+cv::Mat Chromozome::asImage ()
 {
     // Render the image represented by this chromozome
-    Renderer r(image_size);
+    Renderer r(this->_target->image_size);
     const std::vector<cv::Mat> channels = r.render(*this);
 
     // Merge the channels to a 3 channel cv::Mat

@@ -21,20 +21,20 @@ class HillClimber
 {
 public:
 
-    HillClimber (const std::vector<cv::Mat> &target);
+    HillClimber (const std::shared_ptr<Target> &target);
 
 
     /**
      * @brief Run the hill climber algorithm and return the best found chromozome
      */
-    Chromozome run ();
+    std::shared_ptr<Chromozome> run ();
 
 
 private:
 
     // -------------------------------------  PRIVATE MEMBERS  ------------------------------------- //
     // Target image channels, which we want to represent
-    const std::vector<cv::Mat> _target;
+    const std::shared_ptr<Target> _target;
     // Best chromozome that we found so far
     std::shared_ptr<Chromozome> _best_chromozome;
 

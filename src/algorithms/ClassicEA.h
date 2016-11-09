@@ -23,13 +23,13 @@ class ClassicEA
 {
 public:
 
-    ClassicEA (const std::vector<cv::Mat> &target);
+    ClassicEA (const std::shared_ptr<Target> &target);
 
 
     /**
      * @brief Run the hill differential evolution process and return the best found chromozome
      */
-    Chromozome run ();
+    std::shared_ptr<Chromozome> run ();
 
 
 private:
@@ -44,7 +44,7 @@ private:
 
     // -------------------------------------  PRIVATE MEMBERS  ------------------------------------- //
     // Target image channels, which we want to represent
-    const std::vector<cv::Mat> _target;
+    const std::shared_ptr<Target> _target;
     // Population of candidate solutions
     std::vector<std::shared_ptr<Chromozome>> _population;
     // Best chromozome that we found so far
