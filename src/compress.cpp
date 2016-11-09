@@ -21,6 +21,8 @@ void runCompression ()
 {
     cv::Mat image = cv::imread(eic::Config::getParams().path_image, CV_LOAD_IMAGE_COLOR);
 
+    cv::GaussianBlur(image, image, cv::Size(9, 9), 2);
+
     cv::imshow("original", image);
     cv::waitKey(1);
 
