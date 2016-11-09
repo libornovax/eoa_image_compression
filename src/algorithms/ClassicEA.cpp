@@ -45,6 +45,16 @@ Chromozome ClassicEA::run ()
     int last_save = 0;
     for (int e = 0; e < Config::getParams().classic_ea.num_epochs; ++e)
     {
+//        {
+//            int i = 0;
+//            for (auto ch: this->_population)
+//            {
+//                cv::Mat image = ch->asImage(image_size);
+//                cv::imshow("individual " + std::to_string(i++), image);
+//            }
+//            cv::waitKey();
+//        }
+
         std::vector<std::shared_ptr<Chromozome>> new_population(this->_population.size());
         new_population[0] = this->_best_chromozome;
 
@@ -53,18 +63,33 @@ Chromozome ClassicEA::run ()
         {
             // Tournament selection
             // Select 2 individuals for crossover
-            const auto i1  = this->_tournamentSelection();
-            auto offspring = this->_tournamentSelection()->clone();
+//            int i1 = this->_tournamentSelection();
+            int i2 = this->_tournamentSelection();
+//            std::cout << "Crossover individuals: [" << i1 << "] [" << i2 << "]" << std::endl;
+
+            auto offspring = this->_population[i]->clone();
 
             // Crossover
-            OnePointCrossover crossover(image_size, i1);
-            offspring->accept(crossover); // offspring is the editted chromozome
+            if (utils::makeMutation(Config::getParams().classic_ea.crossover_prob))
+            {
+                OnePointCrossover crossover(image_size, this->_population[i2]);
+                offspring->accept(crossover); // offspring is the editted chromozome
+            }
 
             // Mutation
             offspring->accept(mutator);
 
             offspring->computeDifference(this->_target);
-            new_population[i] = offspring;
+
+            // Replace the current individual in the population only if the offspring is better
+            if (offspring->getDifference() < this->_population[i]->getDifference())
+            {
+                new_population[i] = offspring;
+            }
+            else
+            {
+                new_population[i] = this->_population[i];
+            }
 
             // Check if this individual is not the best one so far
             if (offspring->getDifference() < this->_best_chromozome->getDifference())
@@ -92,7 +117,7 @@ Chromozome ClassicEA::run ()
 
 // ------------------------------------------  PRIVATE METHODS  ------------------------------------------ //
 
-std::shared_ptr<Chromozome> ClassicEA::_tournamentSelection ()
+int ClassicEA::_tournamentSelection(int exclude_idx)
 {
     // Select n random individuals for the tournament and select the best one from them
     // We imitate selecting n individuals by shuffling the indices in the population and taking the first
@@ -102,20 +127,34 @@ std::shared_ptr<Chromozome> ClassicEA::_tournamentSelection ()
     std::vector<int> idxs(this->_population.size());
     std::iota(idxs.begin(), idxs.end(), 0);
 
+    // Erase the index we want to exclude
+    if (exclude_idx >= 0 && exclude_idx < idxs.size())
+    {
+        idxs.erase(idxs.begin()+exclude_idx);
+    }
+
     std::random_shuffle(idxs.begin(), idxs.end());
 
-    std::shared_ptr<Chromozome> best = this->_population[idxs[0]];
-    for (int i = 1; i < Config::getParams().classic_ea.tournament_size; ++i)
+    // Take the first tournament_size indices
+    std::vector<std::pair<int, double>> selected;
+    for (int i = 0; i < Config::getParams().classic_ea.tournament_size; ++i)
     {
-        // The difference of these individuals is already computed
-        if (this->_population[idxs[i]]->getDifference() < best->getDifference())
+        selected.emplace_back(idxs[i], this->_population[idxs[i]]->getDifference());
+    }
+
+    // Order them by ascending difference
+    std::sort(selected.begin(), selected.end(),
+              [](const std::pair<int, double> &a, const std::pair<int, double> &b){ return a.second < b.second; });
+
+    for (auto sel: selected)
+    {
+        if (utils::makeMutation(0.5))
         {
-            // This is a better individual
-            best = this->_population[idxs[i]];
+            return sel.first;
         }
     }
 
-    return best;
+    return selected.back().first;
 }
 
 

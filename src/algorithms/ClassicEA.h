@@ -34,7 +34,12 @@ public:
 
 private:
 
-    std::shared_ptr<Chromozome> _tournamentSelection ();
+    /**
+     * @brief Performs tournament selection of size given by the config
+     * @param exclude_idx Index of individual to be excluded from the tournament
+     * @return Index of an individual
+     */
+    int _tournamentSelection (int exclude_idx=-1);
 
 
     // -------------------------------------  PRIVATE MEMBERS  ------------------------------------- //

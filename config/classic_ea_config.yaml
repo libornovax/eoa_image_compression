@@ -37,6 +37,8 @@ classic_ea:
     population_size: 10
     # Number of individuals in tournament selection (must be <= population_size)
     tournament_size: 2
+    # Probability of an individual to undergo crossover
+    crossover_prob: 0.5
 
 
 # Mutator is a common structure, which takes care of mutating the chromozome and the shapes, which
