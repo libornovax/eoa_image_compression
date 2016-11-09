@@ -36,6 +36,8 @@ public:
 
     virtual std::string print () const override final;
 
+    virtual bool contains (const cv::Point &p) const override final;
+
     virtual int getRadius () const final;
     virtual const cv::Point& getCenter () const final;
 

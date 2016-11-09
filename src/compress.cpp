@@ -15,6 +15,7 @@
 #include "components/Renderer.h"
 #include "algorithms/HillClimber.h"
 #include "algorithms/DifferentialEvolution.h"
+#include "algorithms/ClassicEA.h"
 #include "components/Config.h"
 
 
@@ -45,6 +46,12 @@ void runCompression ()
         {
             eic::DifferentialEvolution de(image_channels);
             result = de.run();
+        }
+        break;
+    case eic::AlgorithmType::CLASSIC_EA:
+        {
+            eic::ClassicEA ea(image_channels);
+            result = ea.run();
         }
         break;
     default:

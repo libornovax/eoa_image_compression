@@ -9,6 +9,7 @@
 #include <string>
 #include <assert.h>
 #include <memory>
+#include <opencv2/core/core.hpp>
 #include "components/IVisitor.h"
 
 
@@ -40,6 +41,13 @@ public:
      * @return A string representation of the shape (solely for debug purposes)
      */
     virtual std::string print () const;
+
+    /**
+     * @brief Checks if the given point is inside of the shape
+     * @param p
+     * @return true if it is inside, false for outside
+     */
+    virtual bool contains (const cv::Point &p) const = 0;
 
     virtual int getR () const final;
     virtual int getG () const final;

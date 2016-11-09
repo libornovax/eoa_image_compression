@@ -180,7 +180,7 @@ void Renderer::visit (Chromozome &chromozome)
     // Reset all channels to 0 and the correct size
     this->_reset();
 
-    for (size_t i = 0; i < chromozome.size(); ++i)
+    for (int i = chromozome.size()-1; i >= 0; --i)
     {
         // Render each shape
         chromozome[i]->accept(*this);

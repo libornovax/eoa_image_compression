@@ -21,7 +21,8 @@ enum class ShapeType
 enum class AlgorithmType
 {
     HILL_CLIMBER            = 1,
-    DIFFERENTIAL_EVOLUTION  = 2
+    DIFFERENTIAL_EVOLUTION  = 2,
+    CLASSIC_EA              = 3
 };
 
 
@@ -64,6 +65,15 @@ struct DifferentialCrossoverParams
 };
 
 
+struct ClassicEAParams
+{
+    int num_epochs;
+    int population_size;
+    int tournament_size;
+    double crossover_prob;
+};
+
+
 struct ConfigParams
 {
     std::string path_image;
@@ -76,6 +86,7 @@ struct ConfigParams
     HillClimberParams hill_climber;
     DifferentialEvolutionParams differential_evolution;
     DifferentialCrossoverParams differential_crossover;
+    ClassicEAParams classic_ea;
 };
 
 
