@@ -14,13 +14,20 @@
 namespace eic {
 
 
+enum class CircleType {
+    SMALL   = 0,
+    MEDIUM  = 1,
+    LARGE   = 2
+};
+
+
 class Circle : public IShape
 {
     friend class Mutator;
     friend class DifferentialCrossover;
 public:
 
-    Circle (int r, int g, int b, int a, int radius, const cv::Point2i &center);
+    Circle (int r, int g, int b, int a, int radius, const cv::Point2i &center, CircleType type);
 
     virtual std::shared_ptr<IShape> clone () const override final;
 
@@ -40,6 +47,15 @@ public:
 
     virtual int getRadius () const final;
     virtual const cv::Point& getCenter () const final;
+    virtual CircleType getType () const final;
+
+    /**
+     * @brief Min and max radius of a circle belonging to the given circle type
+     * @param image_size
+     * @param t
+     * @return Pair of min, max
+     */
+    static std::pair<int, int> radiusBounds (const cv::Size &image_size, CircleType t);
 
 private:
 
@@ -52,6 +68,7 @@ private:
     // -------------------------------------  PRIVATE MEMBERS  ------------------------------------- //
     int _radius;
     cv::Point2i _center;
+    CircleType _type;
 
 };
 
