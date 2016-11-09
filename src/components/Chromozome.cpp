@@ -9,7 +9,7 @@
 namespace eic {
 
 
-Chromozome::Chromozome(const std::shared_ptr<Target> &target)
+Chromozome::Chromozome(const std::shared_ptr<const Target> &target)
     : _fitness(DBL_MAX),
       _dirty(true),
       _target(target)
@@ -31,7 +31,7 @@ std::shared_ptr<Chromozome> Chromozome::clone () const
 }
 
 
-std::shared_ptr<Chromozome> Chromozome::randomChromozome (const std::shared_ptr<Target> &target)
+std::shared_ptr<Chromozome> Chromozome::randomChromozome (const std::shared_ptr<const Target> &target)
 {
     auto ch = std::make_shared<Chromozome>(target);
     for (int i = 0; i < Config::getParams().chromozome_length; ++i) ch->addRandomShape();
@@ -117,7 +117,7 @@ void Chromozome::setDirty ()
 }
 
 
-const std::shared_ptr<Target>& Chromozome::getTarget () const
+const std::shared_ptr<const Target>& Chromozome::getTarget () const
 {
     return this->_target;
 }

@@ -12,7 +12,7 @@
 namespace eic {
 
 
-ClassicEA::ClassicEA (const std::shared_ptr<Target> &target)
+ClassicEA::ClassicEA (const std::shared_ptr<const Target> &target)
     : _target(target)
 {
 

@@ -20,7 +20,7 @@ class Chromozome
 {
 public:
 
-    Chromozome (const std::shared_ptr<Target> &target);
+    Chromozome (const std::shared_ptr<const Target> &target);
 
     /**
      * @brief Makes a deep copy of the chromozome and all its shapes
@@ -33,7 +33,7 @@ public:
      * @param image_size Size of an image that is being approximated
      * @return Shared pointer to a new Chromozome instance
      */
-    static std::shared_ptr<Chromozome> randomChromozome (const std::shared_ptr<Target> &target);
+    static std::shared_ptr<Chromozome> randomChromozome (const std::shared_ptr<const Target> &target);
 
 
     /**
@@ -64,7 +64,7 @@ public:
      */
     void setDirty ();
 
-    const std::shared_ptr<Target>& getTarget () const;
+    const std::shared_ptr<const Target>& getTarget () const;
 
     /**
      * @brief Renders the chromozome
@@ -86,7 +86,7 @@ private:
     // Whether the chromozome was touched and fitness needs recomputation
     bool _dirty;
     // Target image that we want to represent
-    const std::shared_ptr<Target> _target;
+    const std::shared_ptr<const Target> _target;
 
 };
 

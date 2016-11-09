@@ -10,7 +10,7 @@
 namespace eic {
 
 
-HillClimber::HillClimber (const std::shared_ptr<Target> &target)
+HillClimber::HillClimber (const std::shared_ptr<const Target> &target)
     : _target(target)
 {
 }

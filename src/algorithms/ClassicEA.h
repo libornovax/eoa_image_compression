@@ -23,7 +23,7 @@ class ClassicEA
 {
 public:
 
-    ClassicEA (const std::shared_ptr<Target> &target);
+    ClassicEA (const std::shared_ptr<const Target> &target);
 
 
     /**
@@ -44,7 +44,7 @@ private:
 
     // -------------------------------------  PRIVATE MEMBERS  ------------------------------------- //
     // Target image channels, which we want to represent
-    const std::shared_ptr<Target> _target;
+    const std::shared_ptr<const Target> _target;
     // Population of candidate solutions
     std::vector<std::shared_ptr<Chromozome>> _population;
     // Best chromozome that we found so far
