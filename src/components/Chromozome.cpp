@@ -51,7 +51,7 @@ void Chromozome::addRandomShape ()
 
     switch (Config::getParams().shape_type) {
     case ShapeType::CIRCLE:
-        this->_chromozome.push_back(Circle::randomCircle(this->_target->image_size));
+        this->_chromozome.push_back(Circle::randomCircle(this->_target));
         break;
     default:
         std::cout << "ERROR: Unknown shape type " << int(Config::getParams().shape_type) << std::endl;

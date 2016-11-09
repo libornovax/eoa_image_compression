@@ -9,6 +9,7 @@
 #include <memory>
 #include <opencv2/core/core.hpp>
 #include "IShape.h"
+#include "components/target.h"
 
 
 namespace eic {
@@ -32,10 +33,10 @@ public:
 
     /**
      * @brief Generates a circle with random parameters (for initialization)
-     * @param image_size Size of the image we are composing
+     * @param target Target image that we are composing
      * @return A new Circle instance
      */
-    static std::shared_ptr<Circle> randomCircle (const cv::Size &image_size);
+    static std::shared_ptr<Circle> randomCircle (const std::shared_ptr<const Target> &target);
 
 
     virtual void accept (IVisitor &visitor) override final;
@@ -55,6 +56,16 @@ public:
      * @return Pair of min, max
      */
     static std::pair<int, int> radiusBounds (const cv::Size &image_size, CircleType t);
+
+    /**
+     * @brief Extracts color from the original images, which should be used for the specified circle
+     * @param center Center of the circle
+     * @param radius Radius of the circle
+     * @param target Target image, which will be used for extracting colors
+     * @return 3 element scalar representing RGB color
+     */
+    static cv::Scalar extractColor (const cv::Point2i &center, int radius,
+                                    const std::shared_ptr<const Target> &target);
 
 private:
 

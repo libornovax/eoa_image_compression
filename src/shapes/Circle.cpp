@@ -23,29 +23,25 @@ std::shared_ptr<IShape> Circle::clone () const
 }
 
 
-std::shared_ptr<Circle> Circle::randomCircle (const cv::Size &image_size)
+std::shared_ptr<Circle> Circle::randomCircle (const std::shared_ptr<const Target> &target)
 {
-    std::uniform_int_distribution<int> dist(0, 255);
-    int r = dist(RGen::mt());
-    int g = dist(RGen::mt());
-    int b = dist(RGen::mt());
-
     std::uniform_int_distribution<int> dista(30, 60);
     int a = dista(RGen::mt());
 
     std::uniform_int_distribution<int> distt(0, 2);
     CircleType t = CircleType(distt(RGen::mt()));
 
-    auto minmax = Circle::radiusBounds(image_size, t);
+    auto minmax = Circle::radiusBounds(target->image_size, t);
     std::uniform_int_distribution<int> distr(minmax.first, minmax.second);
     int radius = distr(RGen::mt());
 
-    std::uniform_int_distribution<int> distcx(0, image_size.width);
-    std::uniform_int_distribution<int> distcy(0, image_size.height);
-    int x = distcx(RGen::mt());
-    int y = distcy(RGen::mt());
+    std::uniform_int_distribution<int> distcx(0, target->image_size.width);
+    std::uniform_int_distribution<int> distcy(0, target->image_size.height);
+    cv::Point center(distcx(RGen::mt()), distcy(RGen::mt()));
 
-    return std::make_shared<Circle>(r, g, b, a, radius, cv::Point(x, y), t);
+    cv::Scalar rgb = Circle::extractColor(center, radius, target);
+
+    return std::make_shared<Circle>(rgb[0], rgb[1], rgb[2], a, radius, center, t);
 }
 
 
@@ -105,14 +101,14 @@ std::pair<int, int> Circle::radiusBounds (const cv::Size &image_size, CircleType
     {
     case CircleType::SMALL:
         minmax.first = 2;
-        minmax.second = 10;
+        minmax.second = 5;
         break;
     case CircleType::MEDIUM:
-        minmax.first = 10;
-        minmax.second = 35;
+        minmax.first = 5;
+        minmax.second = 25;
         break;
     case CircleType::LARGE:
-        minmax.first = 35;
+        minmax.first = 25;
         minmax.second = 200;
         break;
     default:
@@ -123,6 +119,17 @@ std::pair<int, int> Circle::radiusBounds (const cv::Size &image_size, CircleType
 
     return minmax;
 }
+
+
+cv::Scalar Circle::extractColor (const cv::Point2i &center, int radius,
+                                 const std::shared_ptr<const Target> &target)
+{
+    return cv::Scalar(
+            target->channels[0].at<uchar>(center.y, center.x),
+            target->channels[1].at<uchar>(center.y, center.x),
+            target->channels[2].at<uchar>(center.y, center.x));
+}
+
 
 
 // ------------------------------------------  PRIVATE METHODS  ------------------------------------------ //
