@@ -14,7 +14,6 @@
 #include "shapes/Circle.h"
 #include "components/Renderer.h"
 #include "algorithms/HillClimber.h"
-#include "algorithms/DifferentialEvolution.h"
 #include "algorithms/ClassicEA.h"
 #include "components/Config.h"
 
@@ -40,12 +39,6 @@ void runCompression ()
         {
             eic::HillClimber hc(image_channels);
             result = hc.run();
-        }
-        break;
-    case eic::AlgorithmType::DIFFERENTIAL_EVOLUTION:
-        {
-            eic::DifferentialEvolution de(image_channels);
-            result = de.run();
         }
         break;
     case eic::AlgorithmType::CLASSIC_EA:
