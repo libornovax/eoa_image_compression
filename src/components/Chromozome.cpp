@@ -99,6 +99,7 @@ double Chromozome::getFitness ()
             cv::Mat diff;
             cv::subtract(this->_target->channels[i], channels[i], diff, cv::noArray(), CV_32FC1);
             cv::pow(diff, 2, diff);
+            cv::threshold(diff, diff, 50, 0, CV_THRESH_TOZERO);
             cv::Scalar total = cv::sum(diff);
             this->_fitness += total[0];
         }

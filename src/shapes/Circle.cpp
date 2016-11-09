@@ -104,11 +104,11 @@ std::pair<int, int> Circle::radiusBounds (const cv::Size &image_size, CircleType
         minmax.second = 5;
         break;
     case CircleType::MEDIUM:
-        minmax.first = 5;
+        minmax.first = 2;
         minmax.second = 25;
         break;
     case CircleType::LARGE:
-        minmax.first = 25;
+        minmax.first = 20;
         minmax.second = 200;
         break;
     default:
