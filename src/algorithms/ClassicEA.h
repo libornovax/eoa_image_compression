@@ -53,6 +53,12 @@ private:
     void _updateBestChromozome (const std::vector<std::shared_ptr<Chromozome>> &new_population, int e);
 
     /**
+     * @brief Replaces every n-th individual from the given population with a random new one
+     * @param new_population
+     */
+    void _refreshPopulation (std::vector<std::shared_ptr<Chromozome>> &new_population) const;
+
+    /**
      * @brief Performs tournament selection of size given by the config
      * @param exclude_idx Index of individual to be excluded from the tournament
      * @return Index of an individual
@@ -65,6 +71,12 @@ private:
      * @param offspring2
      */
     void _onePointCrossover (std::shared_ptr<Chromozome> &offspring1, std::shared_ptr<Chromozome> &offspring2);
+
+    /**
+     * @brief Saves current population as images on grid
+     * @param epoch Epoch number (for the filaname)
+     */
+    void _saveCurrentPopulation (int epoch);
 
 
     // -------------------------------------  PRIVATE MEMBERS  ------------------------------------- //

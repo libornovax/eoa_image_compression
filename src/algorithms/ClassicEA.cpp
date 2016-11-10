@@ -52,15 +52,10 @@ std::shared_ptr<Chromozome> ClassicEA::run ()
     Mutator mutator(this->_target->image_size);
     for (int e = 0; e < Config::getParams().classic_ea.num_epochs; ++e)
     {
-//        {
-//            int i = 0;
-//            for (auto ch: this->_population)
-//            {
-//                cv::Mat image = ch->asImage(image_size);
-//                cv::imshow("individual " + std::to_string(i++), image);
-//            }
-//            cv::waitKey();
-//        }
+        if (e % 10 == 0)
+        {
+            this->_saveCurrentPopulation(e);
+        }
 
         std::vector<std::shared_ptr<Chromozome>> new_population;
         this->_initializeNewPopulation(new_population);
@@ -72,7 +67,7 @@ std::shared_ptr<Chromozome> ClassicEA::run ()
             // Tournament selection
             // Select 2 individuals for crossover
             int i1 = this->_tournamentSelection();
-            int i2 = this->_tournamentSelection();
+            int i2 = this->_tournamentSelection(i1);
 
             // Careful! We have to clone here!!!
             auto offspring1 = this->_population[i1]->clone();
@@ -90,9 +85,8 @@ std::shared_ptr<Chromozome> ClassicEA::run ()
 
             // Put the offspring into the new population
             new_population[2*i+1] = offspring1;
-            new_population[2*i+2] = offspring1;
+            new_population[2*i+2] = offspring2;
         }
-
 
         // Sort the population by fitness
         std::sort(new_population.begin(), new_population.end(),
@@ -102,6 +96,9 @@ std::shared_ptr<Chromozome> ClassicEA::run ()
 
 
         this->_updateBestChromozome(new_population, e);
+
+        // Replace some of the individuals with random new ones to keep diversity in the population
+        this->_refreshPopulation(new_population);
 
         // Generational replacement with elitism (elitism is already taken care of)
         this->_population = new_population;
@@ -163,6 +160,16 @@ void ClassicEA::_updateBestChromozome (const std::vector<std::shared_ptr<Chromoz
             cv::Mat image = this->_best_chromozome->asImage();
             cv::imwrite(eic::Config::getParams().path_out + "/approx_" + std::to_string(e) + ".png", image);
         }
+    }
+}
+
+
+void ClassicEA::_refreshPopulation (std::vector<std::shared_ptr<Chromozome>> &new_population) const
+{
+    // Replace every n-th chromozome with a new one
+    for (int i = 1; i < new_population.size(); i+=5)
+    {
+        new_population[i] = Chromozome::randomChromozome(this->_target);
     }
 }
 
@@ -255,6 +262,35 @@ void ClassicEA::_onePointCrossover (std::shared_ptr<Chromozome> &offspring1, std
         offspring1->operator [](idxs_i1[i]) = offspring2->operator [](idxs_i2[i]);
         offspring2->operator [](idxs_i2[i]) = tmp;
     }
+}
+
+
+void ClassicEA::_saveCurrentPopulation (int epoch)
+{
+    // Spacing between the images in the grid
+    const int grid_spacing = 10;
+
+    const int grid_dim = std::ceil(std::sqrt(double(this->_population.size())));
+    const int cell_width = this->_target->image_size.width + grid_spacing;
+    const int cell_height = this->_target->image_size.height + grid_spacing;
+
+    cv::Mat canvas(grid_dim*cell_height+grid_spacing, grid_dim*cell_width+grid_spacing,
+                   CV_8UC3, cv::Scalar(255, 255, 255));
+
+    for (int i = 0; i < this->_population.size(); ++i)
+    {
+        int x = i % grid_dim;
+        int y = i / grid_dim;
+
+        cv::Rect roi(x*cell_width+grid_spacing, y*cell_height+grid_spacing,
+                     this->_target->image_size.width, this->_target->image_size.height);
+        cv::Mat canvas_crop = canvas(roi);
+
+        // Copy the rendered image into the grid
+        this->_population[i]->asImage().copyTo(canvas_crop);
+    }
+
+    cv::imwrite(eic::Config::getParams().path_out + "/population_" + std::to_string(epoch) + ".png", canvas);
 }
 
 
