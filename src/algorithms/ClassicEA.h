@@ -35,11 +35,36 @@ public:
 private:
 
     /**
+     * @brief Initializes completely random population
+     */
+    void _initializePopulation ();
+
+    /**
+     * @brief Initializes new population with the elitist chromozome from the previous one
+     * @param new_population Population to be editted
+     */
+    void _initializeNewPopulation (std::vector<std::shared_ptr<Chromozome>> &new_population) const;
+
+    /**
+     * @brief Checks the new_population if there is a better individual then the currently best one (runs saving as well)
+     * @param new_population
+     * @param e Current epoch
+     */
+    void _updateBestChromozome (const std::vector<std::shared_ptr<Chromozome>> &new_population, int e);
+
+    /**
      * @brief Performs tournament selection of size given by the config
      * @param exclude_idx Index of individual to be excluded from the tournament
      * @return Index of an individual
      */
-    int _tournamentSelection (int exclude_idx=-1);
+    int _tournamentSelection (int exclude_idx=-1) const;
+
+    /**
+     * @brief Performs crossover of the two offsprings - exchanges circles, which are at the same location
+     * @param offspring1
+     * @param offspring2
+     */
+    void _onePointCrossover (std::shared_ptr<Chromozome> &offspring1, std::shared_ptr<Chromozome> &offspring2);
 
 
     // -------------------------------------  PRIVATE MEMBERS  ------------------------------------- //
@@ -49,6 +74,8 @@ private:
     std::vector<std::shared_ptr<Chromozome>> _population;
     // Best chromozome that we found so far
     std::shared_ptr<Chromozome> _best_chromozome;
+    // Epoch, when we last saved the best chromozome
+    int _last_save;
 
 };
 
