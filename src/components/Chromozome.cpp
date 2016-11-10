@@ -1,6 +1,7 @@
 #include "Chromozome.h"
 
 #include <opencv2/imgproc/imgproc.hpp>
+#include <opencv2/highgui/highgui.hpp>
 #include "Renderer.h"
 #include "Config.h"
 #include "shapes/Circle.h"
@@ -96,16 +97,25 @@ double Chromozome::getFitness ()
 
         // Render the image
         Renderer renderer(this->_target->image_size);
-        const std::vector<cv::Mat> channels = renderer.render(*this);
+        std::vector<cv::Mat> channels = renderer.render(*this);
+
+//        for (cv::Mat &m: channels) cv::GaussianBlur(m, m, cv::Size(15, 15), 5);
 
         // Compute pixel-wise difference
         this->_fitness = 0;
         for (size_t i = 0; i < 3; ++i)
         {
             cv::Mat diff;
-            cv::subtract(this->_target->channels[i], channels[i], diff, cv::noArray(), CV_32FC1);
+            cv::subtract(this->_target->blurred_channels[i], channels[i], diff, cv::noArray(), CV_32FC1);
             cv::pow(diff, 2, diff);
+
+            // Apply weight on each image pixel
+            cv::multiply(diff, this->_target->weights, diff);
+
+            // Tolerate small differences in color - only count as error if the difference is above the set
+            // threshold
             cv::threshold(diff, diff, 50, 0, CV_THRESH_TOZERO);
+
             cv::Scalar total = cv::sum(diff);
             this->_fitness += total[0];
         }

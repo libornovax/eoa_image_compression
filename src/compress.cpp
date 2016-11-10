@@ -21,16 +21,7 @@ void runCompression ()
 {
     cv::Mat image = cv::imread(eic::Config::getParams().path_image, CV_LOAD_IMAGE_COLOR);
 
-    cv::GaussianBlur(image, image, cv::Size(9, 9), 2);
-
-    cv::imshow("original", image);
-    cv::waitKey(1);
-
-    cv::cvtColor(image, image, CV_BGR2RGB);
-
-    auto target = std::make_shared<eic::Target>();
-    cv::split(image, target->channels);
-    target->image_size = image.size();
+    auto target = std::make_shared<eic::Target>(image);
 
 
     // Compress the image
