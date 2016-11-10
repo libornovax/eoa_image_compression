@@ -64,7 +64,13 @@ public:
      */
     void setDirty ();
 
+    /**
+     * @brief Increases age by 1
+     */
+    void birthday ();
+
     const std::shared_ptr<const Target>& getTarget () const;
+    int getAge () const;
 
     /**
      * @brief Renders the chromozome
@@ -87,6 +93,8 @@ private:
     bool _dirty;
     // Target image that we want to represent
     const std::shared_ptr<const Target> _target;
+    // Age of the chromozome - how many epochs ago it was created
+    int _age;
 
 };
 

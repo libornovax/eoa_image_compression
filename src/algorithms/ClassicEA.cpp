@@ -70,12 +70,14 @@ std::shared_ptr<Chromozome> ClassicEA::run ()
             int i2 = this->_tournamentSelection(i1);
 
             // Careful! We have to clone here!!!
-            auto offspring1 = this->_population[i1]->clone();
-            auto offspring2 = this->_population[i2]->clone();
+            auto offspring1 = this->_population[i1]->clone(); offspring1->birthday();
+            auto offspring2 = this->_population[i2]->clone(); offspring2->birthday();
 
             // Crossover
             if (utils::makeMutation(Config::getParams().classic_ea.crossover_prob))
             {
+                // Do it multiple times to exchange a larger part of the chromozome
+                ClassicEA::_onePointCrossover(offspring1, offspring2);
                 ClassicEA::_onePointCrossover(offspring1, offspring2);
             }
 
@@ -98,7 +100,11 @@ std::shared_ptr<Chromozome> ClassicEA::run ()
         this->_updateBestChromozome(new_population, e);
 
         // Replace some of the individuals with random new ones to keep diversity in the population
-        this->_refreshPopulation(new_population);
+        if (e % Config::getParams().classic_ea.refresh_interval == 0)
+        {
+            std::cout << "AGES: "; for (auto ch: new_population) std::cout << ch->getAge() << " "; std::cout << std::endl;
+            this->_refreshPopulation(new_population);
+        }
 
         // Generational replacement with elitism (elitism is already taken care of)
         this->_population = new_population;
@@ -133,13 +139,15 @@ void ClassicEA::_initializeNewPopulation (std::vector<std::shared_ptr<Chromozome
     new_population.resize(this->_population.size());
 
     // Elitism
-    new_population[0] = this->_best_chromozome;
+    new_population[0] = this->_best_chromozome->clone();
+    new_population[0]->birthday();
 
     // This is just because we need to add even number of chromozomes with crossover (there has to be an even
     // number free spots). That means that if it is odd we need to add one more chromozome
     if (this->_population.size() % 2 == 0)
     {
         new_population[this->_population.size()-1] = this->_population[this->_tournamentSelection()]->clone();
+        new_population[this->_population.size()-1]->birthday();
     }
 }
 
@@ -167,7 +175,9 @@ void ClassicEA::_updateBestChromozome (const std::vector<std::shared_ptr<Chromoz
 void ClassicEA::_refreshPopulation (std::vector<std::shared_ptr<Chromozome>> &new_population) const
 {
     // Replace every n-th chromozome with a new one
-    for (int i = 1; i < new_population.size(); i+=5)
+    int n = 1.0 / Config::getParams().classic_ea.refresh_ratio;
+
+    for (int i = 1; i < new_population.size(); i+=n)
     {
         new_population[i] = Chromozome::randomChromozome(this->_target);
     }

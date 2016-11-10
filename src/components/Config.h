@@ -57,6 +57,8 @@ struct ClassicEAParams
     int population_size;
     int tournament_size;
     double crossover_prob;
+    int refresh_interval;
+    double refresh_ratio;
 };
 
 

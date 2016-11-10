@@ -13,7 +13,8 @@ namespace eic {
 Chromozome::Chromozome(const std::shared_ptr<const Target> &target)
     : _fitness(DBL_MAX),
       _dirty(true),
-      _target(target)
+      _target(target),
+      _age(0)
 {
 
 }
@@ -27,6 +28,10 @@ std::shared_ptr<Chromozome> Chromozome::clone () const
     {
         ch->_chromozome.push_back(shape->clone());
     }
+
+    ch->_fitness = this->_fitness;
+    ch->_dirty   = this->_dirty;
+    ch->_age     = this->_age;
 
     return ch;
 }
@@ -134,9 +139,21 @@ void Chromozome::setDirty ()
 }
 
 
+void Chromozome::birthday ()
+{
+    this->_age++;
+}
+
+
 const std::shared_ptr<const Target>& Chromozome::getTarget () const
 {
     return this->_target;
+}
+
+
+int Chromozome::getAge() const
+{
+    return this->_age;
 }
 
 

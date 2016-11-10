@@ -38,7 +38,12 @@ classic_ea:
     # Number of individuals in tournament selection (must be <= population_size)
     tournament_size: 3
     # Probability of an individual to undergo crossover
-    crossover_prob: 0.5
+    crossover_prob: 0.9
+    # Interval (number of epochs) after each we replace some individuals in the population with
+    # randomly generated new ones
+    refresh_interval: 10
+    # The percentage of individuals that will be replaced in each refresh_interval of epochs
+    refresh_ratio: 0.2
 
 
 # Mutator is a common structure, which takes care of mutating the chromozome and the shapes, which
@@ -50,8 +55,8 @@ mutator:
     shape_reorder_prob: 0.001
 
     # Probability that a color (the alpha) channel will be mutated
-    color_mutation_prob: 0.3
-    alpha_mutation_prob: 0.3
+    color_mutation_prob: 0.5
+    alpha_mutation_prob: 0.5
     # Standard deviation of the mutation for color and alpha channels
     color_mutation_stddev: 10
     alpha_mutation_stddev: 8
