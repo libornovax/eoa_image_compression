@@ -7,11 +7,10 @@
 namespace eic {
 
 
-Circle::Circle (int r, int g, int b, int a, int radius, const cv::Point2i &center, CircleType type)
-    : IShape(r, g, b, a),
+Circle::Circle (int r, int g, int b, int a, int radius, const cv::Point2i &center, SizeGroup size_group)
+    : IShape(r, g, b, a, size_group),
       _radius(radius),
-      _center(center),
-      _type(type)
+      _center(center)
 {
     this->_check();
 }
@@ -19,7 +18,7 @@ Circle::Circle (int r, int g, int b, int a, int radius, const cv::Point2i &cente
 
 std::shared_ptr<IShape> Circle::clone () const
 {
-    return std::make_shared<Circle>(this->_r, this->_g, this->_b, this->_a, this->_radius, this->_center, this->_type);
+    return std::make_shared<Circle>(this->_r, this->_g, this->_b, this->_a, this->_radius, this->_center, this->_size_group);
 }
 
 
@@ -29,9 +28,9 @@ std::shared_ptr<Circle> Circle::randomCircle (const std::shared_ptr<const Target
     int a = dista(RGen::mt());
 
     std::uniform_int_distribution<int> distt(0, 2);
-    CircleType t = CircleType(distt(RGen::mt()));
+    SizeGroup sg = SizeGroup(distt(RGen::mt()));
 
-    auto minmax = Circle::radiusBounds(target->image_size, t);
+    auto minmax = Circle::radiusBounds(target->image_size, sg);
     std::uniform_int_distribution<int> distr(minmax.first, minmax.second);
     int radius = distr(RGen::mt());
 
@@ -41,7 +40,7 @@ std::shared_ptr<Circle> Circle::randomCircle (const std::shared_ptr<const Target
 
     cv::Scalar rgb = Circle::extractColor(center, radius, target);
 
-    return std::make_shared<Circle>(rgb[0], rgb[1], rgb[2], a, radius, center, t);
+    return std::make_shared<Circle>(rgb[0], rgb[1], rgb[2], a, radius, center, sg);
 }
 
 
@@ -58,7 +57,7 @@ std::string Circle::print () const
     output += "radius: " + std::to_string(this->_radius) + ", ";
     output += "center: [" + std::to_string(this->_center.x) + ", " + std::to_string(this->_center.y) + "], ";
     std::vector<std::string> names = { "SMALL", "MEDIUM", "LARGE" };
-    output += "type: " + names[int(this->_type)];
+    output += "type: " + names[int(this->_size_group)];
     output += " }";
     return output;
 }
@@ -85,34 +84,28 @@ const cv::Point& Circle::getCenter () const
 }
 
 
-CircleType Circle::getType () const
-{
-    return this->_type;
-}
-
-
-std::pair<int, int> Circle::radiusBounds (const cv::Size &image_size, CircleType t)
+std::pair<int, int> Circle::radiusBounds (const cv::Size &image_size, SizeGroup sg)
 {
 //    std::min(image_size.width, image_size.height)/4
 
     std::pair<int, int> minmax(0, 0);
 
-    switch (t)
+    switch (sg)
     {
-    case CircleType::SMALL:
+    case SizeGroup::SMALL:
         minmax.first = 2;
         minmax.second = 10;
         break;
-    case CircleType::MEDIUM:
+    case SizeGroup::MEDIUM:
         minmax.first = 8;
         minmax.second = 40;
         break;
-    case CircleType::LARGE:
+    case SizeGroup::LARGE:
         minmax.first = 40;
         minmax.second = 300;
         break;
     default:
-        std::cout << "Error: unknown circle type" << std::endl;
+        std::cout << "Error: unknown SizeGroup" << std::endl;
         exit(EXIT_FAILURE);
         break;
     }

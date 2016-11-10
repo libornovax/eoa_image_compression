@@ -66,7 +66,7 @@ void Mutator::visit (Circle &circle)
             // Mutate the radius
             std::normal_distribution<double> dist(0, Config::getParams().mutator.radius_mutation_sdtddev);
             circle._radius += dist(RGen::mt());
-            auto minmax = Circle::radiusBounds(this->_image_size, circle._type);
+            auto minmax = Circle::radiusBounds(this->_image_size, circle.getSizeGroup());
             circle._radius = utils::clip(circle._radius, minmax.first, minmax.second); // Must be positive
         }
         break;

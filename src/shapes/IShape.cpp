@@ -4,11 +4,12 @@
 namespace eic {
 
 
-IShape::IShape (int r, int g, int b, int a)
+IShape::IShape (int r, int g, int b, int a, SizeGroup size_group)
     : _r(r),
       _g(g),
       _b(b),
-      _a(a)
+      _a(a),
+      _size_group(size_group)
 {
     this->_check();
 }
@@ -46,6 +47,12 @@ int IShape::getB () const
 int IShape::getA () const
 {
     return this->_a;
+}
+
+
+SizeGroup IShape::getSizeGroup () const
+{
+    return this->_size_group;
 }
 
 

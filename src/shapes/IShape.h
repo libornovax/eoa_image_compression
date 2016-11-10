@@ -17,6 +17,17 @@ namespace eic {
 
 
 /**
+ * @brief The SizeGroup enum
+ * Each shape will belong into one of the groups, which will limit its mutation and crossover excess
+ */
+enum class SizeGroup {
+    SMALL   = 0,
+    MEDIUM  = 1,
+    LARGE   = 2
+};
+
+
+/**
  * @brief The IShape class
  * Base class for all shape classes, wich can compose the final image
  */
@@ -25,7 +36,7 @@ class IShape
     friend class Mutator;
 public:
 
-    IShape (int r, int g, int b, int a);
+    IShape (int r, int g, int b, int a, SizeGroup size_group);
 
     virtual std::shared_ptr<IShape> clone () const = 0;
 
@@ -52,6 +63,7 @@ public:
     virtual int getG () const final;
     virtual int getB () const final;
     virtual int getA () const final;
+    virtual SizeGroup getSizeGroup () const final;
 
 
 protected:
@@ -67,6 +79,8 @@ protected:
     int _g; // green
     int _b; // blue
     int _a; // alpha [0,100] %
+    // Each shape will belong to a size group, which will limits its dimensions
+    SizeGroup _size_group;
 
 };
 
