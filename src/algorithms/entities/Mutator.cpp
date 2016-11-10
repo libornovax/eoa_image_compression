@@ -64,10 +64,33 @@ void Mutator::visit (Circle &circle)
         if (utils::makeMutation(Config::getParams().mutator.radius_mutation_prob))
         {
             // Mutate the radius
-            std::normal_distribution<double> dist(0, Config::getParams().mutator.radius_mutation_sdtddev);
-            circle._radius += dist(RGen::mt());
+            switch (circle.getSizeGroup())
+            {
+            case SizeGroup::SMALL:
+                {
+                    std::normal_distribution<double> dist(0, 1);
+                    circle._radius += dist(RGen::mt());
+                }
+                break;
+            case SizeGroup::MEDIUM:
+                {
+                    std::normal_distribution<double> dist(0, Config::getParams().mutator.radius_mutation_sdtddev/2);
+                    circle._radius += dist(RGen::mt());
+                }
+                break;
+            case SizeGroup::LARGE:
+                {
+                    std::normal_distribution<double> dist(0, Config::getParams().mutator.radius_mutation_prob);
+                    circle._radius += dist(RGen::mt());
+                }
+                break;
+            default:
+                std::cout << "ERROR: Unknown SizeGroup" << std::endl;
+                exit(EXIT_FAILURE);
+                break;
+            }
             auto minmax = Circle::radiusBounds(this->_image_size, circle.getSizeGroup());
-            circle._radius = utils::clip(circle._radius, minmax.first, minmax.second); // Must be positive
+            circle._radius = utils::clip(circle._radius, minmax.first, minmax.second);
         }
         break;
     case 5:
@@ -136,7 +159,12 @@ void Mutator::_mutateIShape (IShape &shape, int mutated_feature) const
             // Mutate the value of the alpha channel
             std::normal_distribution<double> dista(0, Config::getParams().mutator.alpha_mutation_stddev);
             shape._a += dista(RGen::mt());
+#ifdef RENDER_AVERAGE
+            // If rendering average, allow alpha to go higher - more pronounced color
+            shape._a = utils::clip(shape._a, 30, 600);
+#else
             shape._a = utils::clip(shape._a, 30, 60);
+#endif
         }
         break;
     default:
