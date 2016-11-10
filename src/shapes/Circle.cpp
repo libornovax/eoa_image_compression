@@ -101,15 +101,15 @@ std::pair<int, int> Circle::radiusBounds (const cv::Size &image_size, CircleType
     {
     case CircleType::SMALL:
         minmax.first = 2;
-        minmax.second = 5;
+        minmax.second = 10;
         break;
     case CircleType::MEDIUM:
-        minmax.first = 2;
-        minmax.second = 25;
+        minmax.first = 8;
+        minmax.second = 40;
         break;
     case CircleType::LARGE:
-        minmax.first = 20;
-        minmax.second = 200;
+        minmax.first = 40;
+        minmax.second = 300;
         break;
     default:
         std::cout << "Error: unknown circle type" << std::endl;
