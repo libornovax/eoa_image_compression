@@ -24,7 +24,12 @@ std::shared_ptr<IShape> Circle::clone () const
 
 std::shared_ptr<Circle> Circle::randomCircle (const std::shared_ptr<const Target> &target)
 {
+#ifdef RENDER_AVERAGE
+    // If rendering average, allow alpha to go higher - more pronounced color
+    std::uniform_int_distribution<int> dista(30, 600);
+#else
     std::uniform_int_distribution<int> dista(30, 60);
+#endif
     int a = dista(RGen::mt());
 
     std::uniform_int_distribution<int> distt(0, 2);

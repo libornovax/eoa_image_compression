@@ -67,7 +67,11 @@ void IShape::_check () const
     assert(this->_b >= 0);
     assert(this->_b <= 255);
     assert(this->_a >= 0);
+#ifdef RENDER_AVERAGE
+    assert(this->_a <= 600);
+#else
     assert(this->_a <= 100);
+#endif
 }
 
 
