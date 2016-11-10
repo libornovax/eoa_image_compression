@@ -44,7 +44,7 @@ struct Target {
 
         {
             cv::imshow("original", bgr_image);
-            cv::imshow("weights", weights-1);
+            cv::imshow("weights", (weights-1)*(1/EDGE_WEIGHT));
             cv::imshow("blurred", blurred_image);
             cv::waitKey(1);
         }
