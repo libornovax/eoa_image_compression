@@ -20,8 +20,14 @@ enum class ShapeType
 
 enum class AlgorithmType
 {
-    HILL_CLIMBER            = 1,
-    CLASSIC_EA              = 2
+    HILL_CLIMBER = 1,
+    CLASSIC_EA   = 2
+};
+
+
+enum class ChromozomeInit {
+    RANDOM       = 1,
+    HILL_CLIMBER = 2
 };
 
 
@@ -53,6 +59,7 @@ struct HillClimberParams
 
 struct ClassicEAParams
 {
+    ChromozomeInit chromozome_init;
     int num_epochs;
     int population_size;
     int tournament_size;

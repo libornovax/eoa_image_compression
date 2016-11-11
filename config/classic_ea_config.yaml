@@ -31,6 +31,9 @@ algorithm: 2  # 1 = HillClimber, 2 = ClassicEA
 
 # Parameters of the classic evolutionary algorithm
 classic_ea:
+    # How are new chromozomes generated (1 = random, 2 = random with subsequent hill climber
+    # optimization - needs hill climber settings as well!)
+    chromozome_init: 1
     # Number of epochs of the evolution
     num_epochs: 50000
     # Number of chromozomes in the population

@@ -1,8 +1,8 @@
 #
 # Libor Novak
-# 10/13/2016
+# 11/08/2016
 #
-# Config file for EOA image compression with the Hill Climber algorithm
+# Config file for EOA image compression with the Classical Evolutionary algorithm
 #
 
 ####################################################################################################
@@ -11,11 +11,9 @@
 
 # Image that will be approximated with the compression algorithm
 path_image: "/Users/libornovak/Data/eoa_image_compression/images/mona_lisa_face.jpg"
-# path_image: "/Users/libornovak/Data/eoa_image_compression/images/bottle.jpg"
 
 # Path to the folder with output and approximaged image
-path_out: "/Users/libornovak/Data/eoa_image_compression/results/20161110/mona_lisa_face2/"
-# path_out: "/Users/libornovak/Data/eoa_image_compression/results/20161024/bottle/"
+path_out: "/Users/libornovak/Data/eoa_image_compression/results/20161110/mona_lisa_face3/"
 
 # Length of the chromozome, that will represent the image (number of shapes)
 chromozome_length: 200
@@ -24,17 +22,38 @@ chromozome_length: 200
 shape_type: 1  # 1 = Circle
 
 # Which algorithm will be used for compression
-algorithm: 1  # 1 = HillClimber, 2 = ClassicEA
+algorithm: 2  # 1 = HillClimber, 2 = ClassicEA
 
 
 ####################################################################################################
 ######################################  ALGORITHM PARAMETERS  ######################################
 ####################################################################################################
 
+# Parameters of the classic evolutionary algorithm
+classic_ea:
+    # How are new chromozomes generated (1 = random, 2 = random with subsequent hill climber
+    # optimization - needs hill climber settings as well!)
+    chromozome_init: 2
+    # Number of epochs of the evolution
+    num_epochs: 50000
+    # Number of chromozomes in the population
+    population_size: 10
+    # Number of individuals in tournament selection (must be <= population_size)
+    tournament_size: 2
+    # Probability of an individual to undergo crossover
+    crossover_prob: 0.9
+    # Interval (number of epochs) after each we replace some individuals in the population with
+    # randomly generated new ones
+    refresh_interval: 200
+    # The percentage of individuals that will be replaced in each refresh_interval of epochs
+    refresh_ratio: 0.3
+
+
+# !! IF chromozome_init: 1 WE NEED THIS TO SET UP THE HILL CLIMBER INITIALIZATION !!
 # Parameters of the Steepest Ascent Hill Climber algorithm
 hill_climber:
     # Number of iterations (mutations) to be tried in one hill climb run
-    num_iterations: 50000
+    num_iterations: 100
     # Number of solutions to select from in each iteration
     pool_size: 10
 
@@ -43,25 +62,25 @@ hill_climber:
 # represent the image
 mutator:
     # Probability of the whole shape being mutated at all
-    shape_mutation_prob: 0.05
+    shape_mutation_prob: 0.1
     # Probability of a shape to switch its position in the chromozome with another shape
     shape_reorder_prob: 0.001
 
     # Probability that a color (the alpha) channel will be mutated
-    color_mutation_prob: 0.1
-    alpha_mutation_prob: 0.1
+    color_mutation_prob: 0.5
+    alpha_mutation_prob: 0.5
     # Standard deviation of the mutation for color and alpha channels
     color_mutation_stddev: 10
     alpha_mutation_stddev: 8
 
     # Probability of a position (point) being mutated
-    position_mutation_prob: 0.1
+    position_mutation_prob: 0.5
     # Standard deviation of the position mutation
     position_mutation_stddev: 10
     # Probability of a position (point) being completely randomly reinitialized
-    position_reinitialization_prob: 0.05
+    position_reinitialization_prob: 0.1
 
     # CIRCLE specific
-    radius_mutation_prob: 0.1
+    radius_mutation_prob: 0.5
     radius_mutation_sdtddev: 5
 

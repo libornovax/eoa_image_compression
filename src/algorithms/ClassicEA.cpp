@@ -6,6 +6,7 @@
 #include "entities/Mutator.h"
 #include "components/Config.h"
 #include "components/utils.h"
+#include "shapes/Circle.h"
 
 
 namespace eic {
@@ -24,7 +25,8 @@ namespace {
 
         for (int i = 0; i < chromozome->size(); ++i)
         {
-            if (chromozome->operator [](i)->contains(p))
+            if (/*chromozome->operator [](i)->getgetSizeGroup() != SizeGroup::LARGE &&*/
+                    chromozome->operator [](i)->contains(p))
             {
                 containing_idxs.push_back(i);
             }
@@ -38,7 +40,8 @@ namespace {
 
 ClassicEA::ClassicEA (const std::shared_ptr<const Target> &target)
     : _target(target),
-      _last_save(0)
+      _last_save(0),
+      _new_chromozome_pool(target, std::ceil(Config::getParams().classic_ea.population_size*Config::getParams().classic_ea.refresh_ratio))
 {
 
 }
@@ -46,6 +49,9 @@ ClassicEA::ClassicEA (const std::shared_ptr<const Target> &target)
 
 std::shared_ptr<Chromozome> ClassicEA::run ()
 {
+    // Start chromozome generation
+    this->_new_chromozome_pool.launch();
+
     this->_initializePopulation();
 
     // Run the evolution
@@ -113,6 +119,9 @@ std::shared_ptr<Chromozome> ClassicEA::run ()
         this->_population = new_population;
     }
 
+    // Shut down the chromozome generator
+    this->_new_chromozome_pool.shutDown();
+
     return this->_best_chromozome->clone();
 }
 
@@ -124,7 +133,7 @@ void ClassicEA::_initializePopulation ()
     // Generate random chromozomes
     for (int i = 0; i < Config::getParams().classic_ea.population_size; ++i)
     {
-        this->_population.push_back(Chromozome::randomChromozome(this->_target));
+        this->_population.push_back(this->_new_chromozome_pool.getNewChromozome());
     }
 
     // Just set the best as a random one from the population
@@ -173,7 +182,7 @@ void ClassicEA::_updateBestChromozome (const std::vector<std::shared_ptr<Chromoz
 }
 
 
-void ClassicEA::_refreshPopulation (std::vector<std::shared_ptr<Chromozome>> &new_population) const
+void ClassicEA::_refreshPopulation (std::vector<std::shared_ptr<Chromozome>> &new_population)
 {
     // Replace every n-th chromozome with a new one
     if (Config::getParams().classic_ea.refresh_ratio > 0)
@@ -182,7 +191,7 @@ void ClassicEA::_refreshPopulation (std::vector<std::shared_ptr<Chromozome>> &ne
 
         for (int i = 1; i < new_population.size(); i+=n)
         {
-            new_population[i] = Chromozome::randomChromozome(this->_target);
+            new_population[i] = this->_new_chromozome_pool.getNewChromozome();
         }
     }
 }
@@ -251,22 +260,25 @@ void ClassicEA::_onePointCrossover (std::shared_ptr<Chromozome> &offspring1, std
     std::vector<int> idxs_i2 = findContainingShapesIdxs(position, offspring2);
 
 //    {
-//        cv::Mat canvas(this->_image_size, CV_8UC3, cv::Scalar(255,255,255));
-//        for (int i = idxs_x.size()-1; i >= 0; --i)
+//        cv::Mat canvas(image_size, CV_8UC3, cv::Scalar(255,255,255));
+//        for (int i = idxs_i1.size()-1; i >= 0; --i)
 //        {
-//            auto circ = std::static_pointer_cast<Circle>(this->_x->operator [](idxs_x[i]));
+//            auto circ = std::static_pointer_cast<Circle>(offspring1->operator [](idxs_i1[i]));
 //            cv::circle(canvas, circ->getCenter(), circ->getRadius(), cv::Scalar(circ->getB(), circ->getG(), circ->getR()), -1);
 //        }
-//        cv::Mat canvas2(this->_image_size, CV_8UC3, cv::Scalar(255,255,255));
-//        for (int i = idxs_ch.size()-1; i >= 0; --i)
+//        cv::Mat canvas2(image_size, CV_8UC3, cv::Scalar(255,255,255));
+//        for (int i = idxs_i2.size()-1; i >= 0; --i)
 //        {
-//            auto circ = std::static_pointer_cast<Circle>(chromozome[idxs_ch[i]]);
+//            auto circ = std::static_pointer_cast<Circle>(offspring2->operator [](idxs_i2[i]));
 //            cv::circle(canvas2, circ->getCenter(), circ->getRadius(), cv::Scalar(circ->getB(), circ->getG(), circ->getR()), -1);
 //        }
-//        cv::imshow("crossover x", canvas);
-//        cv::imshow("crossover ch", canvas2);
-//        std::cout << "Crossover size: " << idxs_x.size() << "  " << idxs_ch.size() << std::endl;
+//        cv::imshow("crossover offspring1", canvas);
+//        cv::imshow("crossover offspring2", canvas2);
+//        std::cout << "Crossover size: " << idxs_i1.size() << "  " << idxs_i2.size() << std::endl;
 //        cv::waitKey();
+
+//        cv::imshow("offspring1 before", offspring1->asImage());
+//        cv::imshow("offspring2 before", offspring2->asImage());
 //    }
 
     // Exchange those shapes (or parts of them)
@@ -276,6 +288,12 @@ void ClassicEA::_onePointCrossover (std::shared_ptr<Chromozome> &offspring1, std
         offspring1->operator [](idxs_i1[i]) = offspring2->operator [](idxs_i2[i]);
         offspring2->operator [](idxs_i2[i]) = tmp;
     }
+
+//    {
+//        cv::imshow("offspring1 after", offspring1->asImage());
+//        cv::imshow("offspring2 after", offspring2->asImage());
+//        cv::waitKey();
+//    }
 }
 
 

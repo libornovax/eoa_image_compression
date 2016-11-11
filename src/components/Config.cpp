@@ -39,24 +39,26 @@ void Config::loadParams (const std::string &path_config)
     Config::_getInstance()._params.mutator.radius_mutation_prob = mutator["radius_mutation_prob"].as<double>();
     Config::_getInstance()._params.mutator.radius_mutation_stddev = mutator["radius_mutation_sdtddev"].as<double>();
 
-    // HillClimber settings
-    if (Config::_getInstance()._params.algorithm == AlgorithmType::HILL_CLIMBER)
-    {
-        YAML::Node hc = config["hill_climber"];
-        Config::_getInstance()._params.hill_climber.num_iterations = hc["num_iterations"].as<int>();
-        Config::_getInstance()._params.hill_climber.pool_size = hc["pool_size"].as<int>();
-    }
-
     // ClassicEA settings
     if (Config::_getInstance()._params.algorithm == AlgorithmType::CLASSIC_EA)
     {
         YAML::Node ea = config["classic_ea"];
+        Config::_getInstance()._params.classic_ea.chromozome_init = ChromozomeInit(ea["chromozome_init"].as<int>());
         Config::_getInstance()._params.classic_ea.num_epochs = ea["num_epochs"].as<int>();
         Config::_getInstance()._params.classic_ea.population_size = ea["population_size"].as<int>();
         Config::_getInstance()._params.classic_ea.tournament_size = ea["tournament_size"].as<int>();
         Config::_getInstance()._params.classic_ea.crossover_prob = ea["crossover_prob"].as<double>();
         Config::_getInstance()._params.classic_ea.refresh_interval = ea["refresh_interval"].as<int>();
         Config::_getInstance()._params.classic_ea.refresh_ratio = ea["refresh_ratio"].as<double>();
+    }
+
+    // HillClimber settings
+    if (Config::_getInstance()._params.algorithm == AlgorithmType::HILL_CLIMBER ||
+            Config::_getInstance()._params.classic_ea.chromozome_init == ChromozomeInit::HILL_CLIMBER)
+    {
+        YAML::Node hc = config["hill_climber"];
+        Config::_getInstance()._params.hill_climber.num_iterations = hc["num_iterations"].as<int>();
+        Config::_getInstance()._params.hill_climber.pool_size = hc["pool_size"].as<int>();
     }
 }
 
@@ -87,21 +89,24 @@ void Config::print ()
     std::cout << "radius_mutation_prob:           " << Config::_getInstance()._params.mutator.radius_mutation_prob << std::endl;
     std::cout << "radius_mutation_sdtddev:        " << Config::_getInstance()._params.mutator.radius_mutation_stddev << std::endl;
 
-    if (Config::_getInstance()._params.algorithm == AlgorithmType::HILL_CLIMBER)
-    {
-        std::cout << "==============================  HILL CLIMBER  ==============================" << std::endl;
-        std::cout << "num_iterations:                 " << Config::_getInstance()._params.hill_climber.num_iterations << std::endl;
-        std::cout << "pool_size:                      " << Config::_getInstance()._params.hill_climber.pool_size << std::endl;
-    }
-    else if (Config::_getInstance()._params.algorithm == AlgorithmType::CLASSIC_EA)
+    if (Config::_getInstance()._params.algorithm == AlgorithmType::CLASSIC_EA)
     {
         std::cout << "=====================  CLASSIC EVOLUTIONARY ALGORITHM  =====================" << std::endl;
+        std::cout << "chromozome_init:                " << int(Config::_getInstance()._params.classic_ea.chromozome_init) << std::endl;
         std::cout << "num_epochs:                     " << Config::_getInstance()._params.classic_ea.num_epochs << std::endl;
         std::cout << "population_size:                " << Config::_getInstance()._params.classic_ea.population_size << std::endl;
         std::cout << "tournament_size:                " << Config::_getInstance()._params.classic_ea.tournament_size << std::endl;
         std::cout << "crossover_prob:                 " << Config::_getInstance()._params.classic_ea.crossover_prob << std::endl;
         std::cout << "refresh_interval:               " << Config::_getInstance()._params.classic_ea.refresh_interval << std::endl;
         std::cout << "refresh_ratio:                  " << Config::_getInstance()._params.classic_ea.refresh_ratio << std::endl;
+    }
+
+    if (Config::_getInstance()._params.algorithm == AlgorithmType::HILL_CLIMBER ||
+            Config::_getInstance()._params.classic_ea.chromozome_init == ChromozomeInit::HILL_CLIMBER)
+    {
+        std::cout << "==============================  HILL CLIMBER  ==============================" << std::endl;
+        std::cout << "num_iterations:                 " << Config::_getInstance()._params.hill_climber.num_iterations << std::endl;
+        std::cout << "pool_size:                      " << Config::_getInstance()._params.hill_climber.pool_size << std::endl;
     }
 
 

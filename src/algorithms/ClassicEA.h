@@ -8,7 +8,7 @@
 #define CLASSICEA_H
 
 #include <iostream>
-#include "components/Chromozome.h"
+#include "entities/NewChromozomePool.h"
 
 
 namespace eic {
@@ -56,7 +56,7 @@ private:
      * @brief Replaces every n-th individual from the given population with a random new one
      * @param new_population
      */
-    void _refreshPopulation (std::vector<std::shared_ptr<Chromozome>> &new_population) const;
+    void _refreshPopulation (std::vector<std::shared_ptr<Chromozome>> &new_population);
 
     /**
      * @brief Performs tournament selection of size given by the config
@@ -88,6 +88,8 @@ private:
     std::shared_ptr<Chromozome> _best_chromozome;
     // Epoch, when we last saved the best chromozome
     int _last_save;
+    // Asynchronous generator of new chromozomes for reinitialization
+    NewChromozomePool _new_chromozome_pool;
 
 };
 
