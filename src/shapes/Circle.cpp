@@ -107,7 +107,7 @@ std::pair<int, int> Circle::radiusBounds (const cv::Size &image_size, SizeGroup 
         break;
     case SizeGroup::LARGE:
         minmax.first = 40;
-        minmax.second = 300;
+        minmax.second = std::min(image_size.width, image_size.height)/4;
         break;
     default:
         std::cout << "Error: unknown SizeGroup" << std::endl;

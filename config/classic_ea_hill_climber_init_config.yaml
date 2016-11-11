@@ -39,12 +39,12 @@ classic_ea:
     # Number of chromozomes in the population
     population_size: 10
     # Number of individuals in tournament selection (must be <= population_size)
-    tournament_size: 3
+    tournament_size: 2
     # Probability of an individual to undergo crossover
     crossover_prob: 0.9
     # Interval (number of epochs) after each we replace some individuals in the population with
     # randomly generated new ones
-    refresh_interval: 20
+    refresh_interval: 200
     # The percentage of individuals that will be replaced in each refresh_interval of epochs
     refresh_ratio: 0.3
 
