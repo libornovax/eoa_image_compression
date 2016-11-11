@@ -40,7 +40,7 @@ struct MutatorParams
     double position_reinitialization_prob;
 
     double radius_mutation_prob;
-    double radius_mutation_sdtddev;
+    double radius_mutation_stddev;
 };
 
 

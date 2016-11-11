@@ -5,16 +5,46 @@
 #include "Renderer.h"
 #include "Config.h"
 #include "shapes/Circle.h"
+#include "RGen.h"
 
 
 namespace eic {
 
+namespace {
 
-Chromozome::Chromozome(const std::shared_ptr<const Target> &target)
+    /**
+     * @brief Computes weighted difference between the original image and the candidate
+     * @param target Original image
+     * @param render Candidate rendered from a chromozome
+     * @param weights Weight map of the pixels
+     * @return Weighted difference
+     */
+    double computeDifference (const cv::Mat &target, const cv::Mat &render, const cv::Mat &weights)
+    {
+        cv::Mat diff;
+        cv::subtract(target, render, diff, cv::noArray(), CV_32FC1);
+        cv::pow(diff, 2, diff);
+
+        // Apply weight on each image pixel
+        cv::multiply(diff, weights, diff);
+
+        // Tolerate small differences in color - only count as error if the difference is above the set
+        // threshold
+        cv::threshold(diff, diff, 50, 0, CV_THRESH_TOZERO);
+
+        cv::Scalar total = cv::sum(diff);
+        return total[0];
+    }
+
+}
+
+
+Chromozome::Chromozome(const std::shared_ptr<const Target> &target, const cv::Rect roi)
     : _fitness(DBL_MAX),
       _dirty(true),
       _target(target),
-      _age(0)
+      _age(0),
+      _roi(roi)
 {
 
 }
@@ -22,7 +52,7 @@ Chromozome::Chromozome(const std::shared_ptr<const Target> &target)
 
 std::shared_ptr<Chromozome> Chromozome::clone () const
 {
-    auto ch = std::make_shared<Chromozome>(this->_target);
+    auto ch = std::make_shared<Chromozome>(this->_target, this->_roi);
 
     for (auto &shape: this->_chromozome)
     {
@@ -39,7 +69,13 @@ std::shared_ptr<Chromozome> Chromozome::clone () const
 
 std::shared_ptr<Chromozome> Chromozome::randomChromozome (const std::shared_ptr<const Target> &target)
 {
-    auto ch = std::make_shared<Chromozome>(target);
+    // Select a random region of interest in target
+    int square_dim = std::min(target->image_size.width, target->image_size.height) / 2;
+    std::uniform_int_distribution<int> distw(0, target->image_size.width-square_dim);
+    std::uniform_int_distribution<int> disth(0, target->image_size.height-square_dim);
+    cv::Rect roi(distw(RGen::mt()), disth(RGen::mt()), square_dim, square_dim);
+
+    auto ch = std::make_shared<Chromozome>(target, roi);
     for (int i = 0; i < Config::getParams().chromozome_length; ++i) ch->addRandomShape();
 
     // Sort the chromozome - put SMALL shapes to the top (this way they will not be covered by the big ones
@@ -104,25 +140,12 @@ double Chromozome::getFitness ()
         Renderer renderer(this->_target->image_size);
         std::vector<cv::Mat> channels = renderer.render(*this);
 
-//        for (cv::Mat &m: channels) cv::GaussianBlur(m, m, cv::Size(15, 15), 5);
-
         // Compute pixel-wise difference
         this->_fitness = 0;
         for (size_t i = 0; i < 3; ++i)
         {
-            cv::Mat diff;
-            cv::subtract(this->_target->blurred_channels[i], channels[i], diff, cv::noArray(), CV_32FC1);
-            cv::pow(diff, 2, diff);
-
-            // Apply weight on each image pixel
-            cv::multiply(diff, this->_target->weights, diff);
-
-            // Tolerate small differences in color - only count as error if the difference is above the set
-            // threshold
-            cv::threshold(diff, diff, 50, 0, CV_THRESH_TOZERO);
-
-            cv::Scalar total = cv::sum(diff);
-            this->_fitness += total[0];
+//            this->_fitness += computeDifference(this->_target->blurred_channels[i](this->_roi), channels[i](this->_roi), this->_target->weights(this->_roi));
+            this->_fitness += computeDifference(this->_target->blurred_channels[i], channels[i], this->_target->weights);
         }
 
         // Just rendered and computed fitness
@@ -167,6 +190,8 @@ cv::Mat Chromozome::asImage ()
     cv::Mat image;
     cv::merge(channels, image);
     cv::cvtColor(image, image, CV_RGB2BGR);
+
+//    cv::rectangle(image, this->_roi, cv::Scalar(0,0,255));
 
     return image;
 }

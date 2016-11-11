@@ -176,11 +176,14 @@ void ClassicEA::_updateBestChromozome (const std::vector<std::shared_ptr<Chromoz
 void ClassicEA::_refreshPopulation (std::vector<std::shared_ptr<Chromozome>> &new_population) const
 {
     // Replace every n-th chromozome with a new one
-    int n = 1.0 / Config::getParams().classic_ea.refresh_ratio;
-
-    for (int i = 1; i < new_population.size(); i+=n)
+    if (Config::getParams().classic_ea.refresh_ratio > 0)
     {
-        new_population[i] = Chromozome::randomChromozome(this->_target);
+        int n = 1.0 / Config::getParams().classic_ea.refresh_ratio;
+
+        for (int i = 1; i < new_population.size(); i+=n)
+        {
+            new_population[i] = Chromozome::randomChromozome(this->_target);
+        }
     }
 }
 

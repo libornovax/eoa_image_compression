@@ -41,9 +41,9 @@ classic_ea:
     crossover_prob: 0.9
     # Interval (number of epochs) after each we replace some individuals in the population with
     # randomly generated new ones
-    refresh_interval: 5
+    refresh_interval: 20
     # The percentage of individuals that will be replaced in each refresh_interval of epochs
-    refresh_ratio: 0.2
+    refresh_ratio: 0.3
 
 
 # Mutator is a common structure, which takes care of mutating the chromozome and the shapes, which

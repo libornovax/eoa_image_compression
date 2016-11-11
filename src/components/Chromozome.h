@@ -18,9 +18,10 @@ namespace eic {
 
 class Chromozome
 {
+    friend class Mutator;
 public:
 
-    Chromozome (const std::shared_ptr<const Target> &target);
+    Chromozome (const std::shared_ptr<const Target> &target, const cv::Rect roi);
 
     /**
      * @brief Makes a deep copy of the chromozome and all its shapes
@@ -95,6 +96,8 @@ private:
     const std::shared_ptr<const Target> _target;
     // Age of the chromozome - how many epochs ago it was created
     int _age;
+    // Region of interest in the target image that this chromozome specializes on
+    cv::Rect _roi;
 
 };
 

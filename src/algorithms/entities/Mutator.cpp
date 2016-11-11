@@ -48,6 +48,13 @@ void Mutator::visit (Chromozome &chromozome)
         }
     }
 #endif
+
+//    std::normal_distribution<double> distroi(0, 10);
+//    chromozome._roi.x += distroi(RGen::mt());
+//    chromozome._roi.y += distroi(RGen::mt());
+//    chromozome._roi.x = utils::clip(chromozome._roi.x, 0, this->_image_size.width-chromozome._roi.width);
+//    chromozome._roi.y = utils::clip(chromozome._roi.y, 0, this->_image_size.height-chromozome._roi.height);
+
 }
 
 
@@ -74,13 +81,13 @@ void Mutator::visit (Circle &circle)
                 break;
             case SizeGroup::MEDIUM:
                 {
-                    std::normal_distribution<double> dist(0, Config::getParams().mutator.radius_mutation_sdtddev/2);
+                    std::normal_distribution<double> dist(0, Config::getParams().mutator.radius_mutation_stddev/2);
                     circle._radius += dist(RGen::mt());
                 }
                 break;
             case SizeGroup::LARGE:
                 {
-                    std::normal_distribution<double> dist(0, Config::getParams().mutator.radius_mutation_prob);
+                    std::normal_distribution<double> dist(0, Config::getParams().mutator.radius_mutation_stddev);
                     circle._radius += dist(RGen::mt());
                 }
                 break;

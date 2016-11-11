@@ -37,7 +37,7 @@ void Config::loadParams (const std::string &path_config)
     Config::_getInstance()._params.mutator.position_mutation_stddev = mutator["position_mutation_stddev"].as<double>();
     Config::_getInstance()._params.mutator.position_reinitialization_prob = mutator["position_reinitialization_prob"].as<double>();
     Config::_getInstance()._params.mutator.radius_mutation_prob = mutator["radius_mutation_prob"].as<double>();
-    Config::_getInstance()._params.mutator.radius_mutation_sdtddev = mutator["radius_mutation_sdtddev"].as<double>();
+    Config::_getInstance()._params.mutator.radius_mutation_stddev = mutator["radius_mutation_sdtddev"].as<double>();
 
     // HillClimber settings
     if (Config::_getInstance()._params.algorithm == AlgorithmType::HILL_CLIMBER)
@@ -85,7 +85,7 @@ void Config::print ()
     std::cout << "position_mutation_stddev:       " << Config::_getInstance()._params.mutator.position_mutation_stddev << std::endl;
     std::cout << "position_reinitialization_prob: " << Config::_getInstance()._params.mutator.position_reinitialization_prob << std::endl;
     std::cout << "radius_mutation_prob:           " << Config::_getInstance()._params.mutator.radius_mutation_prob << std::endl;
-    std::cout << "radius_mutation_sdtddev:        " << Config::_getInstance()._params.mutator.radius_mutation_sdtddev << std::endl;
+    std::cout << "radius_mutation_sdtddev:        " << Config::_getInstance()._params.mutator.radius_mutation_stddev << std::endl;
 
     if (Config::_getInstance()._params.algorithm == AlgorithmType::HILL_CLIMBER)
     {
