@@ -49,7 +49,6 @@ std::shared_ptr<Chromozome> NewChromozomePool::getNewChromozome ()
     // Get a new chromozome from the queue
     auto new_chromozome = this->_queue.front();
     this->_queue.pop_front();
-    std::cout << "Queue size: " << this->_queue.size() << std::endl;
 
     lk.unlock();
     this->_cv_full.notify_one();

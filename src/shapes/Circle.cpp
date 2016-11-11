@@ -68,12 +68,18 @@ std::string Circle::print () const
 }
 
 
-bool Circle::contains (const cv::Point &p) const
+bool Circle::contains (const cv::Point &center, int radius) const
 {
     // Compute the distance of the point from the center and compare with radius
-    double d = (this->_center.x-p.x)*(this->_center.x-p.x) + (this->_center.y-p.y)*(this->_center.y-p.y);
+    double d = std::sqrt(double((this->_center.x-center.x)*(this->_center.x-center.x) + (this->_center.y-center.y)*(this->_center.y-center.y)));
+    return (d+radius < this->_radius);
+}
 
-    return (d < this->_radius*this->_radius);
+
+bool Circle::intersects (const cv::Point &center, int radius) const
+{
+    double d = (center.x-this->_center.x)*(center.x-this->_center.x) + (center.y-this->_center.y)*(center.y-this->_center.y);
+    return (d < (this->_radius + radius)*(this->_radius + radius));
 }
 
 
@@ -83,7 +89,7 @@ int Circle::getRadius () const
 }
 
 
-const cv::Point& Circle::getCenter () const
+cv::Point Circle::getCenter() const
 {
     return this->_center;
 }

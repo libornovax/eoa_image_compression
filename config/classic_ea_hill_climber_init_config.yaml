@@ -33,20 +33,20 @@ algorithm: 2  # 1 = HillClimber, 2 = ClassicEA
 classic_ea:
     # How are new chromozomes generated (1 = random, 2 = random with subsequent hill climber
     # optimization - needs hill climber settings as well!)
-    chromozome_init: 2
+    chromozome_init: 1
     # Number of epochs of the evolution
     num_epochs: 50000
     # Number of chromozomes in the population
-    population_size: 10
+    population_size: 100
     # Number of individuals in tournament selection (must be <= population_size)
     tournament_size: 2
     # Probability of an individual to undergo crossover
     crossover_prob: 0.9
     # Interval (number of epochs) after each we replace some individuals in the population with
     # randomly generated new ones
-    refresh_interval: 200
+    refresh_interval: 10
     # The percentage of individuals that will be replaced in each refresh_interval of epochs
-    refresh_ratio: 0.3
+    refresh_ratio: 0.25
 
 
 # !! IF chromozome_init: 1 WE NEED THIS TO SET UP THE HILL CLIMBER INITIALIZATION !!

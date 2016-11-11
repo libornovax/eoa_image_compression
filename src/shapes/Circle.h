@@ -36,10 +36,12 @@ public:
 
     virtual std::string print () const override final;
 
-    virtual bool contains (const cv::Point &p) const override final;
+    virtual bool contains (const cv::Point &center, int radius) const override final;
+
+    virtual bool intersects (const cv::Point &center, int radius) const override final;
 
     virtual int getRadius () const final;
-    virtual const cv::Point& getCenter () const final;
+    virtual cv::Point getCenter () const override final;
 
     /**
      * @brief Min and max radius of a circle belonging to the given circle type

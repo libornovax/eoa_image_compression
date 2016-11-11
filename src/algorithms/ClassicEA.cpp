@@ -14,25 +14,59 @@ namespace eic {
 namespace {
 
     /**
-     * @brief Finds indices of shapes in the chromozome, which contain the given point
-     * @param p Point
+     * @brief Finds indices of shapes in the chromozome, which intersect or contain the circle of interest
+     * @param center, radius Parameters that define the circle of interest
      * @param chromozome
      * @return Vector of indices in the chromozome
      */
-    std::vector<int> findContainingShapesIdxs (const cv::Point &p, const std::shared_ptr<Chromozome> &chromozome)
+    std::vector<int> findIntersectingShapesIdxs (const cv::Point &center, int radius,
+                                                 const std::shared_ptr<Chromozome> &chromozome)
     {
-        std::vector<int> containing_idxs;
+        std::vector<int> intersecting_idxs;
 
         for (int i = 0; i < chromozome->size(); ++i)
         {
-            if (/*chromozome->operator [](i)->getgetSizeGroup() != SizeGroup::LARGE &&*/
-                    chromozome->operator [](i)->contains(p))
+            // Add a small or medium shape if it intersects the circle
+            if (chromozome->operator [](i)->getSizeGroup() != SizeGroup::LARGE &&
+                    chromozome->operator [](i)->intersects(center, radius))
             {
-                containing_idxs.push_back(i);
+                intersecting_idxs.push_back(i);
+            }
+            // Add a large shape if it contains the whole circle
+            if (chromozome->operator [](i)->getSizeGroup() == SizeGroup::LARGE &&
+                    chromozome->operator [](i)->contains(center, radius))
+            {
+                intersecting_idxs.push_back(i);
             }
         }
 
-        return containing_idxs;
+        return intersecting_idxs;
+    }
+
+
+    cv::Point selectRandomPositionForCrossover (const std::shared_ptr<Chromozome> &chromozome1,
+                                                const std::shared_ptr<Chromozome> &chromozome2)
+    {
+        // We do crossover in a way that we select a random small or medium shape, find all other shapes that
+        // intersect it and then exchange those shapes. Here we select the random small or medium shape
+
+        // Collect small (and medium) shapes from both chromozomes
+        std::vector<const std::shared_ptr<IShape>> small_shapes;
+        for (int i = 0; i < chromozome1->size() && i < chromozome2->size(); ++i)
+        {
+            if (chromozome1->operator [](i)->getSizeGroup() != SizeGroup::LARGE)
+            {
+                small_shapes.push_back(chromozome1->operator [](i));
+            }
+            if (chromozome2->operator [](i)->getSizeGroup() != SizeGroup::LARGE)
+            {
+                small_shapes.push_back(chromozome2->operator [](i));
+            }
+        }
+
+        std::uniform_int_distribution<int> dist(0, small_shapes.size()-1);
+
+        return small_shapes[dist(RGen::mt())]->getCenter();
     }
 
 }
@@ -84,7 +118,7 @@ std::shared_ptr<Chromozome> ClassicEA::run ()
             {
                 // Do it multiple times to exchange a larger part of the chromozome
                 ClassicEA::_onePointCrossover(offspring1, offspring2);
-                ClassicEA::_onePointCrossover(offspring1, offspring2);
+//                ClassicEA::_onePointCrossover(offspring1, offspring2);
             }
 
             // Mutation
@@ -248,30 +282,32 @@ void ClassicEA::_onePointCrossover (std::shared_ptr<Chromozome> &offspring1, std
     offspring1->setDirty();
     offspring2->setDirty();
 
-    // Select a random position in the image
-    cv::Size image_size = offspring1->getTarget()->image_size;
-    std::uniform_int_distribution<int> distx(0, image_size.width);
-    std::uniform_int_distribution<int> disty(0, image_size.height);
+    // Select a random position and radius that will initialize the crossover position. The position is
+    // selected as the center of a random small or medium shape
+    cv::Point position = selectRandomPositionForCrossover(offspring1, offspring2);
+    std::uniform_int_distribution<int> distr(20, this->_target->image_size.width/4);
+    int radius = distr(RGen::mt());
 
-    cv::Point position(distx(RGen::mt()), disty(RGen::mt()));
-
-    // Find all shapes in chromozomes i1 and i2 that contain this position
-    std::vector<int> idxs_i1 = findContainingShapesIdxs(position, offspring1);
-    std::vector<int> idxs_i2 = findContainingShapesIdxs(position, offspring2);
+    // Find all shapes in chromozomes offspring1 and offspring2 that intersect this shape
+    std::vector<int> idxs_i1 = findIntersectingShapesIdxs(position, radius, offspring1);
+    std::vector<int> idxs_i2 = findIntersectingShapesIdxs(position, radius, offspring2);
 
 //    {
+//        cv::Size image_size = this->_target->image_size;
 //        cv::Mat canvas(image_size, CV_8UC3, cv::Scalar(255,255,255));
 //        for (int i = idxs_i1.size()-1; i >= 0; --i)
 //        {
 //            auto circ = std::static_pointer_cast<Circle>(offspring1->operator [](idxs_i1[i]));
 //            cv::circle(canvas, circ->getCenter(), circ->getRadius(), cv::Scalar(circ->getB(), circ->getG(), circ->getR()), -1);
 //        }
+//        cv::circle(canvas, position, radius, cv::Scalar(0,0,255), 1);
 //        cv::Mat canvas2(image_size, CV_8UC3, cv::Scalar(255,255,255));
 //        for (int i = idxs_i2.size()-1; i >= 0; --i)
 //        {
 //            auto circ = std::static_pointer_cast<Circle>(offspring2->operator [](idxs_i2[i]));
 //            cv::circle(canvas2, circ->getCenter(), circ->getRadius(), cv::Scalar(circ->getB(), circ->getG(), circ->getR()), -1);
 //        }
+//        cv::circle(canvas2, position, radius, cv::Scalar(0,0,255), 1);
 //        cv::imshow("crossover offspring1", canvas);
 //        cv::imshow("crossover offspring2", canvas2);
 //        std::cout << "Crossover size: " << idxs_i1.size() << "  " << idxs_i2.size() << std::endl;
@@ -284,9 +320,15 @@ void ClassicEA::_onePointCrossover (std::shared_ptr<Chromozome> &offspring1, std
     // Exchange those shapes (or parts of them)
     for (int i = 0; i < idxs_i1.size() && i < idxs_i2.size(); ++i)
     {
-        auto tmp = offspring1->operator [](idxs_i1[i]);
-        offspring1->operator [](idxs_i1[i]) = offspring2->operator [](idxs_i2[i]);
-        offspring2->operator [](idxs_i2[i]) = tmp;
+        // Exchange the shapes if they are small or medium or if they are both large - we do not want to
+        // exchange small or medium for large ones because the large ones should be in the background
+        if ((offspring1->operator [](idxs_i1[i])->getSizeGroup() != SizeGroup::LARGE && offspring2->operator [](idxs_i2[i])->getSizeGroup() != SizeGroup::LARGE) ||
+                (offspring1->operator [](idxs_i1[i])->getSizeGroup() == SizeGroup::LARGE && offspring2->operator [](idxs_i2[i])->getSizeGroup() == SizeGroup::LARGE))
+        {
+            auto tmp = offspring1->operator [](idxs_i1[i]);
+            offspring1->operator [](idxs_i1[i]) = offspring2->operator [](idxs_i2[i]);
+            offspring2->operator [](idxs_i2[i]) = tmp;
+        }
     }
 
 //    {

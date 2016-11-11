@@ -53,11 +53,16 @@ public:
     virtual std::string print () const;
 
     /**
-     * @brief Checks if the given point is inside of the shape
-     * @param p
+     * @brief Checks if the given circle is inside of the shape
+     * @param center
+     * @param radius
      * @return true if it is inside, false for outside
      */
-    virtual bool contains (const cv::Point &p) const = 0;
+    virtual bool contains (const cv::Point &center, int radius) const = 0;
+
+    virtual bool intersects (const cv::Point &center, int radius) const = 0;
+
+    virtual cv::Point getCenter () const = 0;
 
     virtual int getR () const final;
     virtual int getG () const final;
