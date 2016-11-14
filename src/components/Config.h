@@ -20,8 +20,9 @@ enum class ShapeType
 
 enum class AlgorithmType
 {
-    HILL_CLIMBER = 1,
-    CLASSIC_EA   = 2
+    HILL_CLIMBER      = 1,
+    CLASSIC_EA        = 2,
+    STEADY_STATE_EA   = 3
 };
 
 

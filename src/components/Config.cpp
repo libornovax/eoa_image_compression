@@ -40,9 +40,10 @@ void Config::loadParams (const std::string &path_config)
     Config::_getInstance()._params.mutator.radius_mutation_stddev = mutator["radius_mutation_sdtddev"].as<double>();
 
     // ClassicEA settings
-    if (Config::_getInstance()._params.algorithm == AlgorithmType::CLASSIC_EA)
+    if (Config::_getInstance()._params.algorithm == AlgorithmType::CLASSIC_EA ||
+            Config::_getInstance()._params.algorithm == AlgorithmType::STEADY_STATE_EA)
     {
-        YAML::Node ea = config["classic_ea"];
+        YAML::Node ea = config["ea"];
         Config::_getInstance()._params.classic_ea.chromozome_init = ChromozomeInit(ea["chromozome_init"].as<int>());
         Config::_getInstance()._params.classic_ea.num_epochs = ea["num_epochs"].as<int>();
         Config::_getInstance()._params.classic_ea.population_size = ea["population_size"].as<int>();
@@ -93,6 +94,14 @@ void Config::print ()
     if (Config::_getInstance()._params.algorithm == AlgorithmType::CLASSIC_EA)
     {
         std::cout << "=====================  CLASSIC EVOLUTIONARY ALGORITHM  =====================" << std::endl;
+    }
+    else if (Config::_getInstance()._params.algorithm == AlgorithmType::STEADY_STATE_EA)
+    {
+        std::cout << "==================  STEADY STATE EVOLUTIONARY ALGORITHM  ===================" << std::endl;
+    }
+    if (Config::_getInstance()._params.algorithm == AlgorithmType::CLASSIC_EA ||
+            Config::_getInstance()._params.algorithm == AlgorithmType::STEADY_STATE_EA)
+    {
         std::cout << "chromozome_init:                " << int(Config::_getInstance()._params.classic_ea.chromozome_init) << std::endl;
         std::cout << "num_epochs:                     " << Config::_getInstance()._params.classic_ea.num_epochs << std::endl;
         std::cout << "population_size:                " << Config::_getInstance()._params.classic_ea.population_size << std::endl;

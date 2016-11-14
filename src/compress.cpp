@@ -14,6 +14,7 @@
 #include "components/target.h"
 #include "algorithms/HillClimber.h"
 #include "algorithms/ClassicEA.h"
+#include "algorithms/SteadyStateEA.h"
 #include "components/Config.h"
 
 
@@ -37,6 +38,12 @@ void runCompression ()
     case eic::AlgorithmType::CLASSIC_EA:
         {
             eic::ClassicEA ea(target);
+            result = ea.run();
+        }
+        break;
+    case eic::AlgorithmType::STEADY_STATE_EA:
+        {
+            eic::SteadyStateEA ea(target);
             result = ea.run();
         }
         break;

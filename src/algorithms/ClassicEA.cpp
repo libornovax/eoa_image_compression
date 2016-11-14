@@ -15,7 +15,7 @@ namespace eic {
 ClassicEA::ClassicEA (const std::shared_ptr<const Target> &target)
     : _target(target),
       _last_save(0),
-      _new_chromozome_pool(target, std::ceil(Config::getParams().classic_ea.population_size*Config::getParams().classic_ea.refresh_ratio))
+      _new_chromozome_pool(target, std::max(10.0, std::ceil(Config::getParams().classic_ea.population_size*Config::getParams().classic_ea.refresh_ratio)))
 {
 
 }
@@ -100,7 +100,7 @@ std::shared_ptr<Chromozome> ClassicEA::run ()
 }
 
 
-// ------------------------------------------  PRIVATE METHODS  ------------------------------------------ //
+// -----------------------------------------  PROTECTED METHODS  ----------------------------------------- //
 
 void ClassicEA::_initializePopulation ()
 {

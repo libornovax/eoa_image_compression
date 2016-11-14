@@ -22,7 +22,7 @@ chromozome_length: 200
 shape_type: 1  # 1 = Circle
 
 # Which algorithm will be used for compression
-algorithm: 2  # 1 = HillClimber, 2 = ClassicEA
+algorithm: 2  # 1 = HillClimber, 2 = ClassicEA, 3 = SteadyStateEA
 
 
 ####################################################################################################
@@ -30,7 +30,7 @@ algorithm: 2  # 1 = HillClimber, 2 = ClassicEA
 ####################################################################################################
 
 # Parameters of the classic evolutionary algorithm
-classic_ea:
+ea:
     # How are new chromozomes generated (1 = random, 2 = random with subsequent hill climber
     # optimization - needs hill climber settings as well!)
     chromozome_init: 1

@@ -24,7 +24,7 @@ chromozome_length: 200
 shape_type: 1  # 1 = Circle
 
 # Which algorithm will be used for compression
-algorithm: 1  # 1 = HillClimber, 2 = ClassicEA
+algorithm: 1  # 1 = HillClimber, 2 = ClassicEA, 3 = SteadyStateEA
 
 
 ####################################################################################################
