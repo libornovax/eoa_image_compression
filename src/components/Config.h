@@ -20,8 +20,9 @@ enum class ShapeType
 
 enum class AlgorithmType
 {
-    HILL_CLIMBER = 1,
-    CLASSIC_EA   = 2
+    HILL_CLIMBER      = 1,
+    CLASSIC_EA        = 2,
+    STEADY_STATE_EA   = 3
 };
 
 
@@ -63,6 +64,7 @@ struct ClassicEAParams
     int num_epochs;
     int population_size;
     int tournament_size;
+    double best_selection_prob;
     double crossover_prob;
     int refresh_interval;
     double refresh_ratio;

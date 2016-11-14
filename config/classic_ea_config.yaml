@@ -13,7 +13,7 @@
 path_image: "/Users/libornovak/Data/eoa_image_compression/images/mona_lisa_face.jpg"
 
 # Path to the folder with output and approximaged image
-path_out: "/Users/libornovak/Data/eoa_image_compression/results/20161110/mona_lisa_face3/"
+path_out: "/Users/libornovak/Data/eoa_image_compression/results/test/"
 
 # Length of the chromozome, that will represent the image (number of shapes)
 chromozome_length: 200
@@ -22,7 +22,7 @@ chromozome_length: 200
 shape_type: 1  # 1 = Circle
 
 # Which algorithm will be used for compression
-algorithm: 2  # 1 = HillClimber, 2 = ClassicEA
+algorithm: 2  # 1 = HillClimber, 2 = ClassicEA, 3 = SteadyStateEA
 
 
 ####################################################################################################
@@ -30,7 +30,7 @@ algorithm: 2  # 1 = HillClimber, 2 = ClassicEA
 ####################################################################################################
 
 # Parameters of the classic evolutionary algorithm
-classic_ea:
+ea:
     # How are new chromozomes generated (1 = random, 2 = random with subsequent hill climber
     # optimization - needs hill climber settings as well!)
     chromozome_init: 1
@@ -40,6 +40,8 @@ classic_ea:
     population_size: 100
     # Number of individuals in tournament selection (must be <= population_size)
     tournament_size: 3
+    # Probability that the best individual from a tournament will be selected
+    best_selection_prob: 0.65
     # Probability of an individual to undergo crossover
     crossover_prob: 0.9
     # Interval (number of epochs) after each we replace some individuals in the population with

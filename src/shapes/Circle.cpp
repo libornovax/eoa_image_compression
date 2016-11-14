@@ -97,8 +97,6 @@ cv::Point Circle::getCenter() const
 
 std::pair<int, int> Circle::radiusBounds (const cv::Size &image_size, SizeGroup sg)
 {
-//    std::min(image_size.width, image_size.height)/4
-
     std::pair<int, int> minmax(0, 0);
 
     switch (sg)

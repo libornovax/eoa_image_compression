@@ -11,71 +11,11 @@
 
 namespace eic {
 
-namespace {
-
-    /**
-     * @brief Finds indices of shapes in the chromozome, which intersect or contain the circle of interest
-     * @param center, radius Parameters that define the circle of interest
-     * @param chromozome
-     * @return Vector of indices in the chromozome
-     */
-    std::vector<int> findIntersectingShapesIdxs (const cv::Point &center, int radius,
-                                                 const std::shared_ptr<Chromozome> &chromozome)
-    {
-        std::vector<int> intersecting_idxs;
-
-        for (int i = 0; i < chromozome->size(); ++i)
-        {
-            // Add a small or medium shape if it intersects the circle
-            if (chromozome->operator [](i)->getSizeGroup() != SizeGroup::LARGE &&
-                    chromozome->operator [](i)->intersects(center, radius))
-            {
-                intersecting_idxs.push_back(i);
-            }
-            // Add a large shape if it contains the whole circle
-            if (chromozome->operator [](i)->getSizeGroup() == SizeGroup::LARGE &&
-                    chromozome->operator [](i)->contains(center, radius))
-            {
-                intersecting_idxs.push_back(i);
-            }
-        }
-
-        return intersecting_idxs;
-    }
-
-
-    cv::Point selectRandomPositionForCrossover (const std::shared_ptr<Chromozome> &chromozome1,
-                                                const std::shared_ptr<Chromozome> &chromozome2)
-    {
-        // We do crossover in a way that we select a random small or medium shape, find all other shapes that
-        // intersect it and then exchange those shapes. Here we select the random small or medium shape
-
-        // Collect small (and medium) shapes from both chromozomes
-        std::vector<const std::shared_ptr<IShape>> small_shapes;
-        for (int i = 0; i < chromozome1->size() && i < chromozome2->size(); ++i)
-        {
-            if (chromozome1->operator [](i)->getSizeGroup() != SizeGroup::LARGE)
-            {
-                small_shapes.push_back(chromozome1->operator [](i));
-            }
-            if (chromozome2->operator [](i)->getSizeGroup() != SizeGroup::LARGE)
-            {
-                small_shapes.push_back(chromozome2->operator [](i));
-            }
-        }
-
-        std::uniform_int_distribution<int> dist(0, small_shapes.size()-1);
-
-        return small_shapes[dist(RGen::mt())]->getCenter();
-    }
-
-}
-
 
 ClassicEA::ClassicEA (const std::shared_ptr<const Target> &target)
     : _target(target),
       _last_save(0),
-      _new_chromozome_pool(target, std::ceil(Config::getParams().classic_ea.population_size*Config::getParams().classic_ea.refresh_ratio))
+      _new_chromozome_pool(target, std::max(10.0, std::ceil(Config::getParams().classic_ea.population_size*Config::getParams().classic_ea.refresh_ratio)))
 {
 
 }
@@ -92,16 +32,19 @@ std::shared_ptr<Chromozome> ClassicEA::run ()
     Mutator mutator(this->_target->image_size);
     for (int e = 0; e < Config::getParams().classic_ea.num_epochs; ++e)
     {
+        this->_stats.add(e, this->_best_chromozome->getFitness(), this->_worst_chromozome->getFitness(),
+                         ClassicEA::_meanFitness(this->_population), ClassicEA::_stddevFitness(this->_population));
+
         if (e % 50 == 0)
         {
             this->_saveCurrentPopulation(e);
+            this->_stats.save();
         }
 
         std::vector<std::shared_ptr<Chromozome>> new_population;
         this->_initializeNewPopulation(new_population);
 
         // -- EVOLUTION -- //
-        std::vector<int> histogram(this->_population.size(), 0);
         // Evolve each individual in the population
         for (int i = 0; i < int(this->_population.size()-1)/2; ++i)
         {
@@ -109,7 +52,6 @@ std::shared_ptr<Chromozome> ClassicEA::run ()
             // Select 2 individuals for crossover
             int i1 = this->_tournamentSelection();
             int i2 = this->_tournamentSelection(i1);
-            histogram[i1]++; histogram[i2]++;
 
             // Careful! We have to clone here!!!
             auto offspring1 = this->_population[i1]->clone();
@@ -124,27 +66,22 @@ std::shared_ptr<Chromozome> ClassicEA::run ()
             }
 
             // Mutation
-            for (int k = 0; k < histogram[i1]; ++k) offspring1->accept(mutator);
-            for (int k = 0; k < histogram[i2]; ++k) offspring2->accept(mutator);
+            offspring1->accept(mutator);
+            offspring2->accept(mutator);
 
             // Put the offspring into the new population
             new_population[2*i+1] = offspring1;
             new_population[2*i+2] = offspring2;
         }
 
-        for (auto hi: histogram) std::cout << hi << " "; std::cout << std::endl;
-
         // All chromozomes age
         for (auto ch: new_population) ch->birthday();
 
         // Sort the population by fitness
-        std::sort(new_population.begin(), new_population.end(),
-                  [] (const std::shared_ptr<Chromozome> &ch1, const std::shared_ptr<Chromozome> &ch2) {
-            return ch1->getFitness() < ch2->getFitness();
-        });
-
+        ClassicEA::_sortPopulation(new_population);
 
         this->_updateBestChromozome(new_population, e);
+        this->_updateWorstChromozome(new_population, e);
 
         // Replace some of the individuals with random new ones to keep diversity in the population
         if (e > 0 && e % Config::getParams().classic_ea.refresh_interval == 0)
@@ -164,7 +101,7 @@ std::shared_ptr<Chromozome> ClassicEA::run ()
 }
 
 
-// ------------------------------------------  PRIVATE METHODS  ------------------------------------------ //
+// -----------------------------------------  PROTECTED METHODS  ----------------------------------------- //
 
 void ClassicEA::_initializePopulation ()
 {
@@ -174,8 +111,11 @@ void ClassicEA::_initializePopulation ()
         this->_population.push_back(this->_new_chromozome_pool.getNewChromozome());
     }
 
+    ClassicEA::_sortPopulation(this->_population);
+
     // Just set the best as a random one from the population
-    this->_best_chromozome = this->_population[0]->clone();
+    this->_best_chromozome = this->_population[0];
+    this->_worst_chromozome = this->_population.back();
 
     {
         cv::Mat image = this->_best_chromozome->asImage();
@@ -208,15 +148,22 @@ void ClassicEA::_updateBestChromozome (const std::vector<std::shared_ptr<Chromoz
         std::cout << "[" << e << "] New best difference: " << new_population[0]->getFitness() << std::endl;
 
         // Save the current best image
-        if (e-this->_last_save > 100)
+        if (e-this->_last_save > 50)
         {
             this->_last_save = e;
             cv::Mat image = new_population[0]->asImage();
-            cv::imwrite(eic::Config::getParams().path_out + "/approx_" + std::to_string(e) + ".png", image);
+            cv::imwrite(Config::getParams().path_out + "/approx_" + std::to_string(e) + ".png", image);
         }
     }
 
     this->_best_chromozome = new_population[0];
+}
+
+
+void ClassicEA::_updateWorstChromozome (const std::vector<std::shared_ptr<Chromozome>> &new_population, int e)
+{
+    // WARNING! We suppose the population is sorted from best to worst!!
+    this->_worst_chromozome = new_population.back();
 }
 
 
@@ -238,35 +185,32 @@ void ClassicEA::_refreshPopulation (std::vector<std::shared_ptr<Chromozome>> &ne
 int ClassicEA::_tournamentSelection(int exclude_idx) const
 {
     // Select n random individuals for the tournament and select the best one from them
-    // We imitate selecting n individuals by shuffling the indices in the population and taking the first
-    // n individuals
+    std::uniform_int_distribution<int> dist(0, this->_population.size()-1);
 
-    // Vector 0, 1, 2, ...
-    std::vector<int> idxs(this->_population.size());
-    std::iota(idxs.begin(), idxs.end(), 0);
-
-    // Erase the index we want to exclude
-    if (exclude_idx >= 0 && exclude_idx < idxs.size())
-    {
-        idxs.erase(idxs.begin()+exclude_idx);
-    }
-
-    std::random_shuffle(idxs.begin(), idxs.end());
-
-    // Take the first tournament_size indices
+    // Select n random individuals
     std::vector<std::pair<int, double>> selected;
-    for (int i = 0; i < Config::getParams().classic_ea.tournament_size; ++i)
+    while (selected.size() < Config::getParams().classic_ea.tournament_size)
     {
-        selected.emplace_back(idxs[i], this->_population[idxs[i]]->getFitness());
+        int i = dist(RGen::mt());
+
+        // We do not want this index in the list
+        if (i == exclude_idx) continue;
+
+        // Check if this index is already in the selection, if not add it
+        if (std::find_if(selected.begin(), selected.end(),
+                         [&i](const std::pair<int, double> &p) { return p.first == i; }) == selected.end())
+        {
+            selected.emplace_back(i, this->_population[i]->getFitness());
+        }
     }
 
-    // Order them by ascending difference
+    // Order them by ascending fitness
     std::sort(selected.begin(), selected.end(),
               [](const std::pair<int, double> &a, const std::pair<int, double> &b){ return a.second < b.second; });
 
     for (auto sel: selected)
     {
-        if (utils::makeMutation(0.65))
+        if (utils::makeMutation(Config::getParams().classic_ea.best_selection_prob))
         {
             return sel.first;
         }
@@ -288,13 +232,13 @@ void ClassicEA::_onePointCrossover (std::shared_ptr<Chromozome> &offspring1, std
 
     // Select a random position and radius that will initialize the crossover position. The position is
     // selected as the center of a random small or medium shape
-    cv::Point position = selectRandomPositionForCrossover(offspring1, offspring2);
+    cv::Point position = utils::selectRandomPositionForCrossover(offspring1, offspring2);
     std::uniform_int_distribution<int> distr(20, this->_target->image_size.width/8);
     int radius = distr(RGen::mt());
 
     // Find all shapes in chromozomes offspring1 and offspring2 that intersect this shape
-    std::vector<int> idxs_i1 = findIntersectingShapesIdxs(position, radius, offspring1);
-    std::vector<int> idxs_i2 = findIntersectingShapesIdxs(position, radius, offspring2);
+    std::vector<int> idxs_i1 = utils::findIntersectingShapesIdxs(position, radius, offspring1);
+    std::vector<int> idxs_i2 = utils::findIntersectingShapesIdxs(position, radius, offspring2);
 
 //    {
 //        cv::Size image_size = this->_target->image_size;
@@ -371,7 +315,41 @@ void ClassicEA::_saveCurrentPopulation (int epoch)
         this->_population[i]->asImage().copyTo(canvas_crop);
     }
 
-    cv::imwrite(eic::Config::getParams().path_out + "/population_" + std::to_string(epoch) + ".png", canvas);
+    cv::imwrite(Config::getParams().path_out + "/population_" + std::to_string(epoch) + ".png", canvas);
+}
+
+
+void ClassicEA::_sortPopulation (std::vector<std::shared_ptr<Chromozome>> &population)
+{
+    // Sort the population by ascending fitness
+    std::sort(population.begin(), population.end(),
+              [] (const std::shared_ptr<Chromozome> &ch1, const std::shared_ptr<Chromozome> &ch2) {
+        return ch1->getFitness() < ch2->getFitness();
+    });
+}
+
+
+double ClassicEA::_meanFitness (const std::vector<std::shared_ptr<Chromozome>> &population)
+{
+    double sum = 0.0;
+
+    for (auto &ch: population) sum += ch->getFitness();
+
+    return sum / population.size();
+}
+
+
+double ClassicEA::_stddevFitness (const std::vector<std::shared_ptr<Chromozome>> &population)
+{
+    double mean = ClassicEA::_meanFitness(population);
+    double sum = 0.0;
+
+    for (auto &ch: population)
+    {
+        sum += (ch->getFitness()-mean)*(ch->getFitness()-mean);
+    }
+
+    return std::sqrt(sum / population.size());
 }
 
 

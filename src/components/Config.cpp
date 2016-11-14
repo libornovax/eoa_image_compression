@@ -40,13 +40,15 @@ void Config::loadParams (const std::string &path_config)
     Config::_getInstance()._params.mutator.radius_mutation_stddev = mutator["radius_mutation_sdtddev"].as<double>();
 
     // ClassicEA settings
-    if (Config::_getInstance()._params.algorithm == AlgorithmType::CLASSIC_EA)
+    if (Config::_getInstance()._params.algorithm == AlgorithmType::CLASSIC_EA ||
+            Config::_getInstance()._params.algorithm == AlgorithmType::STEADY_STATE_EA)
     {
-        YAML::Node ea = config["classic_ea"];
+        YAML::Node ea = config["ea"];
         Config::_getInstance()._params.classic_ea.chromozome_init = ChromozomeInit(ea["chromozome_init"].as<int>());
         Config::_getInstance()._params.classic_ea.num_epochs = ea["num_epochs"].as<int>();
         Config::_getInstance()._params.classic_ea.population_size = ea["population_size"].as<int>();
         Config::_getInstance()._params.classic_ea.tournament_size = ea["tournament_size"].as<int>();
+        Config::_getInstance()._params.classic_ea.best_selection_prob = ea["best_selection_prob"].as<double>();
         Config::_getInstance()._params.classic_ea.crossover_prob = ea["crossover_prob"].as<double>();
         Config::_getInstance()._params.classic_ea.refresh_interval = ea["refresh_interval"].as<int>();
         Config::_getInstance()._params.classic_ea.refresh_ratio = ea["refresh_ratio"].as<double>();
@@ -92,10 +94,19 @@ void Config::print ()
     if (Config::_getInstance()._params.algorithm == AlgorithmType::CLASSIC_EA)
     {
         std::cout << "=====================  CLASSIC EVOLUTIONARY ALGORITHM  =====================" << std::endl;
+    }
+    else if (Config::_getInstance()._params.algorithm == AlgorithmType::STEADY_STATE_EA)
+    {
+        std::cout << "==================  STEADY STATE EVOLUTIONARY ALGORITHM  ===================" << std::endl;
+    }
+    if (Config::_getInstance()._params.algorithm == AlgorithmType::CLASSIC_EA ||
+            Config::_getInstance()._params.algorithm == AlgorithmType::STEADY_STATE_EA)
+    {
         std::cout << "chromozome_init:                " << int(Config::_getInstance()._params.classic_ea.chromozome_init) << std::endl;
         std::cout << "num_epochs:                     " << Config::_getInstance()._params.classic_ea.num_epochs << std::endl;
         std::cout << "population_size:                " << Config::_getInstance()._params.classic_ea.population_size << std::endl;
         std::cout << "tournament_size:                " << Config::_getInstance()._params.classic_ea.tournament_size << std::endl;
+        std::cout << "best_selection_prob:            " << Config::_getInstance()._params.classic_ea.best_selection_prob << std::endl;
         std::cout << "crossover_prob:                 " << Config::_getInstance()._params.classic_ea.crossover_prob << std::endl;
         std::cout << "refresh_interval:               " << Config::_getInstance()._params.classic_ea.refresh_interval << std::endl;
         std::cout << "refresh_ratio:                  " << Config::_getInstance()._params.classic_ea.refresh_ratio << std::endl;
