@@ -234,29 +234,26 @@ void ClassicEA::_refreshPopulation (std::vector<std::shared_ptr<Chromozome>> &ne
 int ClassicEA::_tournamentSelection(int exclude_idx) const
 {
     // Select n random individuals for the tournament and select the best one from them
-    // We imitate selecting n individuals by shuffling the indices in the population and taking the first
-    // n individuals
+    std::uniform_int_distribution<int> dist(0, this->_population.size()-1);
 
-    // Vector 0, 1, 2, ...
-    std::vector<int> idxs(this->_population.size());
-    std::iota(idxs.begin(), idxs.end(), 0);
-
-    // Erase the index we want to exclude
-    if (exclude_idx >= 0 && exclude_idx < idxs.size())
-    {
-        idxs.erase(idxs.begin()+exclude_idx);
-    }
-
-    std::random_shuffle(idxs.begin(), idxs.end());
-
-    // Take the first tournament_size indices
+    // Select n random individuals
     std::vector<std::pair<int, double>> selected;
-    for (int i = 0; i < Config::getParams().classic_ea.tournament_size; ++i)
+    while (selected.size() < Config::getParams().classic_ea.tournament_size)
     {
-        selected.emplace_back(idxs[i], this->_population[idxs[i]]->getFitness());
+        int i = dist(RGen::mt());
+
+        // We do not want this index in the list
+        if (i == exclude_idx) continue;
+
+        // Check if this index is already in the selection, if not add it
+        if (std::find_if(selected.begin(), selected.end(),
+                         [&i](const std::pair<int, double> &p) { return p.first == i; }) == selected.end())
+        {
+            selected.emplace_back(i, this->_population[i]->getFitness());
+        }
     }
 
-    // Order them by ascending difference
+    // Order them by ascending fitness
     std::sort(selected.begin(), selected.end(),
               [](const std::pair<int, double> &a, const std::pair<int, double> &b){ return a.second < b.second; });
 
