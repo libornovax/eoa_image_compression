@@ -97,6 +97,8 @@ private:
     double _fitness;
     // Whether the chromozome was touched and fitness needs recomputation
     bool _dirty;
+    // Rendered channels
+    std::vector<cv::Mat> _channels;
     // Target image that we want to represent
     const std::shared_ptr<const Target> _target;
     // Age of the chromozome - how many epochs ago it was created

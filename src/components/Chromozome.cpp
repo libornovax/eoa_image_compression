@@ -60,7 +60,7 @@ std::shared_ptr<Chromozome> Chromozome::clone () const
     }
 
     ch->_fitness = this->_fitness;
-    ch->_dirty   = this->_dirty;
+    ch->_dirty   = true;  // We need to trigger re-rendering
     ch->_age     = this->_age;
 
     return ch;
@@ -146,14 +146,14 @@ double Chromozome::getFitness ()
 
         // Render the image
         Renderer renderer(this->_target->image_size);
-        std::vector<cv::Mat> channels = renderer.render(*this);
+        this->_channels = renderer.render(*this);
 
         // Compute pixel-wise difference
         this->_fitness = 0;
         for (size_t i = 0; i < 3; ++i)
         {
 //            this->_fitness += computeDifference(this->_target->blurred_channels[i](this->_roi), channels[i](this->_roi), this->_target->weights(this->_roi));
-            this->_fitness += computeDifference(this->_target->blurred_channels[i], channels[i], this->_target->weights);
+            this->_fitness += computeDifference(this->_target->blurred_channels[i], this->_channels[i], this->_target->weights);
         }
 
         // Just rendered and computed fitness
@@ -191,12 +191,15 @@ int Chromozome::getAge() const
 cv::Mat Chromozome::asImage ()
 {
     // Render the image represented by this chromozome
-    Renderer r(this->_target->image_size);
-    const std::vector<cv::Mat> channels = r.render(*this);
+    if (this->_dirty)
+    {
+        Renderer r(this->_target->image_size);
+        this->_channels = r.render(*this);
+    }
 
     // Merge the channels to a 3 channel cv::Mat
     cv::Mat image;
-    cv::merge(channels, image);
+    cv::merge(this->_channels, image);
     cv::cvtColor(image, image, CV_RGB2BGR);
 
 //    cv::rectangle(image, this->_roi, cv::Scalar(0,0,255));
