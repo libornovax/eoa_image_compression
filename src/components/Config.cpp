@@ -47,6 +47,7 @@ void Config::loadParams (const std::string &path_config)
         Config::_getInstance()._params.classic_ea.num_epochs = ea["num_epochs"].as<int>();
         Config::_getInstance()._params.classic_ea.population_size = ea["population_size"].as<int>();
         Config::_getInstance()._params.classic_ea.tournament_size = ea["tournament_size"].as<int>();
+        Config::_getInstance()._params.classic_ea.best_selection_prob = ea["best_selection_prob"].as<double>();
         Config::_getInstance()._params.classic_ea.crossover_prob = ea["crossover_prob"].as<double>();
         Config::_getInstance()._params.classic_ea.refresh_interval = ea["refresh_interval"].as<int>();
         Config::_getInstance()._params.classic_ea.refresh_ratio = ea["refresh_ratio"].as<double>();
@@ -96,6 +97,7 @@ void Config::print ()
         std::cout << "num_epochs:                     " << Config::_getInstance()._params.classic_ea.num_epochs << std::endl;
         std::cout << "population_size:                " << Config::_getInstance()._params.classic_ea.population_size << std::endl;
         std::cout << "tournament_size:                " << Config::_getInstance()._params.classic_ea.tournament_size << std::endl;
+        std::cout << "best_selection_prob:            " << Config::_getInstance()._params.classic_ea.best_selection_prob << std::endl;
         std::cout << "crossover_prob:                 " << Config::_getInstance()._params.classic_ea.crossover_prob << std::endl;
         std::cout << "refresh_interval:               " << Config::_getInstance()._params.classic_ea.refresh_interval << std::endl;
         std::cout << "refresh_ratio:                  " << Config::_getInstance()._params.classic_ea.refresh_ratio << std::endl;

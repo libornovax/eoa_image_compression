@@ -63,6 +63,7 @@ struct ClassicEAParams
     int num_epochs;
     int population_size;
     int tournament_size;
+    double best_selection_prob;
     double crossover_prob;
     int refresh_interval;
     double refresh_ratio;

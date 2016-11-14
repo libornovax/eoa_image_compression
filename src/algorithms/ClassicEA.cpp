@@ -262,7 +262,7 @@ int ClassicEA::_tournamentSelection(int exclude_idx) const
 
     for (auto sel: selected)
     {
-        if (utils::makeMutation(0.65))
+        if (utils::makeMutation(Config::getParams().classic_ea.best_selection_prob))
         {
             return sel.first;
         }
