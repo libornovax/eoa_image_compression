@@ -30,9 +30,13 @@ std::shared_ptr<Chromozome> SteadyStateEA::run ()
     Mutator mutator(this->_target->image_size);
     for (int e = 0; e < Config::getParams().classic_ea.num_epochs; ++e)
     {
-        if (e % 1 == 0)
+        this->_stats.add(e, this->_best_chromozome->getFitness(), this->_worst_chromozome->getFitness(),
+                         ClassicEA::_meanFitness(this->_population), ClassicEA::_stddevFitness(this->_population));
+
+        if (e % 10 == 0)
         {
             this->_saveCurrentPopulation(e);
+            this->_stats.save();
         }
 
         std::vector<std::shared_ptr<Chromozome>> new_population;
@@ -77,13 +81,10 @@ std::shared_ptr<Chromozome> SteadyStateEA::run ()
         for (auto ch: new_population) ch->birthday();
 
         // Sort the population by fitness
-        std::sort(new_population.begin(), new_population.end(),
-                  [] (const std::shared_ptr<Chromozome> &ch1, const std::shared_ptr<Chromozome> &ch2) {
-            return ch1->getFitness() < ch2->getFitness();
-        });
-
+        ClassicEA::_sortPopulation(new_population);
 
         this->_updateBestChromozome(new_population, e);
+        this->_updateWorstChromozome(new_population, e);
 
         // Replace some of the individuals with random new ones to keep diversity in the population
         if (e > 0 && e % Config::getParams().classic_ea.refresh_interval == 0)

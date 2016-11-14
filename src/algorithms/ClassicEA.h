@@ -8,6 +8,7 @@
 
 #include <iostream>
 #include "entities/NewChromozomePool.h"
+#include "entities/Stats.h"
 
 
 namespace eic {
@@ -52,6 +53,13 @@ protected:
     virtual void _updateBestChromozome (const std::vector<std::shared_ptr<Chromozome>> &new_population, int e) final;
 
     /**
+     * @brief Replaces the worst chromozome
+     * @param new_population
+     * @param e
+     */
+    virtual void _updateWorstChromozome (const std::vector<std::shared_ptr<Chromozome>> &new_population, int e) final;
+
+    /**
      * @brief Replaces every n-th individual from the given population with a random new one
      * @param new_population
      */
@@ -77,6 +85,26 @@ protected:
      */
     virtual void _saveCurrentPopulation (int epoch) final;
 
+    /**
+     * @brief Sorts the population by fitness in the ascending manner
+     * @param population
+     */
+    static void _sortPopulation (std::vector<std::shared_ptr<Chromozome>> &population);
+
+    /**
+     * @brief Computes mean fitness of the given population
+     * @param population
+     * @return Mean fitness
+     */
+    static double _meanFitness (const std::vector<std::shared_ptr<Chromozome>> &population);
+
+    /**
+     * @brief Computes standard deviation of fitness in the population
+     * @param population
+     * @return
+     */
+    static double _stddevFitness (const std::vector<std::shared_ptr<Chromozome>> &population);
+
 
     // -------------------------------------  PRIVATE MEMBERS  ------------------------------------- //
     // Target image channels, which we want to represent
@@ -85,10 +113,14 @@ protected:
     std::vector<std::shared_ptr<Chromozome>> _population;
     // Best chromozome that we found so far
     std::shared_ptr<Chromozome> _best_chromozome;
+    // Worst chromozome in the current population
+    std::shared_ptr<Chromozome> _worst_chromozome;
     // Epoch, when we last saved the best chromozome
     int _last_save;
     // Asynchronous generator of new chromozomes for reinitialization
     NewChromozomePool _new_chromozome_pool;
+    // Statistics of the evolution
+    Stats _stats;
 
 };
 

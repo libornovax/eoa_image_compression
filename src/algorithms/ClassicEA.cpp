@@ -32,9 +32,13 @@ std::shared_ptr<Chromozome> ClassicEA::run ()
     Mutator mutator(this->_target->image_size);
     for (int e = 0; e < Config::getParams().classic_ea.num_epochs; ++e)
     {
+        this->_stats.add(e, this->_best_chromozome->getFitness(), this->_worst_chromozome->getFitness(),
+                         ClassicEA::_meanFitness(this->_population), ClassicEA::_stddevFitness(this->_population));
+
         if (e % 50 == 0)
         {
             this->_saveCurrentPopulation(e);
+            this->_stats.save();
         }
 
         std::vector<std::shared_ptr<Chromozome>> new_population;
@@ -74,13 +78,10 @@ std::shared_ptr<Chromozome> ClassicEA::run ()
         for (auto ch: new_population) ch->birthday();
 
         // Sort the population by fitness
-        std::sort(new_population.begin(), new_population.end(),
-                  [] (const std::shared_ptr<Chromozome> &ch1, const std::shared_ptr<Chromozome> &ch2) {
-            return ch1->getFitness() < ch2->getFitness();
-        });
-
+        ClassicEA::_sortPopulation(new_population);
 
         this->_updateBestChromozome(new_population, e);
+        this->_updateWorstChromozome(new_population, e);
 
         // Replace some of the individuals with random new ones to keep diversity in the population
         if (e > 0 && e % Config::getParams().classic_ea.refresh_interval == 0)
@@ -110,8 +111,11 @@ void ClassicEA::_initializePopulation ()
         this->_population.push_back(this->_new_chromozome_pool.getNewChromozome());
     }
 
+    ClassicEA::_sortPopulation(this->_population);
+
     // Just set the best as a random one from the population
-    this->_best_chromozome = this->_population[0]->clone();
+    this->_best_chromozome = this->_population[0];
+    this->_worst_chromozome = this->_population.back();
 
     {
         cv::Mat image = this->_best_chromozome->asImage();
@@ -144,15 +148,22 @@ void ClassicEA::_updateBestChromozome (const std::vector<std::shared_ptr<Chromoz
         std::cout << "[" << e << "] New best difference: " << new_population[0]->getFitness() << std::endl;
 
         // Save the current best image
-        if (e-this->_last_save > 100)
+        if (e-this->_last_save > 50)
         {
             this->_last_save = e;
             cv::Mat image = new_population[0]->asImage();
-            cv::imwrite(eic::Config::getParams().path_out + "/approx_" + std::to_string(e) + ".png", image);
+            cv::imwrite(Config::getParams().path_out + "/approx_" + std::to_string(e) + ".png", image);
         }
     }
 
     this->_best_chromozome = new_population[0];
+}
+
+
+void ClassicEA::_updateWorstChromozome (const std::vector<std::shared_ptr<Chromozome>> &new_population, int e)
+{
+    // WARNING! We suppose the population is sorted from best to worst!!
+    this->_worst_chromozome = new_population.back();
 }
 
 
@@ -304,7 +315,41 @@ void ClassicEA::_saveCurrentPopulation (int epoch)
         this->_population[i]->asImage().copyTo(canvas_crop);
     }
 
-    cv::imwrite(eic::Config::getParams().path_out + "/population_" + std::to_string(epoch) + ".png", canvas);
+    cv::imwrite(Config::getParams().path_out + "/population_" + std::to_string(epoch) + ".png", canvas);
+}
+
+
+void ClassicEA::_sortPopulation (std::vector<std::shared_ptr<Chromozome>> &population)
+{
+    // Sort the population by ascending fitness
+    std::sort(population.begin(), population.end(),
+              [] (const std::shared_ptr<Chromozome> &ch1, const std::shared_ptr<Chromozome> &ch2) {
+        return ch1->getFitness() < ch2->getFitness();
+    });
+}
+
+
+double ClassicEA::_meanFitness (const std::vector<std::shared_ptr<Chromozome>> &population)
+{
+    double sum = 0.0;
+
+    for (auto &ch: population) sum += ch->getFitness();
+
+    return sum / population.size();
+}
+
+
+double ClassicEA::_stddevFitness (const std::vector<std::shared_ptr<Chromozome>> &population)
+{
+    double mean = ClassicEA::_meanFitness(population);
+    double sum = 0.0;
+
+    for (auto &ch: population)
+    {
+        sum += (ch->getFitness()-mean)*(ch->getFitness()-mean);
+    }
+
+    return std::sqrt(sum / population.size());
 }
 
 
