@@ -92,7 +92,7 @@ std::shared_ptr<Chromozome> ClassicEA::run ()
     Mutator mutator(this->_target->image_size);
     for (int e = 0; e < Config::getParams().classic_ea.num_epochs; ++e)
     {
-        if (e % 10 == 0)
+        if (e % 50 == 0)
         {
             this->_saveCurrentPopulation(e);
         }
@@ -101,6 +101,7 @@ std::shared_ptr<Chromozome> ClassicEA::run ()
         this->_initializeNewPopulation(new_population);
 
         // -- EVOLUTION -- //
+        std::vector<int> histogram(this->_population.size(), 0);
         // Evolve each individual in the population
         for (int i = 0; i < int(this->_population.size()-1)/2; ++i)
         {
@@ -108,6 +109,7 @@ std::shared_ptr<Chromozome> ClassicEA::run ()
             // Select 2 individuals for crossover
             int i1 = this->_tournamentSelection();
             int i2 = this->_tournamentSelection(i1);
+            histogram[i1]++; histogram[i2]++;
 
             // Careful! We have to clone here!!!
             auto offspring1 = this->_population[i1]->clone();
@@ -118,17 +120,19 @@ std::shared_ptr<Chromozome> ClassicEA::run ()
             {
                 // Do it multiple times to exchange a larger part of the chromozome
                 ClassicEA::_onePointCrossover(offspring1, offspring2);
-//                ClassicEA::_onePointCrossover(offspring1, offspring2);
+                ClassicEA::_onePointCrossover(offspring1, offspring2);
             }
 
             // Mutation
-            offspring1->accept(mutator);
-            offspring2->accept(mutator);
+            for (int k = 0; k < histogram[i1]; ++k) offspring1->accept(mutator);
+            for (int k = 0; k < histogram[i2]; ++k) offspring2->accept(mutator);
 
             // Put the offspring into the new population
             new_population[2*i+1] = offspring1;
             new_population[2*i+2] = offspring2;
         }
+
+        for (auto hi: histogram) std::cout << hi << " "; std::cout << std::endl;
 
         // All chromozomes age
         for (auto ch: new_population) ch->birthday();
@@ -262,7 +266,7 @@ int ClassicEA::_tournamentSelection(int exclude_idx) const
 
     for (auto sel: selected)
     {
-        if (utils::makeMutation(0.5))
+        if (utils::makeMutation(0.65))
         {
             return sel.first;
         }
@@ -285,7 +289,7 @@ void ClassicEA::_onePointCrossover (std::shared_ptr<Chromozome> &offspring1, std
     // Select a random position and radius that will initialize the crossover position. The position is
     // selected as the center of a random small or medium shape
     cv::Point position = selectRandomPositionForCrossover(offspring1, offspring2);
-    std::uniform_int_distribution<int> distr(20, this->_target->image_size.width/4);
+    std::uniform_int_distribution<int> distr(20, this->_target->image_size.width/8);
     int radius = distr(RGen::mt());
 
     // Find all shapes in chromozomes offspring1 and offspring2 that intersect this shape
@@ -330,6 +334,9 @@ void ClassicEA::_onePointCrossover (std::shared_ptr<Chromozome> &offspring1, std
             offspring2->operator [](idxs_i2[i]) = tmp;
         }
     }
+
+    offspring1->sort();
+    offspring2->sort();
 
 //    {
 //        cv::imshow("offspring1 after", offspring1->asImage());

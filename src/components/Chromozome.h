@@ -38,6 +38,11 @@ public:
 
 
     /**
+     * @brief Sorts the shapes in the chromozome by size
+     */
+    void sort ();
+
+    /**
      * @brief Length of the chromozome (number of shapes)
      */
     size_t size () const;

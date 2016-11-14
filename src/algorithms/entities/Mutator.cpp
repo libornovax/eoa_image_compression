@@ -113,9 +113,34 @@ void Mutator::visit (Circle &circle)
         else if (utils::makeMutation(Config::getParams().mutator.position_mutation_prob))
         {
             // Mutate the position of the center
-            std::normal_distribution<double> dist(0, Config::getParams().mutator.position_mutation_stddev);
-            circle._center.x += dist(RGen::mt());
-            circle._center.y += dist(RGen::mt());
+            switch (circle.getSizeGroup())
+            {
+            case SizeGroup::SMALL:
+                {
+                    std::normal_distribution<double> dist(0, Config::getParams().mutator.position_mutation_stddev/5);
+                    circle._center.x += dist(RGen::mt());
+                    circle._center.y += dist(RGen::mt());
+                }
+                break;
+            case SizeGroup::MEDIUM:
+                {
+                    std::normal_distribution<double> dist(0, Config::getParams().mutator.position_mutation_stddev/2);
+                    circle._center.x += dist(RGen::mt());
+                    circle._center.y += dist(RGen::mt());
+                }
+                break;
+            case SizeGroup::LARGE:
+                {
+                    std::normal_distribution<double> dist(0, Config::getParams().mutator.position_mutation_stddev);
+                    circle._center.x += dist(RGen::mt());
+                    circle._center.y += dist(RGen::mt());
+                }
+                break;
+            default:
+                std::cout << "ERROR: Unknown SizeGroup" << std::endl;
+                exit(EXIT_FAILURE);
+                break;
+            }
             circle._center.x = utils::clip(circle._center.x, -circle._radius, this->_image_size.width+circle._radius);
             circle._center.y = utils::clip(circle._center.y, -circle._radius, this->_image_size.height+circle._radius);
         }

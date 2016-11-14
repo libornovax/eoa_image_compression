@@ -78,12 +78,20 @@ std::shared_ptr<Chromozome> Chromozome::randomChromozome (const std::shared_ptr<
     auto ch = std::make_shared<Chromozome>(target, roi);
     for (int i = 0; i < Config::getParams().chromozome_length; ++i) ch->addRandomShape();
 
-    // Sort the chromozome - put SMALL shapes to the top (this way they will not be covered by the big ones
-    // when rendering)
-    std::sort(ch->_chromozome.begin(), ch->_chromozome.end(),
-              [](const std::shared_ptr<IShape> &s1, const std::shared_ptr<IShape> &s2){ return s1->getSizeGroup() < s2->getSizeGroup(); });
+    ch->sort();
 
     return ch;
+}
+
+
+void Chromozome::sort ()
+{
+    // Sort the chromozome - put SMALL shapes to the top (this way they will not be covered by the big ones
+    // when rendering)
+    std::sort(this->_chromozome.begin(), this->_chromozome.end(),
+              [](const std::shared_ptr<IShape> &s1, const std::shared_ptr<IShape> &s2) {
+        return s1->getSizeGroup() < s2->getSizeGroup();
+    });
 }
 
 
