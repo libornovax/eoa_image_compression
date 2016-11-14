@@ -33,7 +33,7 @@ std::shared_ptr<Chromozome> SteadyStateEA::run ()
         this->_stats.add(e, this->_best_chromozome->getFitness(), this->_worst_chromozome->getFitness(),
                          ClassicEA::_meanFitness(this->_population), ClassicEA::_stddevFitness(this->_population));
 
-        if (e % 10 == 0)
+        if ((e < 1000 && e % 50 == 0) || (e >= 1000 && e % 100 == 0))
         {
             this->_saveCurrentPopulation(e);
             this->_stats.save();
@@ -77,6 +77,15 @@ std::shared_ptr<Chromozome> SteadyStateEA::run ()
             }
         }
 
+        // Fill the gaps - the individuals, which were not replaced have to be put to the new population
+        for (int i = 0; i < this->_population.size(); ++i)
+        {
+            if (!new_population[i])
+            {
+                new_population[i] = this->_population[i];
+            }
+        }
+
         // All chromozomes age
         for (auto ch: new_population) ch->birthday();
 
@@ -93,7 +102,7 @@ std::shared_ptr<Chromozome> SteadyStateEA::run ()
             this->_refreshPopulation(new_population);
         }
 
-        // Generational replacement with elitism (elitism is already taken care of)
+        // Replace the population with the new steady state one
         this->_population = new_population;
     }
 
@@ -109,12 +118,6 @@ std::shared_ptr<Chromozome> SteadyStateEA::run ()
 void SteadyStateEA::_initializeNewPopulation (std::vector<std::shared_ptr<Chromozome>> &new_population) const
 {
     new_population.resize(this->_population.size());
-
-    // Clone the whole population
-    for (int i = 0; i < this->_population.size(); ++i)
-    {
-        new_population[i] = this->_population[i]->clone();
-    }
 }
 
 

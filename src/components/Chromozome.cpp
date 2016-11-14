@@ -152,7 +152,7 @@ double Chromozome::getFitness ()
         this->_fitness = 0;
         for (size_t i = 0; i < 3; ++i)
         {
-//            this->_fitness += computeDifference(this->_target->blurred_channels[i](this->_roi), channels[i](this->_roi), this->_target->weights(this->_roi));
+            this->_fitness += computeDifference(this->_target->blurred_channels[i](this->_roi), this->_channels[i](this->_roi), this->_target->weights(this->_roi));
             this->_fitness += computeDifference(this->_target->blurred_channels[i], this->_channels[i], this->_target->weights);
         }
 
@@ -202,7 +202,7 @@ cv::Mat Chromozome::asImage ()
     cv::merge(this->_channels, image);
     cv::cvtColor(image, image, CV_RGB2BGR);
 
-//    cv::rectangle(image, this->_roi, cv::Scalar(0,0,255));
+    cv::rectangle(image, this->_roi, cv::Scalar(0,0,255));
 
     return image;
 }
