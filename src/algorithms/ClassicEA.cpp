@@ -101,7 +101,6 @@ std::shared_ptr<Chromozome> ClassicEA::run ()
         this->_initializeNewPopulation(new_population);
 
         // -- EVOLUTION -- //
-        std::vector<int> histogram(this->_population.size(), 0);
         // Evolve each individual in the population
         for (int i = 0; i < int(this->_population.size()-1)/2; ++i)
         {
@@ -109,7 +108,6 @@ std::shared_ptr<Chromozome> ClassicEA::run ()
             // Select 2 individuals for crossover
             int i1 = this->_tournamentSelection();
             int i2 = this->_tournamentSelection(i1);
-            histogram[i1]++; histogram[i2]++;
 
             // Careful! We have to clone here!!!
             auto offspring1 = this->_population[i1]->clone();
@@ -124,15 +122,13 @@ std::shared_ptr<Chromozome> ClassicEA::run ()
             }
 
             // Mutation
-            for (int k = 0; k < histogram[i1]; ++k) offspring1->accept(mutator);
-            for (int k = 0; k < histogram[i2]; ++k) offspring2->accept(mutator);
+            offspring1->accept(mutator);
+            offspring2->accept(mutator);
 
             // Put the offspring into the new population
             new_population[2*i+1] = offspring1;
             new_population[2*i+2] = offspring2;
         }
-
-        for (auto hi: histogram) std::cout << hi << " "; std::cout << std::endl;
 
         // All chromozomes age
         for (auto ch: new_population) ch->birthday();
