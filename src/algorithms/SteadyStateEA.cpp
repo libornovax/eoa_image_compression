@@ -66,12 +66,15 @@ std::shared_ptr<Chromozome> SteadyStateEA::run ()
             offspring1->accept(mutator);
             offspring2->accept(mutator);
 
-            // Put the offsprings into the new population if they are better than their parents
-            if (offspring1->getFitness() < this->_population[i1]->getFitness())
+            // Put the offsprings into the new population if they are better than their parents and better
+            // than the solutions that can be already in the new population from previous crossovers
+            if (offspring1->getFitness() < this->_population[i1]->getFitness() &&
+                    (!new_population[i1] || offspring1->getFitness() < new_population[i1]->getFitness()))
             {
                 new_population[i1] = offspring1;
             }
-            if (offspring2->getFitness() < this->_population[i2]->getFitness())
+            if (offspring2->getFitness() < this->_population[i2]->getFitness() &&
+                    (!new_population[i2] || offspring2->getFitness() < new_population[i2]->getFitness()))
             {
                 new_population[i2] = offspring2;
             }
