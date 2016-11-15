@@ -44,7 +44,8 @@ Chromozome::Chromozome(const std::shared_ptr<const Target> &target, const cv::Re
       _dirty(true),
       _target(target),
       _age(0),
-      _roi(roi)
+      _roi(roi),
+      _roi_active(false)
 {
 
 }
@@ -59,9 +60,10 @@ std::shared_ptr<Chromozome> Chromozome::clone () const
         ch->_chromozome.push_back(shape->clone());
     }
 
-    ch->_fitness = this->_fitness;
-    ch->_dirty   = true;  // We need to trigger re-rendering
-    ch->_age     = this->_age;
+    ch->_fitness    = this->_fitness;
+    ch->_dirty      = true;  // We need to trigger re-rendering
+    ch->_age        = this->_age;
+    ch->_roi_active = this->_roi_active;
 
     return ch;
 }
@@ -152,7 +154,11 @@ double Chromozome::getFitness ()
         this->_fitness = 0;
         for (size_t i = 0; i < 3; ++i)
         {
-            this->_fitness += computeDifference(this->_target->blurred_channels[i](this->_roi), this->_channels[i](this->_roi), this->_target->weights(this->_roi));
+            if (this->_roi_active)
+            {
+                // ROI is activated, include error from the ROI as well
+                this->_fitness += computeDifference(this->_target->blurred_channels[i](this->_roi), this->_channels[i](this->_roi), this->_target->weights(this->_roi));
+            }
             this->_fitness += computeDifference(this->_target->blurred_channels[i], this->_channels[i], this->_target->weights);
         }
 
@@ -188,6 +194,20 @@ int Chromozome::getAge() const
 }
 
 
+void Chromozome::activateROI ()
+{
+    this->_roi_active = true;
+    this->setDirty();
+}
+
+
+void Chromozome::deactivateROI ()
+{
+    this->_roi_active = false;
+    this->setDirty();
+}
+
+
 cv::Mat Chromozome::asImage ()
 {
     // Render the image represented by this chromozome
@@ -202,7 +222,7 @@ cv::Mat Chromozome::asImage ()
     cv::merge(this->_channels, image);
     cv::cvtColor(image, image, CV_RGB2BGR);
 
-    cv::rectangle(image, this->_roi, cv::Scalar(0,0,255));
+    if (this->_roi_active) cv::rectangle(image, this->_roi, cv::Scalar(0,0,255));
 
     return image;
 }

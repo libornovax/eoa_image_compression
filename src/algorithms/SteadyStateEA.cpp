@@ -26,6 +26,10 @@ std::shared_ptr<Chromozome> SteadyStateEA::run ()
 
     this->_initializePopulation();
 
+    // For the first half of the epochs we want to be evolving regions of the image, afer a half we
+    // deactivate the rois
+    for (auto ch: this->_population) ch->activateROI();
+
     // Run the evolution
     Mutator mutator(this->_target->image_size);
     for (int e = 0; e < Config::getParams().classic_ea.num_epochs; ++e)
@@ -39,10 +43,18 @@ std::shared_ptr<Chromozome> SteadyStateEA::run ()
             this->_stats.save();
         }
 
+        // In the middle point of the evolution we deactivate the roi -> the algorithm will start focusing on
+        // the whole image instead of the rois
+        if (e == Config::getParams().classic_ea.num_epochs/2)
+        {
+            for (auto ch: this->_population) ch->deactivateROI();
+        }
+
+
+        // -- EVOLUTION -- //
         std::vector<std::shared_ptr<Chromozome>> new_population;
         this->_initializeNewPopulation(new_population);
 
-        // -- EVOLUTION -- //
         // Population size/2 times perform tournament selection, crossover, mutation and replace the parents
         // by their children only if they are better
         for (int i = 0; i < this->_population.size()/2; ++i)

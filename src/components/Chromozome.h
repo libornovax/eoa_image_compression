@@ -79,6 +79,12 @@ public:
     int getAge () const;
 
     /**
+     * @brief Activates the computation of error on the roi
+     */
+    void activateROI ();
+    void deactivateROI ();
+
+    /**
      * @brief Renders the chromozome
      */
     cv::Mat asImage ();
@@ -105,6 +111,8 @@ private:
     int _age;
     // Region of interest in the target image that this chromozome specializes on
     cv::Rect _roi;
+    // Whether we should consider extra error from the roi or not
+    bool _roi_active;
 
 };
 
