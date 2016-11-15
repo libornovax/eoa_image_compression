@@ -16,7 +16,6 @@ set ( CMAKE_CXX_FLAGS "-g -std=c++11 -O3" )
 set ( DEBUG_MODE ON )
 
 #add_definitions ( -DMEASURE_TIME )
-#add_definitions ( -DRENDER_AVERAGE )
 
 
 FIND_PACKAGE ( OpenCV 3.1 REQUIRED )
@@ -41,6 +40,9 @@ file ( GLOB MY_SOURCES src/*.cpp
                        src/algorithms/*.cpp
                        src/algorithms/entities/*.cpp )
 
+
+## ----------------------------------------- EXECUTABLES ----------------------------------------- ##
+
 add_executable ( compress
     ${MY_HEADERS}
     ${MY_SOURCES}
@@ -51,3 +53,16 @@ target_link_libraries ( compress
     yaml-cpp
 )
 
+
+
+add_executable ( compress_average
+    ${MY_HEADERS}
+    ${MY_SOURCES}
+)
+
+target_compile_definitions ( compress_average PUBLIC "-DRENDER_AVERAGE" )
+
+target_link_libraries ( compress_average
+    ${OpenCV_LIBS}
+    yaml-cpp
+)
