@@ -268,10 +268,11 @@ void ClassicEA::_onePointCrossover (std::shared_ptr<Chromozome> &offspring1, std
     // Exchange those shapes (or parts of them)
     for (int i = 0; i < idxs_i1.size() && i < idxs_i2.size(); ++i)
     {
-        // Exchange the shapes if they are small or medium or if they are both large - we do not want to
-        // exchange small or medium for large ones because the large ones should be in the background
-        if ((offspring1->operator [](idxs_i1[i])->getSizeGroup() != SizeGroup::LARGE && offspring2->operator [](idxs_i2[i])->getSizeGroup() != SizeGroup::LARGE) ||
-                (offspring1->operator [](idxs_i1[i])->getSizeGroup() == SizeGroup::LARGE && offspring2->operator [](idxs_i2[i])->getSizeGroup() == SizeGroup::LARGE))
+        // Exchange the shapes only if they are of the same size groups - we do not want to mix them because
+        // then we start losing the small ones
+        if ((offspring1->operator [](idxs_i1[i])->getSizeGroup() == SizeGroup::SMALL && offspring2->operator [](idxs_i2[i])->getSizeGroup() == SizeGroup::SMALL) ||
+            (offspring1->operator [](idxs_i1[i])->getSizeGroup() == SizeGroup::MEDIUM && offspring2->operator [](idxs_i2[i])->getSizeGroup() == SizeGroup::MEDIUM) ||
+            (offspring1->operator [](idxs_i1[i])->getSizeGroup() == SizeGroup::LARGE && offspring2->operator [](idxs_i2[i])->getSizeGroup() == SizeGroup::LARGE))
         {
             auto tmp = offspring1->operator [](idxs_i1[i]);
             offspring1->operator [](idxs_i1[i]) = offspring2->operator [](idxs_i2[i]);
@@ -279,8 +280,9 @@ void ClassicEA::_onePointCrossover (std::shared_ptr<Chromozome> &offspring1, std
         }
     }
 
-    offspring1->sort();
-    offspring2->sort();
+    // If we keep the size groups we do not need the sort here
+//    offspring1->sort();
+//    offspring2->sort();
 
 //    {
 //        cv::imshow("offspring1 after", offspring1->asImage());

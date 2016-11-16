@@ -47,6 +47,8 @@ void Mutator::visit (Chromozome &chromozome)
             chromozome[replacee] = tmp;
         }
     }
+
+    chromozome.sort();
 #endif
 
 //    std::normal_distribution<double> distroi(0, 10);

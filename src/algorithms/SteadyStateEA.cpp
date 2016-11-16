@@ -47,6 +47,7 @@ std::shared_ptr<Chromozome> SteadyStateEA::run ()
         // the whole image instead of the rois
         if (e == Config::getParams().classic_ea.num_epochs/2)
         {
+            std::cout << "DEACTIVATING REGIONS OF INTEREST OF CHROMOZOMES" << std::endl;
             for (auto ch: this->_population) ch->deactivateROI();
         }
 
