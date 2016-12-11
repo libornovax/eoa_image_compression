@@ -72,7 +72,7 @@ std::shared_ptr<Chromozome> Chromozome::clone () const
 std::shared_ptr<Chromozome> Chromozome::randomChromozome (const std::shared_ptr<const Target> &target)
 {
     // Select a random region of interest in target
-    int square_dim = std::min(target->image_size.width, target->image_size.height) / 2;
+    int square_dim = std::min(target->image_size.width, target->image_size.height) / 3;
     std::uniform_int_distribution<int> distw(0, target->image_size.width-square_dim);
     std::uniform_int_distribution<int> disth(0, target->image_size.height-square_dim);
     cv::Rect roi(distw(RGen::mt()), disth(RGen::mt()), square_dim, square_dim);
@@ -90,6 +90,9 @@ void Chromozome::sort ()
 {
     // Sort the chromozome - put SMALL shapes to the top (this way they will not be covered by the big ones
     // when rendering)
+
+    // WARNING! Has to be a stable sort because otherwise when we call this sort on an original and a clone
+    // it gives different results (on Ubuntu with GCC!)
     std::stable_sort(this->_chromozome.begin(), this->_chromozome.end(),
               [](const std::shared_ptr<IShape> &s1, const std::shared_ptr<IShape> &s2) {
         return s1->getSizeGroup() < s2->getSizeGroup();
