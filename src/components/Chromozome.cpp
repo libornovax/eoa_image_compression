@@ -90,7 +90,7 @@ void Chromozome::sort ()
 {
     // Sort the chromozome - put SMALL shapes to the top (this way they will not be covered by the big ones
     // when rendering)
-    std::sort(this->_chromozome.begin(), this->_chromozome.end(),
+    std::stable_sort(this->_chromozome.begin(), this->_chromozome.end(),
               [](const std::shared_ptr<IShape> &s1, const std::shared_ptr<IShape> &s2) {
         return s1->getSizeGroup() < s2->getSizeGroup();
     });
