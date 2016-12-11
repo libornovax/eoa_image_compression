@@ -51,6 +51,7 @@ add_executable ( compress
 target_link_libraries ( compress
     ${OpenCV_LIBS}
     yaml-cpp
+    pthread
 )
 
 
@@ -65,4 +66,5 @@ target_compile_definitions ( compress_average PUBLIC "-DRENDER_AVERAGE" )
 target_link_libraries ( compress_average
     ${OpenCV_LIBS}
     yaml-cpp
+    pthread
 )
