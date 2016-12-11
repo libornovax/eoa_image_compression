@@ -70,8 +70,6 @@ void runCompression ()
     cv::Mat approximation = result->asImage();
 
     cv::imwrite(eic::Config::getParams().path_out + "/approximation.png", approximation);
-    cv::imshow("approximation", approximation);
-    cv::waitKey();
 }
 
 

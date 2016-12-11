@@ -8,6 +8,7 @@
 
 #include <iostream>
 #include "components/Chromozome.h"
+#include "entities/Stats.h"
 
 
 namespace eic {
@@ -37,7 +38,8 @@ private:
     const std::shared_ptr<const Target> _target;
     // Best chromozome that we found so far
     std::shared_ptr<Chromozome> _best_chromozome;
-
+    // Statistics of the evolution
+    Stats _stats;
 };
 
 

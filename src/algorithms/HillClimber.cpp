@@ -29,7 +29,11 @@ std::shared_ptr<Chromozome> HillClimber::run()
     Mutator mut(this->_target->image_size);
     int last_save = 0;
     for (int i = 0; i < Config::getParams().hill_climber.num_iterations; ++i)
-    {        
+    {
+        this->_stats.add(i, this->_best_chromozome->getFitness());
+        if (i % 100 == 0) this->_stats.save();
+
+
         // Generate n mutated chromozomes and select the best one from them - Steepest Ascent Hill Climb
         double min_fitness = this->_best_chromozome->getFitness();
         int best = -1;

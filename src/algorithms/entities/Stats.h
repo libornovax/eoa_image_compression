@@ -26,7 +26,7 @@ public:
      * @param mean_fitness
      * @param stddev_fitness
      */
-    void add (int epoch, double best_fitness, double worst_fitness, double mean_fitness=0.0, double stddev_fitness=0.0);
+    void add (int epoch, double best_fitness, double worst_fitness=0.0, double mean_fitness=0.0, double stddev_fitness=0.0);
 
     /**
      * @brief Saves the statistics to statistics.txt into the output folder

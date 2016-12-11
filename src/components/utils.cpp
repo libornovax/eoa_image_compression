@@ -56,7 +56,7 @@ cv::Point selectRandomPositionForCrossover (const std::shared_ptr<Chromozome> &c
     // intersect it and then exchange those shapes. Here we select the random small or medium shape
 
     // Collect small (and medium) shapes from both chromozomes
-    std::vector<const std::shared_ptr<IShape>> small_shapes;
+    std::vector<std::shared_ptr<IShape>> small_shapes;
     for (int i = 0; i < chromozome1->size() && i < chromozome2->size(); ++i)
     {
         if (chromozome1->operator [](i)->getSizeGroup() != SizeGroup::LARGE)
