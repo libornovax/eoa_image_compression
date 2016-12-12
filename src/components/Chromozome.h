@@ -30,6 +30,12 @@ public:
     std::shared_ptr<Chromozome> clone () const;
 
     /**
+     * @brief Copies the other chromozome into itself (updates itself with the data from the other chromozome)
+     * @param other Chromozome
+     */
+    void update (const std::shared_ptr<Chromozome> &other);
+
+    /**
      * @brief Generates a random chromozome according to settings
      * @param image_size Size of an image that is being approximated
      * @return Shared pointer to a new Chromozome instance
@@ -70,13 +76,7 @@ public:
      */
     void setDirty ();
 
-    /**
-     * @brief Increases age by 1
-     */
-    void birthday ();
-
     const std::shared_ptr<const Target>& getTarget () const;
-    int getAge () const;
 
     /**
      * @brief Activates the computation of error on the roi
@@ -106,9 +106,7 @@ private:
     // Rendered channels
     std::vector<cv::Mat> _channels;
     // Target image that we want to represent
-    const std::shared_ptr<const Target> _target;
-    // Age of the chromozome - how many epochs ago it was created
-    int _age;
+    std::shared_ptr<const Target> _target;
     // Region of interest in the target image that this chromozome specializes on
     cv::Rect _roi;
     // Whether we should consider extra error from the roi or not

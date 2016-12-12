@@ -27,7 +27,7 @@ public:
     /**
      * @brief Run the hill differential evolution process and return the best found chromozome
      */
-    virtual std::shared_ptr<Chromozome> run () override final;
+    virtual std::shared_ptr<Chromozome> run () override;
 
 
 protected:
@@ -37,6 +37,11 @@ protected:
      * @param new_population Population to be editted
      */
     virtual void _initializeNewPopulation (std::vector<std::shared_ptr<Chromozome>> &new_population) const override final;
+
+    /**
+     * @brief One evolution epoch of the steady state evolution
+     */
+    virtual void _steadyStateEpoch () final;
 
 
     // -------------------------------------  PRIVATE MEMBERS  ------------------------------------- //

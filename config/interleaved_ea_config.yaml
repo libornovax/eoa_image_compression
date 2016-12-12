@@ -1,8 +1,8 @@
 #
 # Libor Novak
-# 11/08/2016
+# 12/12/2016
 #
-# Config file for EOA image compression with the Classical Evolutionary algorithm
+# Config file for EOA image compression with the Interleaved Evolutionary algorithm
 #
 
 ####################################################################################################
@@ -22,40 +22,36 @@ chromozome_length: 200
 shape_type: 1  # 1 = Circle
 
 # Which algorithm will be used for compression
-algorithm: 2  # 1 = HillClimber, 2 = ClassicEA, 3 = SteadyStateEA
+algorithm: 4  # 1 = HillClimber, 2 = ClassicEA, 3 = SteadyStateEA, 4 = InterleavedEA
 
 
 ####################################################################################################
 ######################################  ALGORITHM PARAMETERS  ######################################
 ####################################################################################################
 
-# Parameters of the classic evolutionary algorithm
+# Parameters of the evolutionary algorithm
 ea:
-    # How are new chromozomes generated (1 = random, 2 = random with subsequent hill climber
-    # optimization - needs hill climber settings as well!)
-    chromozome_init: 1
     # Number of epochs of the evolution
     num_epochs: 50000
     # Number of chromozomes in the population
-    population_size: 100
+    population_size: 10
     # Number of individuals in tournament selection (must be <= population_size)
     tournament_size: 2
     # Probability that the best individual from a tournament will be selected
     best_selection_prob: 0.65
     # Probability of an individual to undergo crossover
     crossover_prob: 0.9
-    # Interval (number of epochs) after each we replace some individuals in the population with
-    # randomly generated new ones
-    refresh_interval: 10
-    # The percentage of individuals that will be replaced in each refresh_interval of epochs
-    refresh_ratio: 0.25
+
+    # Extra parameters for the InterleavedEA
+    interleaved_ea:
+        # How often will the hill climber optimization run (every nth epoch)
+        hillclimb_frequency: 10
 
 
-# !! IF chromozome_init: 1 WE NEED THIS TO SET UP THE HILL CLIMBER INITIALIZATION !!
 # Parameters of the Steepest Ascent Hill Climber algorithm
 hill_climber:
     # Number of iterations (mutations) to be tried in one hill climb run
-    num_iterations: 100
+    num_iterations: 10
     # Number of solutions to select from in each iteration
     pool_size: 10
 

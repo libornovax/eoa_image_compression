@@ -7,8 +7,8 @@
 #define CLASSICEA_H
 
 #include <iostream>
-#include "entities/NewChromozomePool.h"
 #include "entities/Stats.h"
+#include "components/Chromozome.h"
 
 
 namespace eic {
@@ -46,24 +46,16 @@ protected:
     virtual void _initializeNewPopulation (std::vector<std::shared_ptr<Chromozome>> &new_population) const;
 
     /**
-     * @brief Checks the new_population if there is a better individual then the currently best one (runs saving as well)
-     * @param new_population
+     * @brief Checks the population if there is a better individual then the currently best one (runs saving as well)
      * @param e Current epoch
      */
-    virtual void _updateBestChromozome (const std::vector<std::shared_ptr<Chromozome>> &new_population, int e) final;
+    virtual void _updateBestChromozome (int e) final;
 
     /**
      * @brief Replaces the worst chromozome
-     * @param new_population
      * @param e
      */
-    virtual void _updateWorstChromozome (const std::vector<std::shared_ptr<Chromozome>> &new_population, int e) final;
-
-    /**
-     * @brief Replaces every n-th individual from the given population with a random new one
-     * @param new_population
-     */
-    virtual void _refreshPopulation (std::vector<std::shared_ptr<Chromozome>> &new_population) final;
+    virtual void _updateWorstChromozome (int e) final;
 
     /**
      * @brief Performs tournament selection of size given by the config
@@ -117,8 +109,6 @@ protected:
     std::shared_ptr<Chromozome> _worst_chromozome;
     // Epoch, when we last saved the best chromozome
     int _last_save;
-    // Asynchronous generator of new chromozomes for reinitialization
-    NewChromozomePool _new_chromozome_pool;
     // Statistics of the evolution
     Stats _stats;
 
