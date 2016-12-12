@@ -13,7 +13,7 @@ namespace eic {
 
 
 InterleavedEA::InterleavedEA(const std::shared_ptr<const Target> &target)
-    : ClassicEA(target),
+    : SteadyStateEA(target),
       _hcp(Config::getParams().ea.population_size)
 {
 
@@ -29,7 +29,6 @@ std::shared_ptr<Chromozome> InterleavedEA::run ()
     for (auto ch: this->_population) ch->activateROI();
 
     // Run the evolution
-    Mutator mutator(this->_target->image_size);
     for (int e = 0; e < Config::getParams().ea.num_epochs; ++e)
     {
         this->_stats.add(e, this->_best_chromozome->getFitness(), this->_worst_chromozome->getFitness(),
@@ -54,69 +53,13 @@ std::shared_ptr<Chromozome> InterleavedEA::run ()
         if (e % Config::getParams().ea.interleaved_ea.hillclimb_frequency == 0)
         {
             // This is a hill climbing epoch
-            std::cout << "-- (" << e << ") HILL CLIMBING EPOCH" << std::endl;
-
-            for (auto &ch: this->_population)
-            {
-                this->_hcp.addChromozome(ch);
-            }
-
-            this->_hcp.waitToFinish();
+            std::cout << "[" << e << "] Hill climber epoch" << std::endl;
+            this->_hillClimberEpoch();
         }
         else
         {
             // This is a steady state evolution epoch
-            std::vector<std::shared_ptr<Chromozome>> new_population;
-            this->_initializeNewPopulation(new_population);
-
-            // Population size/2 times perform tournament selection, crossover, mutation and replace the parents
-            // by their children only if they are better
-            for (int i = 0; i < this->_population.size()/2; ++i)
-            {
-                // Tournament selection
-                // Select 2 individuals for crossover
-                int i1 = this->_tournamentSelection();
-                int i2 = this->_tournamentSelection(i1);
-
-                // Careful! We have to clone here!!!
-                auto offspring1 = this->_population[i1]->clone();
-                auto offspring2 = this->_population[i2]->clone();
-
-                // Crossover
-                if (utils::makeMutation(Config::getParams().ea.crossover_prob))
-                {
-                    ClassicEA::_onePointCrossover(offspring1, offspring2);
-                }
-
-                // Mutation
-                offspring1->accept(mutator);
-                offspring2->accept(mutator);
-
-                // Put the offsprings into the new population if they are better than their parents and better
-                // than the solutions that can be already in the new population from previous crossovers
-                if (offspring1->getFitness() < this->_population[i1]->getFitness() &&
-                        (!new_population[i1] || offspring1->getFitness() < new_population[i1]->getFitness()))
-                {
-                    new_population[i1] = offspring1;
-                }
-                if (offspring2->getFitness() < this->_population[i2]->getFitness() &&
-                        (!new_population[i2] || offspring2->getFitness() < new_population[i2]->getFitness()))
-                {
-                    new_population[i2] = offspring2;
-                }
-            }
-
-            // Fill the gaps - the individuals, which were not replaced have to be put to the new population
-            for (int i = 0; i < this->_population.size(); ++i)
-            {
-                if (!new_population[i])
-                {
-                    new_population[i] = this->_population[i];
-                }
-            }
-
-            // Replace the population with the new steady state one
-            this->_population = new_population;
+            this->_steadyStateEpoch();
         }
 
 
@@ -133,9 +76,15 @@ std::shared_ptr<Chromozome> InterleavedEA::run ()
 
 // -----------------------------------------  PROTECTED METHODS  ----------------------------------------- //
 
-void InterleavedEA::_initializeNewPopulation (std::vector<std::shared_ptr<Chromozome>> &new_population) const
+void InterleavedEA::_hillClimberEpoch ()
 {
-    new_population.resize(this->_population.size());
+    // Run the whole population through hill climbing algorithm
+    for (auto &ch: this->_population)
+    {
+        this->_hcp.addChromozome(ch);
+    }
+
+    this->_hcp.waitToFinish();
 }
 
 

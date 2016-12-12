@@ -6,7 +6,7 @@
 #ifndef INTERLEAVEDEA_H
 #define INTERLEAVEDEA_H
 
-#include "ClassicEA.h"
+#include "SteadyStateEA.h"
 #include "entities/HillClimberPool.h"
 
 
@@ -19,7 +19,7 @@ namespace eic {
  * population is initialized, then it is optimized by hill climbing and after a number of hill climbing steps
  * a crossover step is applied. These two steps keep interleaving for the whole time of the evolution.
  */
-class InterleavedEA : public ClassicEA
+class InterleavedEA : public SteadyStateEA
 {
 public:
 
@@ -35,10 +35,9 @@ public:
 protected:
 
     /**
-     * @brief Initializes new population with NULL pointers
-     * @param new_population Population to be editted
+     * @brief One hill climber evolution epoch
      */
-    virtual void _initializeNewPopulation (std::vector<std::shared_ptr<Chromozome>> &new_population) const override final;
+    virtual void _hillClimberEpoch () final;
 
 
     // -------------------------------------  PRIVATE MEMBERS  ------------------------------------- //
