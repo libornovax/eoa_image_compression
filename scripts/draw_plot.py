@@ -17,7 +17,10 @@ __author__ = 'Libor Novak, novakli2@fel.cvut.cz'
 
 from optparse import OptionParser
 import os
-import matplotlib.pyplot as plt
+
+import matplotlib
+matplotlib.use('Agg')  # Prevents from using X interface for plotting
+from matplotlib import pyplot as plt
 
 
 ####################################################################################################
