@@ -159,10 +159,14 @@ double Chromozome::getFitness ()
         {
             if (this->_roi_active)
             {
+                double roi_weight = double(this->_target->image_size.area()) / this->_roi.area();
                 // ROI is activated, include error from the ROI as well
-                this->_fitness += computeDifference(this->_target->blurred_channels[i](this->_roi), this->_channels[i](this->_roi), this->_target->weights(this->_roi));
+                this->_fitness += roi_weight * computeDifference(this->_target->blurred_channels[i](this->_roi),
+                                                                 this->_channels[i](this->_roi),
+                                                                 this->_target->weights(this->_roi));
             }
-            this->_fitness += computeDifference(this->_target->blurred_channels[i], this->_channels[i], this->_target->weights);
+            this->_fitness += computeDifference(this->_target->blurred_channels[i],
+                                                this->_channels[i], this->_target->weights);
         }
 
         // Just rendered and computed fitness
