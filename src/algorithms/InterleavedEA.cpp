@@ -78,7 +78,8 @@ std::shared_ptr<Chromozome> InterleavedEA::run ()
 
 void InterleavedEA::_hillClimberEpoch ()
 {
-    // Run the whole population through hill climbing algorithm
+    // Run the whole population through hill climbing algorithm. The HillClimberPool modifies the population
+    // in place - it does not create a new one!
     for (auto &ch: this->_population)
     {
         this->_hcp.addChromozome(ch);

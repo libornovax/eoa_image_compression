@@ -39,7 +39,8 @@ HillClimberPool::~HillClimberPool ()
 void HillClimberPool::shutDown()
 {
     this->_shut_down = true;
-    // If the queue is full and the thread is waiting, we need to trigger the shutdown
+
+    // If there are waiting threads we need to wake them up and shut down
     this->_cv_empty.notify_all();
 
     // Wait for the workers to finish
@@ -117,7 +118,7 @@ void HillClimberPool::_workerThread ()
         if (this->_queue.empty())
         {
             // Queue empty
-            this->_cv_empty.wait(lk, [this]() { return !this->_queue.empty(); });
+            this->_cv_empty.wait(lk, [this]() { return !this->_queue.empty() || this->_shut_down; });
 
             if (this->_shut_down) break;  // We do NOT wait for the queue to get empty
         }

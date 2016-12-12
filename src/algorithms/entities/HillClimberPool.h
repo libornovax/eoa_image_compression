@@ -54,7 +54,7 @@ private:
     void _launch ();
 
     /**
-     * @brief Worker that will be filling up the queue
+     * @brief Worker that will be processing the queue
      */
     void _workerThread ();
 
