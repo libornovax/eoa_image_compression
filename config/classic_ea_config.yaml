@@ -41,11 +41,6 @@ ea:
     best_selection_prob: 0.65
     # Probability of an individual to undergo crossover
     crossover_prob: 0.9
-    # Interval (number of epochs) after each we replace some individuals in the population with
-    # randomly generated new ones
-    refresh_interval: 20
-    # The percentage of individuals that will be replaced in each refresh_interval of epochs
-    refresh_ratio: 0.3
 
 
 # Mutator is a common structure, which takes care of mutating the chromozome and the shapes, which

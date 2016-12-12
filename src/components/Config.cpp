@@ -50,8 +50,6 @@ void Config::loadParams (const std::string &path_config)
         Config::_getInstance()._params.ea.tournament_size = ea["tournament_size"].as<int>();
         Config::_getInstance()._params.ea.best_selection_prob = ea["best_selection_prob"].as<double>();
         Config::_getInstance()._params.ea.crossover_prob = ea["crossover_prob"].as<double>();
-        Config::_getInstance()._params.ea.refresh_interval = ea["refresh_interval"].as<int>();
-        Config::_getInstance()._params.ea.refresh_ratio = ea["refresh_ratio"].as<double>();
 
         if (Config::_getInstance()._params.algorithm == AlgorithmType::INTERLEAVED_EA)
         {
@@ -118,8 +116,6 @@ void Config::print ()
         std::cout << "tournament_size:                " << Config::_getInstance()._params.ea.tournament_size << std::endl;
         std::cout << "best_selection_prob:            " << Config::_getInstance()._params.ea.best_selection_prob << std::endl;
         std::cout << "crossover_prob:                 " << Config::_getInstance()._params.ea.crossover_prob << std::endl;
-        std::cout << "refresh_interval:               " << Config::_getInstance()._params.ea.refresh_interval << std::endl;
-        std::cout << "refresh_ratio:                  " << Config::_getInstance()._params.ea.refresh_ratio << std::endl;
     }
     if (Config::_getInstance()._params.algorithm == AlgorithmType::INTERLEAVED_EA)
     {
