@@ -15,6 +15,7 @@
 #include "algorithms/HillClimber.h"
 #include "algorithms/ClassicEA.h"
 #include "algorithms/SteadyStateEA.h"
+#include "algorithms/InterleavedEA.h"
 #include "components/Config.h"
 
 
@@ -31,8 +32,8 @@ void runCompression ()
     {
     case eic::AlgorithmType::HILL_CLIMBER:
         {
-            eic::HillClimber hc(target);
-            result = hc.run();
+            eic::HillClimber hc(true);
+            result = hc.run(eic::Chromozome::randomChromozome(target));
         }
         break;
     case eic::AlgorithmType::CLASSIC_EA:
@@ -44,6 +45,12 @@ void runCompression ()
     case eic::AlgorithmType::STEADY_STATE_EA:
         {
             eic::SteadyStateEA ea(target);
+            result = ea.run();
+        }
+        break;
+    case eic::AlgorithmType::INTERLEAVED_EA:
+        {
+            eic::InterleavedEA ea(target);
             result = ea.run();
         }
         break;

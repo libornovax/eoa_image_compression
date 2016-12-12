@@ -46,18 +46,16 @@ protected:
     virtual void _initializeNewPopulation (std::vector<std::shared_ptr<Chromozome>> &new_population) const;
 
     /**
-     * @brief Checks the new_population if there is a better individual then the currently best one (runs saving as well)
-     * @param new_population
+     * @brief Checks the population if there is a better individual then the currently best one (runs saving as well)
      * @param e Current epoch
      */
-    virtual void _updateBestChromozome (const std::vector<std::shared_ptr<Chromozome>> &new_population, int e) final;
+    virtual void _updateBestChromozome (int e) final;
 
     /**
      * @brief Replaces the worst chromozome
-     * @param new_population
      * @param e
      */
-    virtual void _updateWorstChromozome (const std::vector<std::shared_ptr<Chromozome>> &new_population, int e) final;
+    virtual void _updateWorstChromozome (int e) final;
 
     /**
      * @brief Replaces every n-th individual from the given population with a random new one

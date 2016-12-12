@@ -22,6 +22,7 @@ class NewChromozomePool
 public:
 
     NewChromozomePool (const std::shared_ptr<const Target> &target, int pool_size);
+    ~NewChromozomePool ();
 
     /**
      * @brief Starts the generator of new chromozomes

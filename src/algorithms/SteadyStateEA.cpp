@@ -32,7 +32,7 @@ std::shared_ptr<Chromozome> SteadyStateEA::run ()
 
     // Run the evolution
     Mutator mutator(this->_target->image_size);
-    for (int e = 0; e < Config::getParams().classic_ea.num_epochs; ++e)
+    for (int e = 0; e < Config::getParams().ea.num_epochs; ++e)
     {
         this->_stats.add(e, this->_best_chromozome->getFitness(), this->_worst_chromozome->getFitness(),
                          ClassicEA::_meanFitness(this->_population), ClassicEA::_stddevFitness(this->_population));
@@ -45,7 +45,7 @@ std::shared_ptr<Chromozome> SteadyStateEA::run ()
 
         // In the middle point of the evolution we deactivate the roi -> the algorithm will start focusing on
         // the whole image instead of the rois
-        if (e == Config::getParams().classic_ea.num_epochs/2)
+        if (e == Config::getParams().ea.num_epochs/2)
         {
             std::cout << "DEACTIVATING REGIONS OF INTEREST OF CHROMOZOMES" << std::endl;
             for (auto ch: this->_population) ch->deactivateROI();
@@ -70,7 +70,7 @@ std::shared_ptr<Chromozome> SteadyStateEA::run ()
             auto offspring2 = this->_population[i2]->clone();
 
             // Crossover
-            if (utils::makeMutation(Config::getParams().classic_ea.crossover_prob))
+            if (utils::makeMutation(Config::getParams().ea.crossover_prob))
             {
                 ClassicEA::_onePointCrossover(offspring1, offspring2);
             }
@@ -102,24 +102,24 @@ std::shared_ptr<Chromozome> SteadyStateEA::run ()
             }
         }
 
-        // All chromozomes age
-        for (auto ch: new_population) ch->birthday();
-
-        // Sort the population by fitness
-        ClassicEA::_sortPopulation(new_population);
-
-        this->_updateBestChromozome(new_population, e);
-        this->_updateWorstChromozome(new_population, e);
-
-        // Replace some of the individuals with random new ones to keep diversity in the population
-        if (e > 0 && e % Config::getParams().classic_ea.refresh_interval == 0)
-        {
-            std::cout << "AGES: "; for (auto ch: new_population) std::cout << ch->getAge() << " "; std::cout << std::endl;
-            this->_refreshPopulation(new_population);
-        }
-
         // Replace the population with the new steady state one
         this->_population = new_population;
+
+        // All chromozomes age
+        for (auto ch: this->_population) ch->birthday();
+
+        // Sort the population by fitness
+        ClassicEA::_sortPopulation(this->_population);
+
+        this->_updateBestChromozome(e);
+        this->_updateWorstChromozome(e);
+
+        // Replace some of the individuals with random new ones to keep diversity in the population
+        if (e > 0 && e % Config::getParams().ea.refresh_interval == 0)
+        {
+            std::cout << "AGES: "; for (auto ch: this->_population) std::cout << ch->getAge() << " "; std::cout << std::endl;
+            this->_refreshPopulation(this->_population);
+        }
     }
 
     // Shut down the chromozome generator

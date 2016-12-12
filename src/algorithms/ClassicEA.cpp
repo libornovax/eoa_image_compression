@@ -15,7 +15,7 @@ namespace eic {
 ClassicEA::ClassicEA (const std::shared_ptr<const Target> &target)
     : _target(target),
       _last_save(0),
-      _new_chromozome_pool(target, std::max(10.0, std::ceil(Config::getParams().classic_ea.population_size*Config::getParams().classic_ea.refresh_ratio)))
+      _new_chromozome_pool(target, std::max(10.0, std::ceil(Config::getParams().ea.population_size*Config::getParams().ea.refresh_ratio)))
 {
 
 }
@@ -30,7 +30,7 @@ std::shared_ptr<Chromozome> ClassicEA::run ()
 
     // Run the evolution
     Mutator mutator(this->_target->image_size);
-    for (int e = 0; e < Config::getParams().classic_ea.num_epochs; ++e)
+    for (int e = 0; e < Config::getParams().ea.num_epochs; ++e)
     {
         this->_stats.add(e, this->_best_chromozome->getFitness(), this->_worst_chromozome->getFitness(),
                          ClassicEA::_meanFitness(this->_population), ClassicEA::_stddevFitness(this->_population));
@@ -58,7 +58,7 @@ std::shared_ptr<Chromozome> ClassicEA::run ()
             auto offspring2 = this->_population[i2]->clone();
 
             // Crossover
-            if (utils::makeMutation(Config::getParams().classic_ea.crossover_prob))
+            if (utils::makeMutation(Config::getParams().ea.crossover_prob))
             {
                 // Do it multiple times to exchange a larger part of the chromozome
                 ClassicEA::_onePointCrossover(offspring1, offspring2);
@@ -74,24 +74,24 @@ std::shared_ptr<Chromozome> ClassicEA::run ()
             new_population[2*i+2] = offspring2;
         }
 
-        // All chromozomes age
-        for (auto ch: new_population) ch->birthday();
-
-        // Sort the population by fitness
-        ClassicEA::_sortPopulation(new_population);
-
-        this->_updateBestChromozome(new_population, e);
-        this->_updateWorstChromozome(new_population, e);
-
-        // Replace some of the individuals with random new ones to keep diversity in the population
-        if (e > 0 && e % Config::getParams().classic_ea.refresh_interval == 0)
-        {
-            std::cout << "AGES: "; for (auto ch: new_population) std::cout << ch->getAge() << " "; std::cout << std::endl;
-            this->_refreshPopulation(new_population);
-        }
-
         // Generational replacement with elitism (elitism is already taken care of)
         this->_population = new_population;
+
+        // All chromozomes age
+        for (auto ch: this->_population) ch->birthday();
+
+        // Sort the population by fitness
+        ClassicEA::_sortPopulation(this->_population);
+
+        this->_updateBestChromozome(e);
+        this->_updateWorstChromozome(e);
+
+        // Replace some of the individuals with random new ones to keep diversity in the population
+        if (e > 0 && e % Config::getParams().ea.refresh_interval == 0)
+        {
+            std::cout << "AGES: "; for (auto ch: this->_population) std::cout << ch->getAge() << " "; std::cout << std::endl;
+            this->_refreshPopulation(this->_population);
+        }
     }
 
     // Shut down the chromozome generator
@@ -106,7 +106,7 @@ std::shared_ptr<Chromozome> ClassicEA::run ()
 void ClassicEA::_initializePopulation ()
 {
     // Generate random chromozomes
-    for (int i = 0; i < Config::getParams().classic_ea.population_size; ++i)
+    for (int i = 0; i < Config::getParams().ea.population_size; ++i)
     {
         this->_population.push_back(this->_new_chromozome_pool.getNewChromozome());
     }
@@ -114,8 +114,8 @@ void ClassicEA::_initializePopulation ()
     ClassicEA::_sortPopulation(this->_population);
 
     // Just set the best as a random one from the population
-    this->_best_chromozome = this->_population[0];
-    this->_worst_chromozome = this->_population.back();
+    this->_best_chromozome = this->_population[0]->clone();
+    this->_worst_chromozome = this->_population.back()->clone();
 
     {
         cv::Mat image = this->_best_chromozome->asImage();
@@ -129,7 +129,7 @@ void ClassicEA::_initializeNewPopulation (std::vector<std::shared_ptr<Chromozome
     new_population.resize(this->_population.size());
 
     // Elitism
-    new_population[0] = this->_best_chromozome;
+    new_population[0] = this->_best_chromozome->clone();
 
     // This is just because we need to add even number of chromozomes with crossover (there has to be an even
     // number free spots). That means that if it is odd we need to add one more chromozome
@@ -140,39 +140,39 @@ void ClassicEA::_initializeNewPopulation (std::vector<std::shared_ptr<Chromozome
 }
 
 
-void ClassicEA::_updateBestChromozome (const std::vector<std::shared_ptr<Chromozome>> &new_population, int e)
+void ClassicEA::_updateBestChromozome (int e)
 {
     // WARNING! We suppose the population is sorted from best to worst!!
-    if (new_population[0]->getFitness() < this->_best_chromozome->getFitness())
+    if (this->_population[0]->getFitness() < this->_best_chromozome->getFitness())
     {
-        std::cout << "[" << e << "] New best difference: " << new_population[0]->getFitness() << std::endl;
+        std::cout << "[" << e << "] New best difference: " << this->_population[0]->getFitness() << std::endl;
 
         // Save the current best image
         if (e-this->_last_save > 50)
         {
             this->_last_save = e;
-            cv::Mat image = new_population[0]->asImage();
+            cv::Mat image = this->_population[0]->asImage();
             cv::imwrite(Config::getParams().path_out + "/approx_" + std::to_string(e) + ".png", image);
         }
     }
 
-    this->_best_chromozome = new_population[0];
+    this->_best_chromozome = this->_population[0]->clone();
 }
 
 
-void ClassicEA::_updateWorstChromozome (const std::vector<std::shared_ptr<Chromozome>> &new_population, int e)
+void ClassicEA::_updateWorstChromozome (int e)
 {
     // WARNING! We suppose the population is sorted from best to worst!!
-    this->_worst_chromozome = new_population.back();
+    this->_worst_chromozome = this->_population.back()->clone();
 }
 
 
 void ClassicEA::_refreshPopulation (std::vector<std::shared_ptr<Chromozome>> &new_population)
 {
     // Replace every n-th chromozome with a new one
-    if (Config::getParams().classic_ea.refresh_ratio > 0)
+    if (Config::getParams().ea.refresh_ratio > 0)
     {
-        int n = 1.0 / Config::getParams().classic_ea.refresh_ratio;
+        int n = 1.0 / Config::getParams().ea.refresh_ratio;
 
         for (int i = 1; i < new_population.size(); i+=n)
         {
@@ -189,7 +189,7 @@ int ClassicEA::_tournamentSelection(int exclude_idx) const
 
     // Select n random individuals
     std::vector<std::pair<int, double>> selected;
-    while (selected.size() < Config::getParams().classic_ea.tournament_size)
+    while (selected.size() < Config::getParams().ea.tournament_size)
     {
         int i = dist(RGen::mt());
 
@@ -210,7 +210,7 @@ int ClassicEA::_tournamentSelection(int exclude_idx) const
 
     for (auto sel: selected)
     {
-        if (utils::makeMutation(Config::getParams().classic_ea.best_selection_prob))
+        if (utils::makeMutation(Config::getParams().ea.best_selection_prob))
         {
             return sel.first;
         }

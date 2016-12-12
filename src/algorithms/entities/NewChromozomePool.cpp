@@ -16,6 +16,12 @@ NewChromozomePool::NewChromozomePool (const std::shared_ptr<const Target> &targe
 }
 
 
+NewChromozomePool::~NewChromozomePool ()
+{
+    if (!this->_shut_down) this->shutDown();
+}
+
+
 void NewChromozomePool::launch ()
 {
     this->_shut_down = false;
@@ -66,7 +72,7 @@ void NewChromozomePool::_workerThread ()
     {
         // Generate a new chromozome
         std::shared_ptr<Chromozome> new_chromozome;
-        switch (Config::getParams().classic_ea.chromozome_init)
+        switch (Config::getParams().ea.chromozome_init)
         {
         case ChromozomeInit::RANDOM:
             {
@@ -75,9 +81,9 @@ void NewChromozomePool::_workerThread ()
             break;
         case ChromozomeInit::HILL_CLIMBER:
             {
-                HillClimber hc(this->_target);
+                HillClimber hc(true);
                 std::cout << "HILLCLIMBER" << std::endl;
-                new_chromozome = hc.run();
+                new_chromozome = hc.run(Chromozome::randomChromozome(this->_target));
             }
             break;
         default:

@@ -22,7 +22,8 @@ enum class AlgorithmType
 {
     HILL_CLIMBER      = 1,
     CLASSIC_EA        = 2,
-    STEADY_STATE_EA   = 3
+    STEADY_STATE_EA   = 3,
+    INTERLEAVED_EA    = 4
 };
 
 
@@ -58,6 +59,12 @@ struct HillClimberParams
 };
 
 
+struct InterleavedEAParams
+{
+    int hillclimb_frequency;
+};
+
+
 struct ClassicEAParams
 {
     ChromozomeInit chromozome_init;
@@ -68,6 +75,8 @@ struct ClassicEAParams
     double crossover_prob;
     int refresh_interval;
     double refresh_ratio;
+
+    InterleavedEAParams interleaved_ea;
 };
 
 
@@ -81,7 +90,7 @@ struct ConfigParams
 
     MutatorParams mutator;
     HillClimberParams hill_climber;
-    ClassicEAParams classic_ea;
+    ClassicEAParams ea;
 };
 
 
