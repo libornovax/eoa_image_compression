@@ -76,13 +76,7 @@ public:
      */
     void setDirty ();
 
-    /**
-     * @brief Increases age by 1
-     */
-    void birthday ();
-
     const std::shared_ptr<const Target>& getTarget () const;
-    int getAge () const;
 
     /**
      * @brief Activates the computation of error on the roi
@@ -113,8 +107,6 @@ private:
     std::vector<cv::Mat> _channels;
     // Target image that we want to represent
     std::shared_ptr<const Target> _target;
-    // Age of the chromozome - how many epochs ago it was created
-    int _age;
     // Region of interest in the target image that this chromozome specializes on
     cv::Rect _roi;
     // Whether we should consider extra error from the roi or not

@@ -43,7 +43,6 @@ Chromozome::Chromozome(const std::shared_ptr<const Target> &target, const cv::Re
     : _fitness(DBL_MAX),
       _dirty(true),
       _target(target),
-      _age(0),
       _roi(roi),
       _roi_active(false)
 {
@@ -62,7 +61,6 @@ std::shared_ptr<Chromozome> Chromozome::clone () const
 
     ch->_fitness    = this->_fitness;
     ch->_dirty      = this->_dirty;
-    ch->_age        = this->_age;
     ch->_roi_active = this->_roi_active;
     ch->_channels   = this->_channels;
 
@@ -76,7 +74,6 @@ void Chromozome::update (const std::shared_ptr<Chromozome> &other)
     this->_roi        = other->_roi;
     this->_fitness    = other->_fitness;
     this->_dirty      = other->_dirty;
-    this->_age        = other->_age;
     this->_roi_active = other->_roi_active;
     this->_channels   = other->_channels;
 
@@ -202,21 +199,9 @@ void Chromozome::setDirty ()
 }
 
 
-void Chromozome::birthday ()
-{
-    this->_age++;
-}
-
-
 const std::shared_ptr<const Target>& Chromozome::getTarget () const
 {
     return this->_target;
-}
-
-
-int Chromozome::getAge() const
-{
-    return this->_age;
 }
 
 

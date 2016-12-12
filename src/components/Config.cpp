@@ -45,7 +45,6 @@ void Config::loadParams (const std::string &path_config)
             Config::_getInstance()._params.algorithm == AlgorithmType::INTERLEAVED_EA)
     {
         YAML::Node ea = config["ea"];
-        Config::_getInstance()._params.ea.chromozome_init = ChromozomeInit(ea["chromozome_init"].as<int>());
         Config::_getInstance()._params.ea.num_epochs = ea["num_epochs"].as<int>();
         Config::_getInstance()._params.ea.population_size = ea["population_size"].as<int>();
         Config::_getInstance()._params.ea.tournament_size = ea["tournament_size"].as<int>();
@@ -63,8 +62,7 @@ void Config::loadParams (const std::string &path_config)
 
     // HillClimber settings
     if (Config::_getInstance()._params.algorithm == AlgorithmType::HILL_CLIMBER ||
-            Config::_getInstance()._params.algorithm == AlgorithmType::INTERLEAVED_EA ||
-            Config::_getInstance()._params.ea.chromozome_init == ChromozomeInit::HILL_CLIMBER)
+            Config::_getInstance()._params.algorithm == AlgorithmType::INTERLEAVED_EA)
     {
         YAML::Node hc = config["hill_climber"];
         Config::_getInstance()._params.hill_climber.num_iterations = hc["num_iterations"].as<int>();
@@ -115,7 +113,6 @@ void Config::print ()
             Config::_getInstance()._params.algorithm == AlgorithmType::STEADY_STATE_EA ||
             Config::_getInstance()._params.algorithm == AlgorithmType::INTERLEAVED_EA)
     {
-        std::cout << "chromozome_init:                " << int(Config::_getInstance()._params.ea.chromozome_init) << std::endl;
         std::cout << "num_epochs:                     " << Config::_getInstance()._params.ea.num_epochs << std::endl;
         std::cout << "population_size:                " << Config::_getInstance()._params.ea.population_size << std::endl;
         std::cout << "tournament_size:                " << Config::_getInstance()._params.ea.tournament_size << std::endl;
@@ -130,7 +127,6 @@ void Config::print ()
     }
 
     if (Config::_getInstance()._params.algorithm == AlgorithmType::HILL_CLIMBER ||
-            Config::_getInstance()._params.ea.chromozome_init == ChromozomeInit::HILL_CLIMBER ||
             Config::_getInstance()._params.algorithm == AlgorithmType::INTERLEAVED_EA)
     {
         std::cout << "==============================  HILL CLIMBER  ==============================" << std::endl;

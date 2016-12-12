@@ -14,8 +14,7 @@ namespace eic {
 
 ClassicEA::ClassicEA (const std::shared_ptr<const Target> &target)
     : _target(target),
-      _last_save(0),
-      _new_chromozome_pool(target, std::max(10.0, std::ceil(Config::getParams().ea.population_size*Config::getParams().ea.refresh_ratio)))
+      _last_save(0)
 {
 
 }
@@ -23,9 +22,6 @@ ClassicEA::ClassicEA (const std::shared_ptr<const Target> &target)
 
 std::shared_ptr<Chromozome> ClassicEA::run ()
 {
-    // Start chromozome generation
-    this->_new_chromozome_pool.launch();
-
     this->_initializePopulation();
 
     // Run the evolution
@@ -77,25 +73,12 @@ std::shared_ptr<Chromozome> ClassicEA::run ()
         // Generational replacement with elitism (elitism is already taken care of)
         this->_population = new_population;
 
-        // All chromozomes age
-        for (auto ch: this->_population) ch->birthday();
-
         // Sort the population by fitness
         ClassicEA::_sortPopulation(this->_population);
 
         this->_updateBestChromozome(e);
         this->_updateWorstChromozome(e);
-
-        // Replace some of the individuals with random new ones to keep diversity in the population
-        if (e > 0 && e % Config::getParams().ea.refresh_interval == 0)
-        {
-            std::cout << "AGES: "; for (auto ch: this->_population) std::cout << ch->getAge() << " "; std::cout << std::endl;
-            this->_refreshPopulation(this->_population);
-        }
     }
-
-    // Shut down the chromozome generator
-    this->_new_chromozome_pool.shutDown();
 
     return this->_best_chromozome->clone();
 }
@@ -108,7 +91,7 @@ void ClassicEA::_initializePopulation ()
     // Generate random chromozomes
     for (int i = 0; i < Config::getParams().ea.population_size; ++i)
     {
-        this->_population.push_back(this->_new_chromozome_pool.getNewChromozome());
+        this->_population.push_back(Chromozome::randomChromozome(this->_target));
     }
 
     ClassicEA::_sortPopulation(this->_population);
@@ -164,21 +147,6 @@ void ClassicEA::_updateWorstChromozome (int e)
 {
     // WARNING! We suppose the population is sorted from best to worst!!
     this->_worst_chromozome = this->_population.back()->clone();
-}
-
-
-void ClassicEA::_refreshPopulation (std::vector<std::shared_ptr<Chromozome>> &new_population)
-{
-    // Replace every n-th chromozome with a new one
-    if (Config::getParams().ea.refresh_ratio > 0)
-    {
-        int n = 1.0 / Config::getParams().ea.refresh_ratio;
-
-        for (int i = 1; i < new_population.size(); i+=n)
-        {
-            new_population[i] = this->_new_chromozome_pool.getNewChromozome();
-        }
-    }
 }
 
 

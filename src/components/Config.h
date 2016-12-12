@@ -27,12 +27,6 @@ enum class AlgorithmType
 };
 
 
-enum class ChromozomeInit {
-    RANDOM       = 1,
-    HILL_CLIMBER = 2
-};
-
-
 struct MutatorParams
 {
     double shape_mutation_prob;
@@ -67,7 +61,6 @@ struct InterleavedEAParams
 
 struct ClassicEAParams
 {
-    ChromozomeInit chromozome_init;
     int num_epochs;
     int population_size;
     int tournament_size;

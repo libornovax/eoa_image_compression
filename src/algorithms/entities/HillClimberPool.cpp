@@ -93,8 +93,8 @@ void HillClimberPool::_launch ()
     this->_shut_down = false;
 
     // Determine the number of cores on this machine
-    int num_cores = std::thread::hardware_concurrency();
-    std::cout << "-- This machine has " << num_cores << " cores" << std::endl;
+    unsigned int num_cores = std::thread::hardware_concurrency();
+    std::cout << "-- This machine has " << num_cores << " concurent threads" << std::endl;
     for (int i = 0; i < num_cores; ++i)
     {
         this->_worker_pool.emplace_back(&HillClimberPool::_workerThread, this);

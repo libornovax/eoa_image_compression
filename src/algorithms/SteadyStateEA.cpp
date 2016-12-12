@@ -21,9 +21,6 @@ SteadyStateEA::SteadyStateEA(const std::shared_ptr<const Target> &target)
 
 std::shared_ptr<Chromozome> SteadyStateEA::run ()
 {
-    // Start chromozome generation
-    this->_new_chromozome_pool.launch();
-
     this->_initializePopulation();
 
     // For the first half of the epochs we want to be evolving regions of the image, afer a half we
@@ -105,25 +102,12 @@ std::shared_ptr<Chromozome> SteadyStateEA::run ()
         // Replace the population with the new steady state one
         this->_population = new_population;
 
-        // All chromozomes age
-        for (auto ch: this->_population) ch->birthday();
-
         // Sort the population by fitness
         ClassicEA::_sortPopulation(this->_population);
 
         this->_updateBestChromozome(e);
         this->_updateWorstChromozome(e);
-
-        // Replace some of the individuals with random new ones to keep diversity in the population
-        if (e > 0 && e % Config::getParams().ea.refresh_interval == 0)
-        {
-            std::cout << "AGES: "; for (auto ch: this->_population) std::cout << ch->getAge() << " "; std::cout << std::endl;
-            this->_refreshPopulation(this->_population);
-        }
     }
-
-    // Shut down the chromozome generator
-    this->_new_chromozome_pool.shutDown();
 
     return this->_best_chromozome->clone();
 }
