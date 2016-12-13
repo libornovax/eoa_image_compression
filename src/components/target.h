@@ -7,10 +7,6 @@
 #include <opencv2/highgui/highgui.hpp>
 
 
-// The edge weight map maximum
-#define EDGE_WEIGHT 100
-
-
 namespace eic {
 
 
@@ -20,7 +16,7 @@ namespace eic {
  */
 struct Target {
 
-    Target (const cv::Mat &bgr_image_in)
+    Target (const cv::Mat &bgr_image_in, const cv::Mat &grayscale_weights, double max_weight)
         : bgr_image(bgr_image_in)
     {
         image_size = bgr_image.size();
@@ -31,20 +27,26 @@ struct Target {
         cv::split(image, channels);
 
         // Blur the image - BLURRED channels
-        cv::GaussianBlur(image, blurred_image, cv::Size(9, 9), 2);
+        cv::GaussianBlur(image, blurred_image, cv::Size(5, 5), 2);
         cv::split(blurred_image, blurred_channels);
 
-        // Edges
-        cv::Canny(blurred_image, weights, 600, 1000, 5, true);
-        weights.convertTo(weights, CV_32FC1);
-        cv::GaussianBlur(weights, weights, cv::Size(19, 19), 5);
+        // Weights
+        grayscale_weights.convertTo(weights, CV_32FC1);
         double max_val, dummy; cv::minMaxLoc(weights, &dummy, &max_val);
-        weights *= EDGE_WEIGHT/max_val;
+        weights *= max_weight/max_val;
         weights += 1;
+
+//        // Edges
+//        cv::Canny(blurred_image, weights, 600, 1000, 5, true);
+//        weights.convertTo(weights, CV_32FC1);
+//        cv::GaussianBlur(weights, weights, cv::Size(19, 19), 5);
+//        double max_val, dummy; cv::minMaxLoc(weights, &dummy, &max_val);
+//        weights *= max_weight/max_val;
+//        weights += 1;
 
 //        {
 //            cv::imshow("original", bgr_image);
-//            cv::imshow("weights", (weights-1)*(1.0/EDGE_WEIGHT));
+//            cv::imshow("weights", (weights-1)*(1.0/max_weight));
 //            cv::imshow("blurred", blurred_image);
 //            cv::waitKey(1);
 //        }

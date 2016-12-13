@@ -74,6 +74,8 @@ struct ClassicEAParams
 struct ConfigParams
 {
     std::string path_image;
+    std::string path_image_weights;
+    double max_weight;
     std::string path_out;
     int chromozome_length;
     ShapeType shape_type;
