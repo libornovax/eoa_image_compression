@@ -21,9 +21,10 @@
 
 void runCompression ()
 {
-    cv::Mat image = cv::imread(eic::Config::getParams().path_image, CV_LOAD_IMAGE_COLOR);
+    cv::Mat image         = cv::imread(eic::Config::getParams().path_image, CV_LOAD_IMAGE_COLOR);
+    cv::Mat image_weights = cv::imread(eic::Config::getParams().path_image_weights, CV_LOAD_IMAGE_GRAYSCALE);
 
-    auto target = std::make_shared<eic::Target>(image);
+    auto target = std::make_shared<eic::Target>(image, image_weights, eic::Config::getParams().max_weight);
 
 
     // Compress the image

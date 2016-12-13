@@ -20,6 +20,8 @@ void Config::loadParams (const std::string &path_config)
 
     // General parameters
     Config::_getInstance()._params.path_image = config["path_image"].as<std::string>();
+    Config::_getInstance()._params.path_image_weights = config["path_image_weights"].as<std::string>();
+    Config::_getInstance()._params.max_weight = config["max_weight"].as<double>();
     Config::_getInstance()._params.path_out = config["path_out"].as<std::string>();
     Config::_getInstance()._params.chromozome_length = config["chromozome_length"].as<int>();
     Config::_getInstance()._params.shape_type = ShapeType(config["shape_type"].as<int>());
@@ -76,6 +78,8 @@ void Config::print ()
     std::cout << "============================================================================" << std::endl;
 
     std::cout << "path_image:                     " << Config::_getInstance()._params.path_image << std::endl;
+    std::cout << "path_image_weights:             " << Config::_getInstance()._params.path_image_weights << std::endl;
+    std::cout << "max_weight:                     " << Config::_getInstance()._params.max_weight << std::endl;
     std::cout << "path_out:                       " << Config::_getInstance()._params.path_out << std::endl;
     std::cout << "chromozome_length:              " << Config::_getInstance()._params.chromozome_length << std::endl;
     std::cout << "shape_type:                     " << int(Config::_getInstance()._params.shape_type) << std::endl;
