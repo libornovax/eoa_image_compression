@@ -33,7 +33,7 @@ struct Target {
 
         // -- WEIGHTS -- //
         // Weight map of the image is a combination of the provided weight file and detected edges.
-        // The detected edges have a max of 1/4 of the max of the provided weight map
+        // The detected edges have a max of 1/10 of the max of the provided weight map
 
         // Weight map from file
         cv::Mat external_weights;
@@ -50,7 +50,7 @@ struct Target {
             edge_weights.convertTo(edge_weights, CV_32FC1);
             cv::GaussianBlur(edge_weights, edge_weights, cv::Size(19, 19), 5);
             double max_val, dummy; cv::minMaxLoc(edge_weights, &dummy, &max_val);
-            edge_weights *= max_weight/max_val/4;  // 1/4 of the max_weight
+            edge_weights *= max_weight/max_val/10;  // 1/10 of the max_weight
             edge_weights += 1;
         }
 
