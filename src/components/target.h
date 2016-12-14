@@ -30,19 +30,31 @@ struct Target {
         cv::GaussianBlur(image, blurred_image, cv::Size(5, 5), 2);
         cv::split(blurred_image, blurred_channels);
 
-        // Weights
-        grayscale_weights.convertTo(weights, CV_32FC1);
-        double max_val, dummy; cv::minMaxLoc(weights, &dummy, &max_val);
-        weights *= max_weight/max_val;
-        weights += 1;
 
-//        // Edges
-//        cv::Canny(blurred_image, weights, 600, 1000, 5, true);
-//        weights.convertTo(weights, CV_32FC1);
-//        cv::GaussianBlur(weights, weights, cv::Size(19, 19), 5);
-//        double max_val, dummy; cv::minMaxLoc(weights, &dummy, &max_val);
-//        weights *= max_weight/max_val;
-//        weights += 1;
+        // -- WEIGHTS -- //
+        // Weight map of the image is a combination of the provided weight file and detected edges.
+        // The detected edges have a max of 1/4 of the max of the provided weight map
+
+        // Weight map from file
+        cv::Mat external_weights;
+        {
+            grayscale_weights.convertTo(external_weights, CV_32FC1);
+            double max_val, dummy; cv::minMaxLoc(external_weights, &dummy, &max_val);
+            external_weights *= max_weight/max_val;
+            external_weights += 1;
+        }
+        // Edges
+        cv::Mat edge_weights;
+        {
+            cv::Canny(blurred_image, edge_weights, 600, 1000, 5, true);
+            edge_weights.convertTo(edge_weights, CV_32FC1);
+            cv::GaussianBlur(edge_weights, edge_weights, cv::Size(19, 19), 5);
+            double max_val, dummy; cv::minMaxLoc(edge_weights, &dummy, &max_val);
+            edge_weights *= max_weight/max_val/4;  // 1/4 of the max_weight
+            edge_weights += 1;
+        }
+
+        weights = cv::max(external_weights, edge_weights);
 
 //        {
 //            cv::imshow("original", bgr_image);

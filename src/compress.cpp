@@ -26,6 +26,10 @@ void runCompression ()
 
     auto target = std::make_shared<eic::Target>(image, image_weights, eic::Config::getParams().max_weight);
 
+    // Save the weights image
+    cv::imwrite(eic::Config::getParams().path_out + "/weights.png",
+                (target->weights-1)*(256/eic::Config::getParams().max_weight));
+
 
     // Compress the image
     std::shared_ptr<eic::Chromozome> result;
