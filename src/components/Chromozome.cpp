@@ -5,6 +5,7 @@
 #include "Renderer.h"
 #include "Config.h"
 #include "shapes/Circle.h"
+#include "shapes/Rectangle.h"
 #include "RGen.h"
 
 
@@ -129,6 +130,9 @@ void Chromozome::addRandomShape ()
     switch (Config::getParams().shape_type) {
     case ShapeType::CIRCLE:
         this->_chromozome.push_back(Circle::randomCircle(this->_target));
+        break;
+    case ShapeType::RECTANGLE:
+        this->_chromozome.push_back(Rectangle::randomRectangle(this->_target));
         break;
     default:
         std::cout << "ERROR: Unknown shape type " << int(Config::getParams().shape_type) << std::endl;

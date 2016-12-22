@@ -44,6 +44,12 @@ public:
      */
     virtual void visit (Circle &circle) override final;
 
+    /**
+     * @brief Renders a Rectangle into the current image
+     * @param circle Rectangle to be rendered
+     */
+    virtual void visit (Rectangle &rect) override final;
+
 
 private:
 

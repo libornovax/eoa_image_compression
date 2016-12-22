@@ -31,6 +31,11 @@ public:
      */
     virtual void visit (Circle &circle) override final;
 
+    /**
+     * @brief Mutates a rectangle shape
+     */
+    virtual void visit (Rectangle &rect) override final;
+
 
 private:
 

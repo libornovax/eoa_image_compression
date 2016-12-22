@@ -12,6 +12,7 @@ namespace eic {
 // Tell the compiler that the classes that we want to visit exist
 class Chromozome;
 class Circle;
+class Rectangle;
 
 
 class IVisitor
@@ -22,6 +23,7 @@ public:
 
     virtual void visit (Chromozome &chromozome) = 0;
     virtual void visit (Circle &circle) = 0;
+    virtual void visit (Rectangle &rect) = 0;
 
 };
 

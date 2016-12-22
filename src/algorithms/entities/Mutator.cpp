@@ -4,6 +4,7 @@
 #include "components/utils.h"
 #include "components/RGen.h"
 #include "shapes/Circle.h"
+#include "shapes/Rectangle.h"
 #include "components/Chromozome.h"
 #include "components/Config.h"
 
@@ -149,6 +150,134 @@ void Mutator::visit (Circle &circle)
         break;
     default:
         this->_mutateIShape(circle, mutated_feature);
+        break;
+    }
+}
+
+
+void Mutator::visit (Rectangle &rect)
+{
+    // Select one of the features of the rectangle, which will be mutated (we only want to mutate one per visit)
+    std::uniform_int_distribution<int> distf(0, 6);  // RGBAwh(tl)
+    int mutated_feature = distf(RGen::mt());
+
+    switch (mutated_feature)
+    {
+    case 4:
+        // Width
+        if (utils::makeMutation(Config::getParams().mutator.wh_mutation_prob))
+        {
+            // Mutate the radius
+            switch (rect.getSizeGroup())
+            {
+            case SizeGroup::SMALL:
+                {
+                    std::normal_distribution<double> dist(0, 1);
+                    rect._rect.width += dist(RGen::mt());
+                }
+                break;
+            case SizeGroup::MEDIUM:
+                {
+                    std::normal_distribution<double> dist(0, Config::getParams().mutator.wh_mutation_stddev/2);
+                    rect._rect.width += dist(RGen::mt());
+                }
+                break;
+            case SizeGroup::LARGE:
+                {
+                    std::normal_distribution<double> dist(0, Config::getParams().mutator.wh_mutation_stddev);
+                    rect._rect.width += dist(RGen::mt());
+                }
+                break;
+            default:
+                std::cout << "ERROR: Unknown SizeGroup" << std::endl;
+                exit(EXIT_FAILURE);
+                break;
+            }
+            auto minmax = Circle::radiusBounds(this->_image_size, rect.getSizeGroup());
+            rect._rect.width = utils::clip(rect._rect.width, minmax.first, minmax.second);
+        }
+        break;
+    case 5:
+        // Height
+        if (utils::makeMutation(Config::getParams().mutator.wh_mutation_prob))
+        {
+            // Mutate the radius
+            switch (rect.getSizeGroup())
+            {
+            case SizeGroup::SMALL:
+                {
+                    std::normal_distribution<double> dist(0, 1);
+                    rect._rect.height += dist(RGen::mt());
+                }
+                break;
+            case SizeGroup::MEDIUM:
+                {
+                    std::normal_distribution<double> dist(0, Config::getParams().mutator.wh_mutation_stddev/2);
+                    rect._rect.height += dist(RGen::mt());
+                }
+                break;
+            case SizeGroup::LARGE:
+                {
+                    std::normal_distribution<double> dist(0, Config::getParams().mutator.wh_mutation_stddev);
+                    rect._rect.height += dist(RGen::mt());
+                }
+                break;
+            default:
+                std::cout << "ERROR: Unknown SizeGroup" << std::endl;
+                exit(EXIT_FAILURE);
+                break;
+            }
+            auto minmax = Circle::radiusBounds(this->_image_size, rect.getSizeGroup());
+            rect._rect.height = utils::clip(rect._rect.height, minmax.first, minmax.second);
+        }
+        break;
+    case 6:
+        // Position of top left corner
+        if (utils::makeMutation(Config::getParams().mutator.position_reinitialization_prob))
+        {
+            // Generate a completely new position for the rectangle
+            std::uniform_int_distribution<int> distcx(0, this->_image_size.width-rect._rect.width);
+            std::uniform_int_distribution<int> distcy(0, this->_image_size.height-rect._rect.height);
+            rect._rect.x = distcx(RGen::mt());
+            rect._rect.y = distcy(RGen::mt());
+        }
+        else if (utils::makeMutation(Config::getParams().mutator.position_mutation_prob))
+        {
+            // Mutate the position of the center
+            switch (rect.getSizeGroup())
+            {
+            case SizeGroup::SMALL:
+                {
+                    std::normal_distribution<double> dist(0, Config::getParams().mutator.position_mutation_stddev/5);
+                    rect._rect.x += dist(RGen::mt());
+                    rect._rect.y += dist(RGen::mt());
+                }
+                break;
+            case SizeGroup::MEDIUM:
+                {
+                    std::normal_distribution<double> dist(0, Config::getParams().mutator.position_mutation_stddev/2);
+                    rect._rect.x += dist(RGen::mt());
+                    rect._rect.y += dist(RGen::mt());
+                }
+                break;
+            case SizeGroup::LARGE:
+                {
+                    std::normal_distribution<double> dist(0, Config::getParams().mutator.position_mutation_stddev);
+                    rect._rect.x += dist(RGen::mt());
+                    rect._rect.y += dist(RGen::mt());
+                }
+                break;
+            default:
+                std::cout << "ERROR: Unknown SizeGroup" << std::endl;
+                exit(EXIT_FAILURE);
+                break;
+            }
+            rect._rect.x = utils::clip(rect._rect.x, 0, this->_image_size.width-rect._rect.width);
+            rect._rect.y = utils::clip(rect._rect.y, 0, this->_image_size.height-rect._rect.height);
+        }
+        break;
+    default:
+        this->_mutateIShape(rect, mutated_feature);
         break;
     }
 }

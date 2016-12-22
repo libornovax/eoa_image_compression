@@ -24,7 +24,7 @@ path_out: "/Users/libornovak/Data/eoa_image_compression/results/test/"
 chromozome_length: 200
 
 # Type of shape to be used in the chromozome
-shape_type: 1  # 1 = Circle
+shape_type: 2  # 1 = Circle, 2 = Rectangle
 
 # Which algorithm will be used for compression
 algorithm: 1  # 1 = HillClimber, 2 = ClassicEA, 3 = SteadyStateEA, 4 = InterleavedEA
@@ -67,4 +67,9 @@ mutator:
     # CIRCLE specific
     radius_mutation_prob: 0.1
     radius_mutation_sdtddev: 5
+
+    # RECTANGLE specific
+    wh_mutation_prob: 0.1
+    wh_mutation_sdtddev: 2
+
 

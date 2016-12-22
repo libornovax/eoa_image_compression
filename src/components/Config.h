@@ -14,7 +14,8 @@ namespace eic {
 
 enum class ShapeType
 {
-    CIRCLE = 1
+    CIRCLE    = 1,
+    RECTANGLE = 2
 };
 
 
@@ -43,6 +44,9 @@ struct MutatorParams
 
     double radius_mutation_prob;
     double radius_mutation_stddev;
+
+    double wh_mutation_prob;
+    double wh_mutation_stddev;
 };
 
 

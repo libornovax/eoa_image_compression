@@ -38,8 +38,16 @@ void Config::loadParams (const std::string &path_config)
     Config::_getInstance()._params.mutator.position_mutation_prob = mutator["position_mutation_prob"].as<double>();
     Config::_getInstance()._params.mutator.position_mutation_stddev = mutator["position_mutation_stddev"].as<double>();
     Config::_getInstance()._params.mutator.position_reinitialization_prob = mutator["position_reinitialization_prob"].as<double>();
-    Config::_getInstance()._params.mutator.radius_mutation_prob = mutator["radius_mutation_prob"].as<double>();
-    Config::_getInstance()._params.mutator.radius_mutation_stddev = mutator["radius_mutation_sdtddev"].as<double>();
+    if (Config::_getInstance()._params.shape_type == ShapeType::CIRCLE)
+    {
+        Config::_getInstance()._params.mutator.radius_mutation_prob = mutator["radius_mutation_prob"].as<double>();
+        Config::_getInstance()._params.mutator.radius_mutation_stddev = mutator["radius_mutation_sdtddev"].as<double>();
+    }
+    else if (Config::_getInstance()._params.shape_type == ShapeType::RECTANGLE)
+    {
+        Config::_getInstance()._params.mutator.wh_mutation_prob = mutator["wh_mutation_prob"].as<double>();
+        Config::_getInstance()._params.mutator.wh_mutation_stddev = mutator["wh_mutation_sdtddev"].as<double>();
+    }
 
     // ClassicEA settings
     if (Config::_getInstance()._params.algorithm == AlgorithmType::CLASSIC_EA ||
@@ -96,8 +104,16 @@ void Config::print ()
     std::cout << "position_mutation_prob:         " << Config::_getInstance()._params.mutator.position_mutation_prob << std::endl;
     std::cout << "position_mutation_stddev:       " << Config::_getInstance()._params.mutator.position_mutation_stddev << std::endl;
     std::cout << "position_reinitialization_prob: " << Config::_getInstance()._params.mutator.position_reinitialization_prob << std::endl;
-    std::cout << "radius_mutation_prob:           " << Config::_getInstance()._params.mutator.radius_mutation_prob << std::endl;
-    std::cout << "radius_mutation_sdtddev:        " << Config::_getInstance()._params.mutator.radius_mutation_stddev << std::endl;
+    if (Config::_getInstance()._params.shape_type == ShapeType::CIRCLE)
+    {
+        std::cout << "radius_mutation_prob:           " << Config::_getInstance()._params.mutator.radius_mutation_prob << std::endl;
+        std::cout << "radius_mutation_sdtddev:        " << Config::_getInstance()._params.mutator.radius_mutation_stddev << std::endl;
+    }
+    else if (Config::_getInstance()._params.shape_type == ShapeType::RECTANGLE)
+    {
+        std::cout << "wh_mutation_prob:               " << Config::_getInstance()._params.mutator.wh_mutation_prob << std::endl;
+        std::cout << "wh_mutation_sdtddev:            " << Config::_getInstance()._params.mutator.wh_mutation_stddev << std::endl;
+    }
 
     if (Config::_getInstance()._params.algorithm == AlgorithmType::CLASSIC_EA)
     {

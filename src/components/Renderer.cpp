@@ -4,6 +4,7 @@
 #include <opencv2/imgproc/imgproc.hpp>
 #include "Chromozome.h"
 #include "shapes/Circle.h"
+#include "shapes/Rectangle.h"
 
 
 namespace eic {
@@ -133,6 +134,30 @@ namespace {
         }
     }
 
+
+    /**
+     * @brief Adds the specified color value to the specified rectangular shape into the image
+     * @param image Image (CV_32SC1) to be altered
+     * @param rect
+     * @param color Number to be added to the current values of the pixels
+     */
+#ifdef RENDER_AVERAGE
+    void renderRectangle (cv::Mat &image, const cv::Rect &rect, int color)
+#else
+    void renderRectangle (cv::Mat &image, const cv::Rect &rect, int alpha_color, double alpha)
+#endif
+    {
+        // Reder the rectangle line by line
+        for (int i = 0; i < rect.height; ++i)
+        {
+#ifdef RENDER_AVERAGE
+            drawLine(image, rect.y + i, rect.x, rect.x + rect.width, color);
+#else
+            drawLine(image, rect.y + i, rect.x, rect.x + rect.width, alpha_color, alpha);
+#endif
+        }
+    }
+
 }
 
 
@@ -203,6 +228,25 @@ void Renderer::visit (Circle &circle)
     renderCircle(this->_channels[0], circle.getCenter(), circle.getRadius(), alpha*circle.getR(), alpha);
     renderCircle(this->_channels[1], circle.getCenter(), circle.getRadius(), alpha*circle.getG(), alpha);
     renderCircle(this->_channels[2], circle.getCenter(), circle.getRadius(), alpha*circle.getB(), alpha);
+#endif
+}
+
+
+void Renderer::visit (Rectangle &rect)
+{
+    double alpha = double(rect.getA()) / 100.0;
+
+#ifdef RENDER_AVERAGE
+    // Render (add) the values for each color channel
+    renderRectangle(this->_channels[0], rect.getRect(), alpha*rect.getR());
+    renderRectangle(this->_channels[1], rect.getRect(), alpha*rect.getG());
+    renderRectangle(this->_channels[2], rect.getRect(), alpha*rect.getB());
+    // Render the sum of the alpha channel
+    renderRectangle(this->_channels[3], rect.getRect(), rect.getA());
+#else
+    renderRectangle(this->_channels[0], rect.getRect(), alpha*rect.getR(), alpha);
+    renderRectangle(this->_channels[1], rect.getRect(), alpha*rect.getG(), alpha);
+    renderRectangle(this->_channels[2], rect.getRect(), alpha*rect.getB(), alpha);
 #endif
 }
 
