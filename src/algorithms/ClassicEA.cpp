@@ -7,6 +7,10 @@
 #include "components/Config.h"
 #include "components/utils.h"
 #include "shapes/Circle.h"
+#include "components/fitness/Fitness.h"
+
+// How often will the whole population be saved
+#define POPULATION_SAVE_FREQUENCY 50
 
 
 namespace eic {
@@ -31,7 +35,7 @@ std::shared_ptr<Chromozome> ClassicEA::run ()
         this->_stats.add(e, this->_best_chromozome->getFitness(), this->_worst_chromozome->getFitness(),
                          ClassicEA::_meanFitness(this->_population), ClassicEA::_stddevFitness(this->_population));
 
-        if (e % 50 == 0)
+        if (e % POPULATION_SAVE_FREQUENCY == 0)
         {
             this->_saveCurrentPopulation(e);
             this->_stats.save();
@@ -73,6 +77,15 @@ std::shared_ptr<Chromozome> ClassicEA::run ()
         // Generational replacement with elitism (elitism is already taken care of)
         this->_population = new_population;
 
+
+        // Compute fitness of all chromozomes in the population
+        if ((e+1) % POPULATION_SAVE_FREQUENCY == 0)
+        {
+            computeFitness(this->_population, true);  // Next epoch will be saving the images
+        }
+        else computeFitness(this->_population);
+
+
         // Sort the population by fitness
         ClassicEA::_sortPopulation(this->_population);
 
@@ -94,11 +107,13 @@ void ClassicEA::_initializePopulation ()
         this->_population.push_back(Chromozome::randomChromozome(this->_target));
     }
 
+    computeFitness(this->_population, true);
+
     ClassicEA::_sortPopulation(this->_population);
 
     // Just set the best as a random one from the population
-    this->_best_chromozome = this->_population[0]->clone();
-    this->_worst_chromozome = this->_population.back()->clone();
+    this->_best_chromozome = this->_population[0];
+    this->_worst_chromozome = this->_population.back();
 
     {
         cv::Mat image = this->_best_chromozome->asImage();
@@ -128,25 +143,26 @@ void ClassicEA::_updateBestChromozome (int e)
     // WARNING! We suppose the population is sorted from best to worst!!
     if (this->_population[0]->getFitness() < this->_best_chromozome->getFitness())
     {
-        std::cout << "[" << e << "] New best difference: " << this->_population[0]->getFitness() << std::endl;
+        this->_best_chromozome = this->_population[0];
+
+        std::cout << "[" << e << "] New best difference: " << this->_best_chromozome->getFitness() << std::endl;
 
         // Save the current best image
         if (e-this->_last_save > 50)
         {
             this->_last_save = e;
-            cv::Mat image = this->_population[0]->asImage();
+            computeFitness(this->_best_chromozome, true);
+            cv::Mat image = this->_best_chromozome->asImage();
             cv::imwrite(Config::getParams().path_out + "/approx_" + std::to_string(e) + ".png", image);
         }
     }
-
-    this->_best_chromozome = this->_population[0]->clone();
 }
 
 
 void ClassicEA::_updateWorstChromozome (int e)
 {
     // WARNING! We suppose the population is sorted from best to worst!!
-    this->_worst_chromozome = this->_population.back()->clone();
+    this->_worst_chromozome = this->_population.back();
 }
 
 

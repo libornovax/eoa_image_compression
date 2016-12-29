@@ -17,6 +17,7 @@
 #include "algorithms/SteadyStateEA.h"
 #include "algorithms/InterleavedEA.h"
 #include "components/Config.h"
+#include "components/fitness/Fitness.h"
 
 
 void runCompression ()
@@ -79,6 +80,7 @@ void runCompression ()
 
 
     // Show the final approximated image
+    eic::computeFitness(result, true);
     cv::Mat approximation = result->asImage();
 
     cv::imwrite(eic::Config::getParams().path_out + "/approximation.png", approximation);

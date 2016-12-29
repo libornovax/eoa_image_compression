@@ -7,6 +7,7 @@
 #include "components/Config.h"
 #include "components/utils.h"
 #include "shapes/Circle.h"
+#include "components/fitness/cpu/CPUFitness.h"
 
 
 namespace eic {
@@ -22,6 +23,8 @@ SteadyStateEA::SteadyStateEA(const std::shared_ptr<const Target> &target)
 std::shared_ptr<Chromozome> SteadyStateEA::run ()
 {
     this->_initializePopulation();
+
+    CPUFitness::computeFitness(this->_population);
 
     // For the first half of the epochs we want to be evolving regions of the image, afer a half we
     // deactivate the rois

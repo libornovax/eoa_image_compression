@@ -11,6 +11,7 @@
 #include <opencv2/core/core.hpp>
 #include "shapes/IShape.h"
 #include "target.h"
+#include "components/fitness/cpu/CPUFitness.h"
 
 
 namespace eic {
@@ -19,6 +20,8 @@ namespace eic {
 class Chromozome
 {
     friend class Mutator;
+    friend void CPUFitness::computeFitness<Chromozome> (const std::vector<std::shared_ptr<Chromozome>> &chromozomes, bool write_channels);
+    friend void CPUFitness::computeFitness<Chromozome> (const std::shared_ptr<Chromozome> &ch, bool write_channels);
 public:
 
     Chromozome (const std::shared_ptr<const Target> &target, const cv::Rect roi);

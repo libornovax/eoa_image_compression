@@ -10,34 +10,6 @@
 
 namespace eic {
 
-namespace {
-
-    /**
-     * @brief Computes weighted difference between the original image and the candidate
-     * @param target Original image
-     * @param render Candidate rendered from a chromozome
-     * @param weights Weight map of the pixels
-     * @return Weighted difference
-     */
-    double computeDifference (const cv::Mat &target, const cv::Mat &render, const cv::Mat &weights)
-    {
-        cv::Mat diff;
-        cv::subtract(target, render, diff, cv::noArray(), CV_32FC1);
-        cv::pow(diff, 2, diff);
-
-        // Apply weight on each image pixel
-        cv::multiply(diff, weights, diff);
-
-        // Tolerate small differences in color - only count as error if the difference is above the set
-        // threshold
-        cv::threshold(diff, diff, 50, 0, CV_THRESH_TOZERO);
-
-        cv::Scalar total = cv::sum(diff);
-        return total[0];
-    }
-
-}
-
 
 Chromozome::Chromozome(const std::shared_ptr<const Target> &target, const cv::Rect roi)
     : _fitness(DBL_MAX),
@@ -158,36 +130,7 @@ const std::shared_ptr<IShape>& Chromozome::operator[] (size_t i) const
 
 double Chromozome::getFitness ()
 {
-    if (this->_dirty)
-    {
-        // The chromozome was editted - we need to recompute the fitness
-
-        assert(this->_target->channels.size() == 3);
-        assert(this->_target->channels[0].size() == this->_target->channels[1].size() && this->_target->channels[0].size() == this->_target->channels[2].size());
-
-        // Render the image
-        Renderer renderer(this->_target->image_size);
-        this->_channels = renderer.render(*this);
-
-        // Compute pixel-wise difference
-        this->_fitness = 0;
-        for (size_t i = 0; i < 3; ++i)
-        {
-            if (this->_roi_active)
-            {
-                double roi_weight = double(this->_target->image_size.area()) / this->_roi.area();
-                // ROI is activated, include error from the ROI as well
-                this->_fitness += roi_weight * computeDifference(this->_target->blurred_channels[i](this->_roi),
-                                                                 this->_channels[i](this->_roi),
-                                                                 this->_target->weights(this->_roi));
-            }
-            this->_fitness += computeDifference(this->_target->blurred_channels[i],
-                                                this->_channels[i], this->_target->weights);
-        }
-
-        // Just rendered and computed fitness
-        this->_dirty = false;
-    }
+    assert(!this->_dirty);
 
     return this->_fitness;
 }
@@ -221,12 +164,7 @@ void Chromozome::deactivateROI ()
 
 cv::Mat Chromozome::asImage ()
 {
-    // Render the image represented by this chromozome
-    if (this->_dirty)
-    {
-        Renderer r(this->_target->image_size);
-        this->_channels = r.render(*this);
-    }
+    assert(!this->_dirty);
 
     // Merge the channels to a 3 channel cv::Mat
     cv::Mat image;

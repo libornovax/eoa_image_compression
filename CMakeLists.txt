@@ -13,7 +13,7 @@ project ( eoa_image_compression )
 set ( EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/bin )
 set ( CMAKE_CXX_FLAGS "-g -std=c++11 -O3" )
 #set ( CMAKE_CXX_FLAGS "-g -std=c++11" )
-#set ( DEBUG_MODE ON )
+set ( DEBUG_MODE ON )
 
 #add_definitions ( -DMEASURE_TIME )
 
@@ -33,12 +33,15 @@ file ( GLOB MY_HEADERS src/*.h
                        src/shapes/*.h
                        src/components/*.h
                        src/algorithms/*.h
-                       src/algorithms/entities/*.h )
+                       src/algorithms/entities/*.h
+                       src/components/fitness/*.h
+                       src/components/fitness/cpu/*.h )
 file ( GLOB MY_SOURCES src/*.cpp
                        src/shapes/*.cpp
                        src/components/*.cpp
                        src/algorithms/*.cpp
-                       src/algorithms/entities/*.cpp )
+                       src/algorithms/entities/*.cpp
+                       src/components/fitness/cpu/*.cpp )
 
 
 ## ----------------------------------------- EXECUTABLES ----------------------------------------- ##
