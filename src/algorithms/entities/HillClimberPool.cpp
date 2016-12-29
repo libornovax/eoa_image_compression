@@ -24,7 +24,8 @@ namespace {
 HillClimberPool::HillClimberPool (int queue_size)
     : _shut_down(true),
       _queue_size(queue_size),
-      _num_running_workers(0)
+      _num_running_workers(0),
+      _num_processing_workers(0)
 {
     this->_launch();
 }
@@ -76,8 +77,10 @@ void HillClimberPool::waitToFinish ()
 
     if (!this->_queue.empty())
     {
-        // Wait for the queue to get become empty
-        this->_cv_full.wait(lk, [this]() { return this->_queue.empty(); });
+        // Wait for the queue to get become empty and all threads to finish processing the queue
+        this->_cv_one_done.wait(lk, [this]() {
+            return this->_queue.empty() && this->_num_processing_workers == 0;
+        });
     }
 
     lk.unlock();
@@ -123,6 +126,9 @@ void HillClimberPool::_workerThread ()
             if (this->_shut_down) break;  // We do NOT wait for the queue to get empty
         }
 
+        // One more chromozome is being processed
+        this->_num_processing_workers++;
+
         // Get a chromozome from the queue
         std::shared_ptr<Chromozome> chromozome = this->_queue.front();
         this->_queue.pop_front();
@@ -133,6 +139,10 @@ void HillClimberPool::_workerThread ()
 
         // Run Hill Climber on this chromozome and replace it with the optimized one
         chromozome->update(hc.run(chromozome));
+
+        // One more chromozome has finished being processed
+        this->_num_processing_workers--;
+        this->_cv_one_done.notify_all();  // This is only for waitToFinish()
     }
 
     this->_num_running_workers--;
