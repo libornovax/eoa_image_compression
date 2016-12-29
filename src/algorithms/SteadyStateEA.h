@@ -33,15 +33,9 @@ public:
 protected:
 
     /**
-     * @brief Initializes new population with NULL pointers
-     * @param new_population Population to be editted
-     */
-    virtual void _initializeNewPopulation (std::vector<std::shared_ptr<Chromozome>> &new_population) const override final;
-
-    /**
      * @brief One evolution epoch of the steady state evolution
      */
-    virtual void _steadyStateEpoch () final;
+    virtual void _steadyStateEpoch (int epoch) final;
 
 
     // -------------------------------------  PRIVATE MEMBERS  ------------------------------------- //

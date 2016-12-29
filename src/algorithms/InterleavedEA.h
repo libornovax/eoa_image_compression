@@ -37,7 +37,7 @@ protected:
     /**
      * @brief One hill climber evolution epoch
      */
-    virtual void _hillClimberEpoch () final;
+    virtual void _hillClimberEpoch (int epoch) final;
 
 
     // -------------------------------------  PRIVATE MEMBERS  ------------------------------------- //

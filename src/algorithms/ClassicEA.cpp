@@ -9,9 +9,6 @@
 #include "shapes/Circle.h"
 #include "components/fitness/Fitness.h"
 
-// How often will the whole population be saved
-#define POPULATION_SAVE_FREQUENCY 50
-
 
 namespace eic {
 
