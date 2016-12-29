@@ -9,19 +9,17 @@
 #include <vector>
 
 
+class Chromozome;
+
 namespace eic {
-namespace CPUFitness {
 
-    template<typename CH>
-    void computeFitness (const std::vector<std::shared_ptr<CH>> &chromozomes, bool write_channels=false);
 
-    template<typename CH>
-    void computeFitness (const std::shared_ptr<CH> &ch, bool write_channels=false);
+void computeFitnessCPU (const std::vector<std::shared_ptr<Chromozome>> &chromozomes, bool write_channels=false);
+
+void computeFitnessCPU (const std::shared_ptr<Chromozome> &ch, bool write_channels=false);
+
 
 }
-}
 
-
-#include "CPUFitness.cpp"
 
 #endif // CPUFITNESS_H

@@ -95,6 +95,14 @@ cv::Point Circle::getCenter() const
 }
 
 
+#ifdef USE_GPU
+void Circle::writeDescription (float *desc_array) const
+{
+
+}
+#endif
+
+
 std::pair<int, int> Circle::radiusBounds (const cv::Size &image_size, SizeGroup sg)
 {
     std::pair<int, int> minmax(0, 0);

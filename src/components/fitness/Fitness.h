@@ -7,6 +7,9 @@
 #define FITNESS_H
 
 #include "cpu/CPUFitness.h"
+#ifdef USE_GPU
+#include "gpu/GPUFitness.h"
+#endif
 
 
 namespace eic {
@@ -16,8 +19,9 @@ template<typename CH>
 void computeFitness (const std::vector<std::shared_ptr<CH>> &chromozomes, bool write_channels=false)
 {
 #ifdef USE_GPU
+    computeFitnessGPU(chromozomes, write_channels);
 #else
-    CPUFitness::computeFitness(chromozomes, write_channels);
+    computeFitnessCPU(chromozomes, write_channels);
 #endif
 }
 
@@ -26,8 +30,9 @@ template<typename CH>
 void computeFitness (const std::shared_ptr<CH> &ch, bool write_channels=false)
 {
 #ifdef USE_GPU
+    computeFitnessGPU(ch, write_channels);
 #else
-    CPUFitness::computeFitness(ch, write_channels);
+    computeFitnessCPU(ch, write_channels);
 #endif
 }
 

@@ -12,6 +12,9 @@
 #include "shapes/IShape.h"
 #include "target.h"
 #include "components/fitness/cpu/CPUFitness.h"
+#ifdef USE_GPU
+#include "components/fitness/gpu/GPUFitness.h"
+#endif
 
 
 namespace eic {
@@ -20,8 +23,12 @@ namespace eic {
 class Chromozome
 {
     friend class Mutator;
-    friend void CPUFitness::computeFitness<Chromozome> (const std::vector<std::shared_ptr<Chromozome>> &chromozomes, bool write_channels);
-    friend void CPUFitness::computeFitness<Chromozome> (const std::shared_ptr<Chromozome> &ch, bool write_channels);
+    friend void computeFitnessCPU (const std::vector<std::shared_ptr<Chromozome>> &chromozomes, bool write_channels);
+    friend void computeFitnessCPU (const std::shared_ptr<Chromozome> &ch, bool write_channels);
+#ifdef USE_GPU
+    friend void computeFitnessGPU (const std::vector<std::shared_ptr<Chromozome>> &chromozomes, bool write_channels);
+    friend void computeFitnessGPU (const std::shared_ptr<Chromozome> &ch, bool write_channels);
+#endif
 public:
 
     Chromozome (const std::shared_ptr<const Target> &target, const cv::Rect roi);
