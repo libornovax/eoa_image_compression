@@ -56,6 +56,17 @@ SizeGroup IShape::getSizeGroup () const
 }
 
 
+#ifdef USE_GPU
+void IShape::writeDescription (float *desc_array) const
+{
+    desc_array[1] = float(this->_r);
+    desc_array[2] = float(this->_g);
+    desc_array[3] = float(this->_b);
+    desc_array[4] = float(this->_a);
+}
+#endif
+
+
 // -----------------------------------------  PROTECTED METHODS  ----------------------------------------- //
 
 void IShape::_check () const

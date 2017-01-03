@@ -2,6 +2,7 @@
 
 #include <iostream>
 #include "components/RGen.h"
+#include "components/Config.h"
 
 
 namespace eic {
@@ -98,7 +99,11 @@ cv::Point Circle::getCenter() const
 #ifdef USE_GPU
 void Circle::writeDescription (float *desc_array) const
 {
-
+    desc_array[0] = float(ShapeType::CIRCLE);
+    IShape::writeDescription(desc_array);  // RGBa
+    desc_array[5] = float(this->_center.x);
+    desc_array[6] = float(this->_center.y);
+    desc_array[7] = float(this->_radius);
 }
 #endif
 

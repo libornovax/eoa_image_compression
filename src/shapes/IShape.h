@@ -72,9 +72,9 @@ public:
 
 #ifdef USE_GPU
     /**
-     * @brief Writes a float description of the shape into the given array. Max length 10!
+     * @brief Writes a float description of the shape into the given array. Max length DESC_LEN!
      */
-    virtual void writeDescription (float *desc_array) const = 0;
+    virtual void writeDescription (float *desc_array) const;
 #endif
 
 
