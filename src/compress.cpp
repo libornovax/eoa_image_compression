@@ -22,6 +22,10 @@
 
 void runCompression ()
 {
+#ifdef USE_GPU
+    eic::initializeGPU();
+#endif
+
     cv::Mat image         = cv::imread(eic::Config::getParams().path_image, CV_LOAD_IMAGE_COLOR);
     cv::Mat image_weights = cv::imread(eic::Config::getParams().path_image_weights, CV_LOAD_IMAGE_GRAYSCALE);
 

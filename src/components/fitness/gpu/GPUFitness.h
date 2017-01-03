@@ -19,6 +19,7 @@ void computeFitnessGPU (const std::vector<std::shared_ptr<Chromozome>> &chromozo
 
 void computeFitnessGPU (const std::shared_ptr<Chromozome> &ch, bool write_channels=false);
 
+bool initializeGPU ();
 
 }
 

@@ -5,6 +5,7 @@
 #include "components/Chromozome.h"
 #include "check_error.h"
 #include "kernels.h"
+#include "settings.h"
 
 
 namespace eic {
@@ -17,17 +18,18 @@ void computeFitnessGPU (const std::vector<std::shared_ptr<Chromozome>> &chromozo
 
     float* g_out_fitness; cudaMalloc((void**)&g_out_fitness, 10*sizeof(float));
 
-    float population[] = { 1.0f/*roi*/, 1.0f, 255.0f, 120.0f, 160.0f, 30.0f, 25.0f, 35.0f, 10.0f };
-    float* g_population; cudaMalloc((void**)&g_population, 11*sizeof(float));
-    cudaMemcpy(g_population, population, 11*sizeof(float), cudaMemcpyHostToDevice);
+    int population[] = { 1/*roi*/, 1, 255, 120, 160, 30, 25, 35, 10 };
+    int* g_population; cudaMalloc((void**)&g_population, 11*sizeof(int));
+    cudaMemcpy(g_population, population, 11*sizeof(int), cudaMemcpyHostToDevice);
 
-    float* g_canvas; cudaMalloc((void**)&g_canvas, 80*50*3*sizeof(float));
+    int* g_canvas; cudaMalloc((void**)&g_canvas, 60*60*3*sizeof(int));
 
 
-    populationFitness<<< 1, 64, 80*50*3*sizeof(float) >>>(g_target, 80, 50, g_population, 1, 1, g_out_fitness, g_canvas);
+    // Each rendering can run only on one multiprocessor!!! Because of the shared memory
+    populationFitness<<< 1, 64, SHARED_MEM_SIZE >>>(g_target, 60, 60, g_population, 1, 1, g_out_fitness, g_canvas);
 
-    cv::Mat canvas(50, 80, CV_32FC3);
-    cudaMemcpy(canvas.ptr<float>(), g_canvas, 80*50*3*sizeof(float), cudaMemcpyDeviceToHost);
+    cv::Mat canvas(60, 60, CV_32SC3);
+    cudaMemcpy(canvas.ptr<int>(), g_canvas, 60*60*3*sizeof(int), cudaMemcpyDeviceToHost);
 
     std::cout << canvas << std::endl;
 
@@ -50,6 +52,45 @@ void computeFitnessGPU (const std::shared_ptr<Chromozome> &ch, bool write_channe
     chromozomes.push_back(ch);
 
     computeFitnessGPU(chromozomes, write_channels);
+}
+
+
+bool initializeGPU ()
+{
+    // Find out if there is a CUDA capable device
+    int device_count;
+    CHECK_ERROR(cudaGetDeviceCount(&device_count));
+
+    // Get properties of the device
+    cudaDeviceProp device_properties;
+    CHECK_ERROR(cudaGetDeviceProperties(&device_properties, 0));
+
+    if (device_count == 0 || (device_properties.major == 0 && device_properties.minor == 0))
+    {
+        // Error, we cannot initialize
+        return false;
+    }
+    else
+    {
+        // Copying a dummy to the device will initialize it
+        int* gpu_dummy;
+        cudaMalloc((void**)&gpu_dummy, sizeof(int));
+        cudaFree(gpu_dummy);
+
+        std::cout << "--------------------------------------------------------------" << std::endl;
+        std::cout << "Device name:                    " << device_properties.name << std::endl;
+        std::cout << "Compute capability:             " << device_properties.major << "." << device_properties.minor << std::endl;
+        std::cout << "Total global memory:            " << device_properties.totalGlobalMem << std::endl;
+        std::cout << "Multiprocessor count:           " << device_properties.multiProcessorCount << std::endl;
+        std::cout << "Max threads per block:          " << device_properties.maxThreadsPerBlock << std::endl;
+        std::cout << "Max threads dim:                " << device_properties.maxThreadsDim[0] << std::endl;
+        std::cout << "Max grid size:                  " << device_properties.maxGridSize[0] << std::endl;
+        std::cout << "Shared mem per block:           " << device_properties.sharedMemPerBlock << std::endl;
+        std::cout << "Shared mem per multiprocessor:  " << device_properties.sharedMemPerMultiprocessor << std::endl;
+        std::cout << "--------------------------------------------------------------" << std::endl;
+
+        return true;
+    }
 }
 
 

@@ -8,11 +8,6 @@
 
 #include <string>
 
-//#ifdef USE_GPU
-// Max length of description of a shape, which is passed to the GPU
-#define DESC_LEN 10
-//#endif
-
 
 namespace eic {
 

@@ -5,6 +5,8 @@
 #include <cuda_runtime.h>
 #include <vector>
 #include "components/Config.h"
+#include "settings.h"
+
 
 namespace eic {
 
@@ -12,7 +14,7 @@ namespace eic {
 namespace {
 
     __device__
-    void renderCircle (float *s_canvas, const unsigned int width, const unsigned int height, float *g_shape_desc)
+    void renderCircle (int *s_canvas, const unsigned int width, const unsigned int height, int *g_shape_desc)
     {
         // Circle has the following representation
         // [0] = ShapeType::CIRCLE
@@ -54,13 +56,13 @@ namespace {
 // //////////////////////////////////////////////////////////////////////////////////////////////////////// //
 
 __global__
-void populationFitness (__uint8_t *g_target, unsigned int width, unsigned int height, float *g_population,
+void populationFitness (__uint8_t *g_target, unsigned int width, unsigned int height, int *g_population,
                         unsigned int population_size, unsigned int chromozome_length, float *g_out_fitness,
-                        float * g_canvas)
+                        int * g_canvas)
 {
 //    int tid = blockIdx.x*blockDim.x + threadIdx.x;
 
-    extern __shared__ float s_canvas[];  // width x height x 3 channels
+    extern __shared__ int s_canvas[];  // width x height x 3 channels
     // Clear the whole canvas - set to 0
     for (int i = threadIdx.x; i < width*height; i += blockDim.x)
     {
@@ -75,8 +77,8 @@ void populationFitness (__uint8_t *g_target, unsigned int width, unsigned int he
     unsigned int ch_id = blockIdx.x;
 
     // Plot each shape in the chromozome
-    float *g_chromozome = g_population + ch_id*(chromozome_length*DESC_LEN+1);
-    float *g_shape_desc = g_chromozome + 1;
+    int *g_chromozome = g_population + ch_id*(chromozome_length*DESC_LEN+1);
+    int *g_shape_desc = g_chromozome + 1;
     for (int i = 0; i < chromozome_length; ++i)
     {
         // Render each shape
