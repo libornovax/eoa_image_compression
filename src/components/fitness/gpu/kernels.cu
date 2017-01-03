@@ -88,7 +88,7 @@ namespace {
             x += bb_tl_x; y += bb_tl_y;
 
             // Check if this point is inside of the circle
-            if ((x-center_x)*(x-center_x) + (y-center_y)*(y-center_y) < radius_sq)
+            if ((x-center_x)*(x-center_x) + (y-center_y)*(y-center_y) <= radius_sq)
             {
                 int pixel_idx = 3*canvas_width*y + 3*x;
                 s_canvas[pixel_idx + 0] = alpha_inv*s_canvas[pixel_idx + 0] + r;

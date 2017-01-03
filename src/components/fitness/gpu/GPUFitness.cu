@@ -40,9 +40,9 @@ void computeFitnessGPU (const std::vector<std::shared_ptr<Chromozome>> &chromozo
         }
 
         // Write all shapes
-        for (int j = chromozome_length-1; j > 0; --j)
+        for (int j = 0; j < chromozome_length; j++)
         {
-            int population_shape_idx = population_idx + 5 + j*DESC_LEN;
+            int population_shape_idx = population_idx + 5 + (chromozome_length-j-1)*DESC_LEN;
             chromozomes[i]->operator[](j)->writeDescription(&(population[population_shape_idx]));
         }
     }
@@ -85,7 +85,7 @@ void computeFitnessGPU (const std::vector<std::shared_ptr<Chromozome>> &chromozo
 
     canvas.convertTo(canvas, CV_8UC3);
     cv::cvtColor(canvas, canvas, CV_RGB2BGR);
-    cv::imwrite("gpu_render.png", canvas);
+    cv::imwrite("render_gpu.png", canvas);
 
     float out_fitness[population_size];
     CHECK_ERROR(cudaMemcpy(out_fitness, g_out_fitness, population_size*sizeof(float), cudaMemcpyDeviceToHost));
