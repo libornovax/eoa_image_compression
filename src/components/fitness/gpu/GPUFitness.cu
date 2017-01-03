@@ -40,7 +40,7 @@ void computeFitnessGPU (const std::vector<std::shared_ptr<Chromozome>> &chromozo
         }
 
         // Write all shapes
-        for (int j = chromozome_length; j > 0; --j)
+        for (int j = chromozome_length-1; j > 0; --j)
         {
             int population_shape_idx = population_idx + 5 + j*DESC_LEN;
             chromozomes[i]->operator[](j)->writeDescription(&(population[population_shape_idx]));
