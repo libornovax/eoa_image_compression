@@ -46,22 +46,51 @@ namespace {
     }
 
 
+    /**
+     * @brief Renders a transparent circle or its part onto the given canvas
+     * @param s_canvas Canvas of size CANVAS_DIMENSION
+     * @param canvas_width Width of the canvas in pixels
+     * @param canvas_height Height of the canvas in pixels
+     * @param r Red channel multiplied already by alpha
+     * @param g Green channel multiplied already by alpha
+     * @param b Blue channel multiplied already by alpha
+     * @param alpha_inv 1-alpha (to avoid the subtraction)
+     * @param center_x X coordinate of the circle with respect to canvas
+     * @param center_y Y coordinate of the circle with respect to canvas
+     * @param radius Radius of the circle
+     */
     __device__
     void renderCircle (int *s_canvas, const int canvas_width, const int canvas_height, const int r,
                        const int g, const int b, const float alpha_inv, const int center_x,
                        const int center_y, const int radius)
     {
-        // cv::Mat is organized in the h x w x 3 (01c) manner - we want to have the same
+        // The circle is rendered as follows - a bounding box around the circle is determined and for each
+        // pixel inside of the bounding box we determine whether it is inside of the circle or not. If yes,
+        // then the color is set accordingly
+
         int diameter = 2 * radius;
         int radius_sq = radius * radius;
-        int tl_x   = center_x - radius;
-        int tl_y   = center_y - radius;
 
-        for (int i = threadIdx.x; i < diameter*diameter; i += blockDim.x)
+        // Coordinates of the top left and bottom right corner of the bounding box
+        int tl_x = center_x - radius;
+        int tl_y = center_y - radius;
+        int br_x = center_x + radius;
+        int br_y = center_y + radius;
+
+        // Determine the bounding box inside the canvas
+        int bb_tl_x = max(0, tl_x);
+        int bb_tl_y = max(0, tl_y);
+        int bb_br_x = min(canvas_width, br_x);
+        int bb_br_y = min(canvas_height, br_y);
+        int bb_width = bb_br_x-bb_tl_x;
+        int bb_height = bb_br_y-bb_tl_y;
+
+
+        for (int i = threadIdx.x; i < bb_width*bb_height; i += blockDim.x)
         {
-            int y = int(i / diameter);
-            int x = (i - (y * diameter));
-            x += tl_x; y += tl_y;
+            int y = int(i / bb_width);
+            int x = (i - (y * bb_width));
+            x += bb_tl_x; y += bb_tl_y;
 
             if ((x-center_x)*(x-center_x) + (y-center_y)*(y-center_y) < radius_sq &&  // Point inside circle
                     x >= 0 && y >= 0 && x < canvas_width && y < canvas_height)        // Image bounds
@@ -128,7 +157,8 @@ void populationFitness (__uint8_t *g_target, unsigned int width, unsigned int he
 {
 //    int tid = blockIdx.x*blockDim.x + threadIdx.x;
 
-    extern __shared__ int s_canvas[];  // size is SHARED_MEM_SIZE
+    // cv::Mat is organized in the h x w x 3 (01c) manner - we want to have the same
+    extern __shared__ int s_canvas[];  // size is SHARED_MEM_SIZE (h x w x 3 channels)
 
 
 
