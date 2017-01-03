@@ -20,6 +20,9 @@ namespace {
     __device__
     void clearCanvas (int *s_canvas)
     {
+        // Make sure we do not delete anything before we are done processing it (this actually happened to me)
+        __syncthreads();
+
         // Number of elements to be processed per thread
         int nept = ceil(float(CANVAS_DIMENSION*CANVAS_DIMENSION) / blockDim.x);
 
@@ -99,42 +102,6 @@ namespace {
             g_shape_desc += DESC_LEN;
         }
     }
-
-
-//    __device__
-//    void renderCircle (int *s_canvas, const unsigned int width, const unsigned int height, int *g_shape_desc)
-//    {
-//        // Circle has the following representation
-//        // [0] = ShapeType::CIRCLE
-//        // [1] = R
-//        // [2] = G
-//        // [3] = B
-//        // [4] = alpha
-//        // [5] = center.x
-//        // [6] = center.y
-//        // [7] = radius
-
-//        // cv::Mat is organized in the h x w x 3 (01c) manner - we want to have the same
-//        int radius = g_shape_desc[7];
-//        int diameter = 2 * radius;
-//        int tl_x   = g_shape_desc[5] - radius;
-//        int tl_y   = g_shape_desc[6] - radius;
-
-//        for (int i = threadIdx.x; i < diameter*diameter; i += blockDim.x)
-//        {
-//            int y = int(i / diameter);
-//            int x = (i - (y * diameter));
-//            x += tl_x; y += tl_y;
-
-//            // Check the image bounds
-//            if (x >= 0 && y >= 0 && x < width && y < height)
-//            {
-//                s_canvas[3*width*y + 3*x + 0] = g_shape_desc[1]; // R
-//                s_canvas[3*width*y + 3*x + 1] = g_shape_desc[2]; // G
-//                s_canvas[3*width*y + 3*x + 2] = g_shape_desc[3]; // B
-//            }
-//        }
-//    }
 
 }
 
