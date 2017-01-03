@@ -40,7 +40,7 @@ void computeFitnessGPU (const std::vector<std::shared_ptr<Chromozome>> &chromozo
         }
 
         // Write all shapes
-        for (int j = 0; j < chromozome_length; ++j)
+        for (int j = chromozome_length; j > 0; --j)
         {
             int population_shape_idx = population_idx + 5 + j*DESC_LEN;
             chromozomes[i]->operator[](j)->writeDescription(&(population[population_shape_idx]));
@@ -49,18 +49,18 @@ void computeFitnessGPU (const std::vector<std::shared_ptr<Chromozome>> &chromozo
 
     // Copy the population description to GPU
     int *g_population; cudaMalloc((void**)&g_population, description_length*sizeof(int));
-    cudaMemcpy(g_population, population.data(), description_length*sizeof(int), cudaMemcpyHostToDevice);
+    CHECK_ERROR(cudaMemcpy(g_population, population.data(), description_length*sizeof(int), cudaMemcpyHostToDevice));
 
 
     // Copy the target to GPU
     cv::Mat target = chromozomes[0]->getTarget()->blurred_image;
     int target_size = 3*target.rows*target.cols;
     uchar *g_target; cudaMalloc((void**)&g_target, target_size*sizeof(uchar));
-    cudaMemcpy(g_target, target.ptr<uchar>(), target_size*sizeof(uchar), cudaMemcpyHostToDevice);
+    CHECK_ERROR(cudaMemcpy(g_target, target.ptr<uchar>(), target_size*sizeof(uchar), cudaMemcpyHostToDevice));
     // Copy the weights to GPU
     cv::Mat weights = chromozomes[0]->getTarget()->weights;
     float *g_weights; cudaMalloc((void**)&g_weights, target_size*sizeof(float));
-    cudaMemcpy(g_weights, weights.ptr<float>(), target_size*sizeof(float), cudaMemcpyHostToDevice);
+    CHECK_ERROR(cudaMemcpy(g_weights, weights.ptr<float>(), target_size*sizeof(float), cudaMemcpyHostToDevice));
 
     // Allocate memory for output fitness values
     float *g_out_fitness; cudaMalloc((void**)&g_out_fitness, population_size*sizeof(float));
@@ -79,9 +79,9 @@ void computeFitnessGPU (const std::vector<std::shared_ptr<Chromozome>> &chromozo
 
 
     cv::Mat canvas(target.size(), CV_32SC3);
-    cudaMemcpy(canvas.ptr<int>(), g_canvas, target_size*sizeof(int), cudaMemcpyDeviceToHost);
+    CHECK_ERROR(cudaMemcpy(canvas.ptr<int>(), g_canvas, target_size*sizeof(int), cudaMemcpyDeviceToHost));
 
-//    std::cout << canvas << std::endl;
+    std::cout << canvas << std::endl;
 
     canvas.convertTo(canvas, CV_8UC3);
     cv::cvtColor(canvas, canvas, CV_RGB2BGR);
