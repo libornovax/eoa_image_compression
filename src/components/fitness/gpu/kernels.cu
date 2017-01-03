@@ -26,13 +26,15 @@ namespace {
 
         // cv::Mat is organized in the h x w x 3 (01c) manner - we want to have the same
         int radius = g_shape_desc[7];
+        int diameter = 2 * radius;
         int tl_x   = g_shape_desc[5] - radius;
         int tl_y   = g_shape_desc[6] - radius;
 
-        for (int i = threadIdx.x; i < 4*radius*radius; i += blockDim.x)
+        for (int i = threadIdx.x; i < diameter*diameter; i += blockDim.x)
         {
-            int x = tl_x + i / width;
-            int y = tl_y - radius + i - (x * width);
+            int y = int(i / diameter);
+            int x = (i - (y * diameter));
+            x += tl_x; y += tl_y;
 
             // Check the image bounds
             if (x >= 0 && y >= 0 && x < width && y < height)
@@ -54,12 +56,20 @@ namespace {
 __global__
 void populationFitness (__uint8_t *g_target, unsigned int width, unsigned int height, float *g_population,
                         unsigned int population_size, unsigned int chromozome_length, float *g_out_fitness,
-                        float * s_canvas)
+                        float * g_canvas)
 {
 //    int tid = blockIdx.x*blockDim.x + threadIdx.x;
 
-//    extern __shared__ float s_canvas[];  // width x height x 3 channels
-
+    extern __shared__ float s_canvas[];  // width x height x 3 channels
+    // Clear the whole canvas - set to 0
+    for (int i = threadIdx.x; i < width*height; i += blockDim.x)
+    {
+        int row = i / width;
+        int col = i - row*width;
+        s_canvas[3*row*width + 3*col + 0] = 0;
+        s_canvas[3*row*width + 3*col + 1] = 0;
+        s_canvas[3*row*width + 3*col + 2] = 0;
+    }
 
     // Chromozome id that is being rendered is given by the block id
     unsigned int ch_id = blockIdx.x;
@@ -82,6 +92,15 @@ void populationFitness (__uint8_t *g_target, unsigned int width, unsigned int he
 
     // Compute fitness
 
+
+    for (int i = threadIdx.x; i < width*height; i += blockDim.x)
+    {
+        int row = i / width;
+        int col = i - row*width;
+        g_canvas[3*row*width + 3*col + 0] = s_canvas[3*row*width + 3*col + 0];
+        g_canvas[3*row*width + 3*col + 1] = s_canvas[3*row*width + 3*col + 1];
+        g_canvas[3*row*width + 3*col + 2] = s_canvas[3*row*width + 3*col + 2];
+    }
 }
 
 
