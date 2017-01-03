@@ -59,8 +59,8 @@ void computeFitnessGPU (const std::vector<std::shared_ptr<Chromozome>> &chromozo
     CHECK_ERROR(cudaMemcpy(g_target, target.ptr<uchar>(), target_size*sizeof(uchar), cudaMemcpyHostToDevice));
     // Copy the weights to GPU
     cv::Mat weights = chromozomes[0]->getTarget()->weights;
-    float *g_weights; cudaMalloc((void**)&g_weights, target_size*sizeof(float));
-    CHECK_ERROR(cudaMemcpy(g_weights, weights.ptr<float>(), target_size*sizeof(float), cudaMemcpyHostToDevice));
+    float *g_weights; cudaMalloc((void**)&g_weights, target_size/3*sizeof(float));
+    CHECK_ERROR(cudaMemcpy(g_weights, weights.ptr<float>(), target_size/3*sizeof(float), cudaMemcpyHostToDevice));
 
     // Allocate memory for output fitness values
     float *g_out_fitness; cudaMalloc((void**)&g_out_fitness, population_size*sizeof(float));
