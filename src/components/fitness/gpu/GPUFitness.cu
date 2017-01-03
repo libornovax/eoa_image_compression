@@ -13,26 +13,73 @@ namespace eic {
 
 void computeFitnessGPU (const std::vector<std::shared_ptr<Chromozome>> &chromozomes, bool write_channels)
 {
-    uchar* g_target; cudaMalloc((void**)&g_target, 10*sizeof(uchar));
-//    cudaMemcpy(g_seq_in_out, seq.data(), seq.size()*sizeof(float), cudaMemcpyHostToDevice);
+    // CAREFUL! For this fitness computation to work each chromozome must have the same length and
+    // the same target!
 
-    float* g_out_fitness; cudaMalloc((void**)&g_out_fitness, 10*sizeof(float));
+    assert(chromozomes.size() > 0);
 
-    int population[] = { 1/*roi*/, 0, 0, 100, 100/*/roi*/,
-                         1, 255, 120, 160, 30, 600, 350, 200, 0, 0,
-                         1, 255, 120, 160, 30, 400, 350, 100, 0, 0,
-                         1,  86, 181, 235, 30, 450,  50, 150, 0, 0 };
-    int* g_population; cudaMalloc((void**)&g_population, 35*sizeof(int));
-    cudaMemcpy(g_population, population, 11*sizeof(int), cudaMemcpyHostToDevice);
+    // Create population description from the chromozome list - each chromozome is encoded into an array
+    // of integers
+    int population_size    = chromozomes.size();
+    int chromozome_length  = chromozomes[0]->size();
+    int description_length = population_size * (5 + chromozome_length*DESC_LEN);  // The 5 is for fitness ROI
 
-    int* g_canvas; cudaMalloc((void**)&g_canvas, 1000*600*3*sizeof(int));
+    std::vector<int> population(description_length, 0);
+    for (int i = 0; i < population_size; ++i)
+    {
+        int population_idx = i * (5 + chromozome_length*DESC_LEN);
 
+        if (chromozomes[i]->_roi_active)
+        {
+            // Write and activate the ROI for this chromozome
+            population[population_idx] = 1;
+            population[population_idx + 1] = chromozomes[i]->_roi.x;
+            population[population_idx + 2] = chromozomes[i]->_roi.y;
+            population[population_idx + 3] = chromozomes[i]->_roi.width;
+            population[population_idx + 4] = chromozomes[i]->_roi.height;
+        }
+
+        // Write all shapes
+        for (int j = 0; j < chromozome_length; ++j)
+        {
+            int population_shape_idx = population_idx + 5 + j*DESC_LEN;
+            chromozomes[i]->operator[](j)->writeDescription(&(population[population_shape_idx]));
+        }
+    }
+
+    // Copy the population description to GPU
+    int *g_population; cudaMalloc((void**)&g_population, description_length*sizeof(int));
+    cudaMemcpy(g_population, population.data(), description_length*sizeof(int), cudaMemcpyHostToDevice);
+
+
+    // Copy the target to GPU
+    cv::Mat target = chromozomes[0]->getTarget()->blurred_image;
+    int target_size = 3*target.rows*target.cols;
+    uchar *g_target; cudaMalloc((void**)&g_target, target_size*sizeof(uchar));
+    cudaMemcpy(g_target, target.ptr<uchar>(), target_size*sizeof(uchar), cudaMemcpyHostToDevice);
+    // Copy the weights to GPU
+    cv::Mat weights = chromozomes[0]->getTarget()->weights;
+    float *g_weights; cudaMalloc((void**)&g_weights, target_size*sizeof(float));
+    cudaMemcpy(g_weights, weights.ptr<float>(), target_size*sizeof(float), cudaMemcpyHostToDevice);
+
+    // Allocate memory for output fitness values
+    float *g_out_fitness; cudaMalloc((void**)&g_out_fitness, population_size*sizeof(float));
+
+
+    int* g_canvas; cudaMalloc((void**)&g_canvas, target_size*sizeof(int));
 
     // Each rendering can run only on one multiprocessor!!! Because of the shared memory
-    populationFitness<<< 1, 64, SHARED_MEM_SIZE >>>(g_target, 1000, 600, g_population, 1, 3, g_out_fitness, g_canvas);
+    int num_blocks = population_size;
+    int threads_per_block = 64;
+    populationFitness<<< 1, threads_per_block, SHARED_MEM_SIZE >>>(g_target, g_weights, target.cols,
+                                                                            target.rows, g_population, 0,
+                                                                            population_size,
+                                                                            chromozome_length, g_out_fitness,
+                                                                            g_canvas);
 
-    cv::Mat canvas(600, 1000, CV_32SC3);
-    cudaMemcpy(canvas.ptr<int>(), g_canvas, 1000*600*3*sizeof(int), cudaMemcpyDeviceToHost);
+
+    cv::Mat canvas(target.size(), CV_32SC3);
+    cudaMemcpy(canvas.ptr<int>(), g_canvas, target_size*sizeof(int), cudaMemcpyDeviceToHost);
 
 //    std::cout << canvas << std::endl;
 

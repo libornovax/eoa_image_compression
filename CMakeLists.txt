@@ -46,8 +46,8 @@ file ( GLOB MY_HEADERS src/*.h
                        src/algorithms/*.h
                        src/algorithms/entities/*.h
                        src/components/fitness/*.h
-                       src/components/fitness/cpu/*.h
-                       src/components/fitness/gpu/*.h )
+                       src/components/fitness/cpu/*.h )
+file ( GLOB CU_HEADERS src/components/fitness/gpu/*.h )
 file ( GLOB MY_SOURCES src/*.cpp
                        src/shapes/*.cpp
                        src/components/*.cpp
@@ -88,11 +88,11 @@ target_link_libraries ( compress_average
 
 cuda_add_executable ( compress_gpu
     ${MY_HEADERS}
+    ${CU_HEADERS}
     ${MY_SOURCES}
     ${CU_SOURCES}
+    OPTIONS -DUSE_GPU
 )
-
-target_compile_definitions ( compress_gpu PUBLIC "-DUSE_GPU" )
 
 target_link_libraries ( compress_gpu
     ${OpenCV_LIBS}
@@ -104,11 +104,11 @@ target_link_libraries ( compress_gpu
 
 cuda_add_executable ( compress_average_gpu
     ${MY_HEADERS}
+    ${CU_HEADERS}
     ${MY_SOURCES}
     ${CU_SOURCES}
+    OPTIONS -DRENDER_AVERAGE -DUSE_GPU
 )
-
-target_compile_definitions ( compress_average_gpu PUBLIC "-DRENDER_AVERAGE -DUSE_GPU" )
 
 target_link_libraries ( compress_average_gpu
     ${OpenCV_LIBS}

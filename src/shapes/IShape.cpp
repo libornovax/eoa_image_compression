@@ -57,12 +57,12 @@ SizeGroup IShape::getSizeGroup () const
 
 
 #ifdef USE_GPU
-void IShape::writeDescription (float *desc_array) const
+void IShape::writeDescription (int *desc_array) const
 {
-    desc_array[1] = float(this->_r);
-    desc_array[2] = float(this->_g);
-    desc_array[3] = float(this->_b);
-    desc_array[4] = float(this->_a);
+    desc_array[1] = this->_r;
+    desc_array[2] = this->_g;
+    desc_array[3] = this->_b;
+    desc_array[4] = this->_a;
 }
 #endif
 

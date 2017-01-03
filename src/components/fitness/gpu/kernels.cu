@@ -146,9 +146,9 @@ namespace {
 // //////////////////////////////////////////////////////////////////////////////////////////////////////// //
 
 __global__
-void populationFitness (__uint8_t *g_target, unsigned int width, unsigned int height, int *g_population,
-                        unsigned int population_size, unsigned int chromozome_length, float *g_out_fitness,
-                        int * g_canvas)
+void populationFitness (__uint8_t *g_target, float *g_weights, int width, int height, int *g_population,
+                        int offset, int population_size, int chromozome_length,
+                        float *g_out_fitness, int *g_canvas)
 {
 //    int tid = blockIdx.x*blockDim.x + threadIdx.x;
 
@@ -158,7 +158,7 @@ void populationFitness (__uint8_t *g_target, unsigned int width, unsigned int he
 
 
     // Chromozome id that is being rendered is given by the block id
-    unsigned int ch_id = blockIdx.x;
+    unsigned int ch_id = offset + blockIdx.x;
 
     // Plot each shape in the chromozome
     int *g_chromozome = g_population + ch_id*(chromozome_length*DESC_LEN+5);
@@ -183,6 +183,7 @@ void populationFitness (__uint8_t *g_target, unsigned int width, unsigned int he
             int cell_height = br_y-tl_y;
 
             clearCanvas(s_canvas);
+
             renderCell(s_canvas, cell_width, cell_height, tl_x, tl_y, g_shape_desc, chromozome_length);
 
             // Copy the rendered part to the output
@@ -196,35 +197,6 @@ void populationFitness (__uint8_t *g_target, unsigned int width, unsigned int he
             }
         }
     }
-
-
-
-
-
-//    for (int i = 0; i < chromozome_length; ++i)
-//    {
-//        // Render each shape
-//        if (ShapeType(g_shape_desc[0]) == ShapeType::CIRCLE)
-//        {
-//            renderCircle(s_canvas, width, height, g_shape_desc);
-//        }
-
-//        __syncthreads();
-
-//        g_shape_desc += DESC_LEN;
-//    }
-
-    // Compute fitness
-
-
-//    for (int i = threadIdx.x; i < width*height; i += blockDim.x)
-//    {
-//        int row = i / width;
-//        int col = i - row*width;
-//        g_canvas[3*row*width + 3*col + 0] = s_canvas[3*row*width + 3*col + 0];
-//        g_canvas[3*row*width + 3*col + 1] = s_canvas[3*row*width + 3*col + 1];
-//        g_canvas[3*row*width + 3*col + 2] = s_canvas[3*row*width + 3*col + 2];
-//    }
 }
 
 

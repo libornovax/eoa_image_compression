@@ -44,7 +44,7 @@ public:
     virtual cv::Point getCenter () const override final;
 
 #ifdef USE_GPU
-    virtual void writeDescription (float *desc_array) const override final;
+    virtual void writeDescription (int *desc_array) const override final;
 #endif
 
     /**

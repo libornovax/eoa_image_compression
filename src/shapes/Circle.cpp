@@ -97,13 +97,13 @@ cv::Point Circle::getCenter() const
 
 
 #ifdef USE_GPU
-void Circle::writeDescription (float *desc_array) const
+void Circle::writeDescription (int *desc_array) const
 {
-    desc_array[0] = float(ShapeType::CIRCLE);
+    desc_array[0] = int(ShapeType::CIRCLE);
     IShape::writeDescription(desc_array);  // RGBa
-    desc_array[5] = float(this->_center.x);
-    desc_array[6] = float(this->_center.y);
-    desc_array[7] = float(this->_radius);
+    desc_array[5] = this->_center.x;
+    desc_array[6] = this->_center.y;
+    desc_array[7] = this->_radius;
 }
 #endif
 
