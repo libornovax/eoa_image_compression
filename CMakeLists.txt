@@ -94,6 +94,8 @@ cuda_add_executable ( compress_gpu
     OPTIONS -DUSE_GPU
 )
 
+target_compile_definitions ( compress_gpu PUBLIC "-DUSE_GPU" )
+
 target_link_libraries ( compress_gpu
     ${OpenCV_LIBS}
     yaml-cpp
@@ -109,6 +111,8 @@ cuda_add_executable ( compress_average_gpu
     ${CU_SOURCES}
     OPTIONS -DRENDER_AVERAGE -DUSE_GPU
 )
+
+target_compile_definitions ( compress_average_gpu PUBLIC "-DRENDER_AVERAGE -DUSE_GPU" )
 
 target_link_libraries ( compress_average_gpu
     ${OpenCV_LIBS}
