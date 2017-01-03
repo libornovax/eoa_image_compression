@@ -18,18 +18,18 @@ void computeFitnessGPU (const std::vector<std::shared_ptr<Chromozome>> &chromozo
 
     float* g_out_fitness; cudaMalloc((void**)&g_out_fitness, 10*sizeof(float));
 
-    int population[] = { 1/*roi*/, 1, 255, 120, 160, 30, 25, 35, 10 };
+    int population[] = { 1/*roi*/, 1, 255, 120, 160, 30, 60, 35, 10 };
     int* g_population; cudaMalloc((void**)&g_population, 11*sizeof(int));
     cudaMemcpy(g_population, population, 11*sizeof(int), cudaMemcpyHostToDevice);
 
-    int* g_canvas; cudaMalloc((void**)&g_canvas, 60*60*3*sizeof(int));
+    int* g_canvas; cudaMalloc((void**)&g_canvas, 100*60*3*sizeof(int));
 
 
     // Each rendering can run only on one multiprocessor!!! Because of the shared memory
-    populationFitness<<< 1, 64, SHARED_MEM_SIZE >>>(g_target, 60, 60, g_population, 1, 1, g_out_fitness, g_canvas);
+    populationFitness<<< 1, 64, SHARED_MEM_SIZE >>>(g_target, 100, 60, g_population, 1, 1, g_out_fitness, g_canvas);
 
-    cv::Mat canvas(60, 60, CV_32SC3);
-    cudaMemcpy(canvas.ptr<int>(), g_canvas, 60*60*3*sizeof(int), cudaMemcpyDeviceToHost);
+    cv::Mat canvas(60, 100, CV_32SC3);
+    cudaMemcpy(canvas.ptr<int>(), g_canvas, 100*60*3*sizeof(int), cudaMemcpyDeviceToHost);
 
     std::cout << canvas << std::endl;
 
