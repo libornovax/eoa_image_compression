@@ -17,7 +17,7 @@
 // SHARED MEMORY SIZE
 // Limit for CUDA capability >= 2.0 is 48kB
 // One pixel: 3*sizeof(int) = 12B, Dimensions of rendering window 60x60 = 3600, 3600*12 = 43200
-#define CELL_DIMENSION 60
+#define CANVAS_DIMENSION 60
 #define SHARED_MEM_SIZE 43200
 
 

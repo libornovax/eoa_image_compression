@@ -13,6 +13,31 @@ namespace eic {
 
 namespace {
 
+    /**
+     * @brief Set the whole canvas to the initialization value before rendering
+     * @param s_canvas
+     */
+    __device__
+    void clearCanvas (int *s_canvas)
+    {
+        // Number of elements to be processed per thread
+        int nept = ceil(CANVAS_DIMENSION*CANVAS_DIMENSION / blockDim.x);
+
+        for (int i = threadIdx.x*nept; i < threadIdx.x*nept+nept; ++i)
+        {
+#ifdef RENDER_AVERAGE
+            s_canvas[3*i + 0] = 1;
+            s_canvas[3*i + 1] = 1;
+            s_canvas[3*i + 2] = 1;
+#else
+            s_canvas[3*i + 0] = 0;
+            s_canvas[3*i + 1] = 0;
+            s_canvas[3*i + 2] = 0;
+#endif
+        }
+    }
+
+
     __device__
     void renderCircle (int *s_canvas, const unsigned int width, const unsigned int height, int *g_shape_desc)
     {
@@ -62,16 +87,9 @@ void populationFitness (__uint8_t *g_target, unsigned int width, unsigned int he
 {
 //    int tid = blockIdx.x*blockDim.x + threadIdx.x;
 
-    extern __shared__ int s_canvas[];  // width x height x 3 channels
-    // Clear the whole canvas - set to 0
-    for (int i = threadIdx.x; i < width*height; i += blockDim.x)
-    {
-        int row = i / width;
-        int col = i - row*width;
-        s_canvas[3*row*width + 3*col + 0] = 0;
-        s_canvas[3*row*width + 3*col + 1] = 0;
-        s_canvas[3*row*width + 3*col + 2] = 0;
-    }
+    extern __shared__ int s_canvas[];  // size is SHARED_MEM_SIZE
+    // Initialize the whole canvas
+    clearCanvas(s_canvas);
 
     // Chromozome id that is being rendered is given by the block id
     unsigned int ch_id = blockIdx.x;
