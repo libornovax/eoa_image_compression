@@ -161,8 +161,8 @@ void populationFitness (__uint8_t *g_target, unsigned int width, unsigned int he
     unsigned int ch_id = blockIdx.x;
 
     // Plot each shape in the chromozome
-    int *g_chromozome = g_population + ch_id*(chromozome_length*DESC_LEN+1);
-    int *g_shape_desc = g_chromozome + 1;
+    int *g_chromozome = g_population + ch_id*(chromozome_length*DESC_LEN+5);
+    int *g_shape_desc = g_chromozome + 5;
 
 
     // Split the rendering to a grid of cells of size CANVAS_DIMENSION x CANVAS_DIMENSION
