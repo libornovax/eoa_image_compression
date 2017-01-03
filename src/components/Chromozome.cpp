@@ -2,7 +2,6 @@
 
 #include <opencv2/imgproc/imgproc.hpp>
 #include <opencv2/highgui/highgui.hpp>
-#include "Renderer.h"
 #include "Config.h"
 #include "shapes/Circle.h"
 #include "RGen.h"

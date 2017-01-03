@@ -2,7 +2,7 @@
 
 #include <chrono>
 #include <opencv2/imgproc/imgproc.hpp>
-#include "Chromozome.h"
+#include "components/Chromozome.h"
 #include "shapes/Circle.h"
 
 
