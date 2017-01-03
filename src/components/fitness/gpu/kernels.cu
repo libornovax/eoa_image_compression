@@ -48,7 +48,7 @@ namespace {
 
     __device__
     void renderCircle (int *s_canvas, const int canvas_width, const int canvas_height, const int r,
-                       const int g, const int b, const int alpha, const int center_x, const int center_y,
+                       const int g, const int b, const float alpha_inv, const int center_x, const int center_y,
                        const int radius)
     {
         // cv::Mat is organized in the h x w x 3 (01c) manner - we want to have the same
@@ -65,16 +65,17 @@ namespace {
             // Check the image bounds
             if (x >= 0 && y >= 0 && x < canvas_width && y < canvas_height)
             {
-                s_canvas[3*canvas_width*y + 3*x + 0] = r; // R
-                s_canvas[3*canvas_width*y + 3*x + 1] = g; // G
-                s_canvas[3*canvas_width*y + 3*x + 2] = b; // B
+                int pixel_idx = 3*canvas_width*y + 3*x;
+                s_canvas[pixel_idx + 0] = alpha_inv*s_canvas[pixel_idx + 0] + r;
+                s_canvas[pixel_idx + 1] = alpha_inv*s_canvas[pixel_idx + 1] + g;
+                s_canvas[pixel_idx + 2] = alpha_inv*s_canvas[pixel_idx + 2] + b;
             }
         }
     }
 
 
     __device__
-    void renderCell (int *s_canvas, const int width, const int height, const int tl_x, const int tl_y, int *g_shape_desc, const int chromozome_length)
+    void renderCell (int *s_canvas, const int width, const int height, const int tl_x, const int tl_y, const int *g_shape_desc, const int chromozome_length)
     {
         for (int i = 0; i < chromozome_length; ++i)
         {
@@ -91,12 +92,21 @@ namespace {
                 // [6] = center.y
                 // [7] = radius
 
-                // TODO: Check if circle intersects current cell
+                // Check if circle intersects current cell - in that case render it
+                if (g_shape_desc[5]+g_shape_desc[7] >= tl_x &&
+                        g_shape_desc[5]-g_shape_desc[7] < tl_x+width &&
+                        g_shape_desc[6]+g_shape_desc[7] >= tl_y &&
+                        g_shape_desc[6]-g_shape_desc[7] < tl_y+height)
+                {
+                    float alpha = float(g_shape_desc[4]) / 100;
 
-                renderCircle(s_canvas, width, height, g_shape_desc[1], g_shape_desc[2], g_shape_desc[3],
-                             g_shape_desc[4], g_shape_desc[5]-tl_x, g_shape_desc[6]-tl_y, g_shape_desc[7]);
+                    renderCircle(s_canvas, width, height,
+                                 alpha*g_shape_desc[1], alpha*g_shape_desc[2], alpha*g_shape_desc[3],
+                                 1-alpha, g_shape_desc[5]-tl_x, g_shape_desc[6]-tl_y, g_shape_desc[7]);
+                }
             }
 
+            // Wait for the whole shape to be rendered
             __syncthreads();
 
             g_shape_desc += DESC_LEN;
