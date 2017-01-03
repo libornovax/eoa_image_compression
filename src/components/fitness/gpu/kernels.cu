@@ -138,7 +138,35 @@ namespace {
         }
     }
 
+
+    __device__
+    void fitnessCell (int *s_canvas, const int canvas_width, const int canvas_height, const int tl_x, const int tl_y, const __uint8_t *g_target, const float *g_weights, const int target_width, const int target_height, float *s_fitness)
+    {
+        // TODO: Add ROI!
+
+        float my_fitness = 0.0f;
+
+        for (int i = threadIdx.x; i < canvas_width*canvas_height; i += blockDim.x)
+        {
+            // Get the x and y coordinates of the pixel in the canvas and target
+            int y = int(i / canvas_width);
+            int x = (i - (y * canvas_width));
+            int tx = x + tl_x;
+            int ty = y + tl_y;
+
+            float diff = (s_canvas[y*3*canvas_width+3*x]-g_target[ty*3*target_width+3*tx]);
+            my_fitness += g_weights[ty*target_width+tx] * diff*diff;
+            diff = (s_canvas[y*3*canvas_width+3*x+1]-g_target[ty*3*target_width+3*tx+1]);
+            my_fitness += g_weights[ty*target_width+tx] * diff*diff;
+            diff = (s_canvas[y*3*canvas_width+3*x+2]-g_target[ty*3*target_width+3*tx+2]);
+            my_fitness += g_weights[ty*target_width+tx] * diff*diff;
+        }
+
+        atomicAdd(s_fitness, my_fitness);
+    }
+
 }
+
 
 
 // //////////////////////////////////////////////////////////////////////////////////////////////////////// //
@@ -150,11 +178,12 @@ void populationFitness (__uint8_t *g_target, float *g_weights, int width, int he
                         int offset, int population_size, int chromozome_length,
                         float *g_out_fitness, int *g_canvas)
 {
-//    int tid = blockIdx.x*blockDim.x + threadIdx.x;
-
     // cv::Mat is organized in the h x w x 3 (01c) manner - we want to have the same
     extern __shared__ int s_canvas[];  // size is SHARED_MEM_SIZE (h x w x 3 channels)
 
+    // Variable for keeping the intermediate fitness value
+    __shared__ float s_fitness[1];
+    if (threadIdx.x == 0) s_fitness[0] = 0.0f;
 
 
     // Chromozome id that is being rendered is given by the block id
@@ -186,6 +215,9 @@ void populationFitness (__uint8_t *g_target, float *g_weights, int width, int he
 
             renderCell(s_canvas, cell_width, cell_height, tl_x, tl_y, g_shape_desc, chromozome_length);
 
+            // Compute fitness on this part of the image
+            fitnessCell(s_canvas, cell_width, cell_height, tl_x, tl_y, g_target, g_weights, width, height, s_fitness);
+
             // Copy the rendered part to the output
             for (int k = threadIdx.x; k < cell_width*cell_height; k += blockDim.x)
             {
@@ -196,6 +228,15 @@ void populationFitness (__uint8_t *g_target, float *g_weights, int width, int he
                 g_canvas[3*(tl_y+row)*width + 3*(tl_x+col) + 2] = s_canvas[3*row*cell_width + 3*col + 2];
             }
         }
+    }
+
+
+    __syncthreads();
+
+    // Copy the final fitness value to the output
+    if (threadIdx.x == 0)
+    {
+        g_out_fitness[ch_id] = s_fitness[0];
     }
 }
 

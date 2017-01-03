@@ -81,13 +81,19 @@ void computeFitnessGPU (const std::vector<std::shared_ptr<Chromozome>> &chromozo
     cv::Mat canvas(target.size(), CV_32SC3);
     CHECK_ERROR(cudaMemcpy(canvas.ptr<int>(), g_canvas, target_size*sizeof(int), cudaMemcpyDeviceToHost));
 
-    std::cout << canvas << std::endl;
+//    std::cout << canvas << std::endl;
 
     canvas.convertTo(canvas, CV_8UC3);
     cv::cvtColor(canvas, canvas, CV_RGB2BGR);
     cv::imwrite("render.png", canvas);
 
+    float out_fitness[population_size];
+    CHECK_ERROR(cudaMemcpy(out_fitness, g_out_fitness, population_size*sizeof(float), cudaMemcpyDeviceToHost));
+
+    std::cout << "Fitness: " << out_fitness[0] << std::endl;
+
     cudaFree(g_target);
+    cudaFree(g_weights);
     cudaFree(g_out_fitness);
     cudaFree(g_population);
     cudaFree(g_canvas);
