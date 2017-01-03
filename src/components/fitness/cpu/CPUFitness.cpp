@@ -74,11 +74,17 @@ void computeFitnessCPU (const std::shared_ptr<Chromozome> &ch, bool write_channe
                                      channels[i], ch->_target->weights);
     }
 
+    cv::Mat image;
+    cv::merge(channels, image);
+    cv::cvtColor(image, image, CV_RGB2BGR);
+    cv::imwrite("render_cpu.png", image);
+
     if (write_channels)
     {
         // Copy also the rendered channels
         ch->_channels = channels;
     }
+    std::cout << "CPU fitness: " << fitness << std::endl;
     ch->_fitness = fitness;
     ch->_dirty = false;
 }
