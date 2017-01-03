@@ -21,6 +21,11 @@
 #define SHARED_MEM_SIZE 43200
 
 
+// Because we cannot determine the number of cuda cores from device propertied, we need to set this by hand.
+// This number should equal num_cuda_cores/num_multiprocessors
+// For GeForce GTX Titan X we get 3072 / 24 = 128
+#define THREADS_PER_BLOCK 128
+
 
 #endif // SETTINGS_H
 

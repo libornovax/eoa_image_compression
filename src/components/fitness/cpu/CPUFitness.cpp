@@ -44,6 +44,11 @@ void computeFitnessCPU (const std::vector<std::shared_ptr<Chromozome>> &chromozo
     {
         computeFitnessCPU(ch, write_channels);
     }
+
+    for (int i = 0; i < chromozomes.size(); ++i)
+    {
+        std::cout << "[" << i << "] CPU fitness: " << chromozomes[i]->_fitness << std::endl;
+    }
 }
 
 

@@ -218,15 +218,15 @@ void populationFitness (__uint8_t *g_target, float *g_weights, int width, int he
             // Compute fitness on this part of the image
             fitnessCell(s_canvas, cell_width, cell_height, tl_x, tl_y, g_target, g_weights, width, height, s_fitness);
 
-            // Copy the rendered part to the output
-            for (int k = threadIdx.x; k < cell_width*cell_height; k += blockDim.x)
-            {
-                int row = k / cell_width;
-                int col = k - row*cell_width;
-                g_canvas[3*(tl_y+row)*width + 3*(tl_x+col) + 0] = s_canvas[3*row*cell_width + 3*col + 0];
-                g_canvas[3*(tl_y+row)*width + 3*(tl_x+col) + 1] = s_canvas[3*row*cell_width + 3*col + 1];
-                g_canvas[3*(tl_y+row)*width + 3*(tl_x+col) + 2] = s_canvas[3*row*cell_width + 3*col + 2];
-            }
+//            // Copy the rendered part to the output
+//            for (int k = threadIdx.x; k < cell_width*cell_height; k += blockDim.x)
+//            {
+//                int row = k / cell_width;
+//                int col = k - row*cell_width;
+//                g_canvas[3*(tl_y+row)*width + 3*(tl_x+col) + 0] = s_canvas[3*row*cell_width + 3*col + 0];
+//                g_canvas[3*(tl_y+row)*width + 3*(tl_x+col) + 1] = s_canvas[3*row*cell_width + 3*col + 1];
+//                g_canvas[3*(tl_y+row)*width + 3*(tl_x+col) + 2] = s_canvas[3*row*cell_width + 3*col + 2];
+//            }
         }
     }
 
