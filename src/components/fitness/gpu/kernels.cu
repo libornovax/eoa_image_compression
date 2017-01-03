@@ -68,32 +68,27 @@ namespace {
         // pixel inside of the bounding box we determine whether it is inside of the circle or not. If yes,
         // then the color is set accordingly
 
-        int diameter = 2 * radius;
-        int radius_sq = radius * radius;
+        const int radius_sq = radius * radius;
 
-        // Coordinates of the top left and bottom right corner of the bounding box
-        int tl_x = center_x - radius;
-        int tl_y = center_y - radius;
-        int br_x = center_x + radius;
-        int br_y = center_y + radius;
+        // Determine the bounding box coordinates inside the current canvas
+        const int bb_tl_x = max(0, center_x - radius);
+        const int bb_tl_y = max(0, center_y - radius);
+        const int bb_br_x = min(canvas_width, center_x + radius);
+        const int bb_br_y = min(canvas_height, center_y + radius);
 
-        // Determine the bounding box inside the canvas
-        int bb_tl_x = max(0, tl_x);
-        int bb_tl_y = max(0, tl_y);
-        int bb_br_x = min(canvas_width, br_x);
-        int bb_br_y = min(canvas_height, br_y);
-        int bb_width = bb_br_x-bb_tl_x;
-        int bb_height = bb_br_y-bb_tl_y;
+        const int bb_width = bb_br_x-bb_tl_x;
+        const int bb_height = bb_br_y-bb_tl_y;
 
-
+        // Traverse the bounding box and render the pixels, which are inside of the circle
         for (int i = threadIdx.x; i < bb_width*bb_height; i += blockDim.x)
         {
+            // Get the x and y coordinates of the pixel in the canvas
             int y = int(i / bb_width);
             int x = (i - (y * bb_width));
             x += bb_tl_x; y += bb_tl_y;
 
-            if ((x-center_x)*(x-center_x) + (y-center_y)*(y-center_y) < radius_sq &&  // Point inside circle
-                    x >= 0 && y >= 0 && x < canvas_width && y < canvas_height)        // Image bounds
+            // Check if this point is inside of the circle
+            if ((x-center_x)*(x-center_x) + (y-center_y)*(y-center_y) < radius_sq)
             {
                 int pixel_idx = 3*canvas_width*y + 3*x;
                 s_canvas[pixel_idx + 0] = alpha_inv*s_canvas[pixel_idx + 0] + r;
