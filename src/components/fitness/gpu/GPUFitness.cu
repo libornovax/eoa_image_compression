@@ -31,7 +31,7 @@ void computeFitnessGPU (const std::vector<std::shared_ptr<Chromozome>> &chromozo
     cv::Mat canvas(600, 1000, CV_32SC3);
     cudaMemcpy(canvas.ptr<int>(), g_canvas, 1000*600*3*sizeof(int), cudaMemcpyDeviceToHost);
 
-    std::cout << canvas << std::endl;
+//    std::cout << canvas << std::endl;
 
     canvas.convertTo(canvas, CV_8UC3);
     cv::cvtColor(canvas, canvas, CV_RGB2BGR);

@@ -48,11 +48,12 @@ namespace {
 
     __device__
     void renderCircle (int *s_canvas, const int canvas_width, const int canvas_height, const int r,
-                       const int g, const int b, const float alpha_inv, const int center_x, const int center_y,
-                       const int radius)
+                       const int g, const int b, const float alpha_inv, const int center_x,
+                       const int center_y, const int radius)
     {
         // cv::Mat is organized in the h x w x 3 (01c) manner - we want to have the same
         int diameter = 2 * radius;
+        int radius_sq = radius * radius;
         int tl_x   = center_x - radius;
         int tl_y   = center_y - radius;
 
@@ -62,8 +63,8 @@ namespace {
             int x = (i - (y * diameter));
             x += tl_x; y += tl_y;
 
-            // Check the image bounds
-            if (x >= 0 && y >= 0 && x < canvas_width && y < canvas_height)
+            if ((x-center_x)*(x-center_x) + (y-center_y)*(y-center_y) < radius_sq &&  // Point inside circle
+                    x >= 0 && y >= 0 && x < canvas_width && y < canvas_height)        // Image bounds
             {
                 int pixel_idx = 3*canvas_width*y + 3*x;
                 s_canvas[pixel_idx + 0] = alpha_inv*s_canvas[pixel_idx + 0] + r;
