@@ -7,6 +7,7 @@
 #define GPUFITNESS_H
 
 #include <vector>
+#include <memory>
 
 
 class Chromozome;

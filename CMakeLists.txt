@@ -15,15 +15,16 @@ set ( CMAKE_CXX_FLAGS "-g -std=c++11 -O3" )
 #set ( CMAKE_CXX_FLAGS "-g -std=c++11" )
 set ( DEBUG_MODE ON )
 
-find_package ( CUDA )
-list ( APPEND CUDA_NVCC_FLAGS "-gencode arch=compute_35,code=sm_35;-std=c++11;-DVERBOSE" )
+find_package ( CUDA REQUIRED )
+list ( APPEND CUDA_NVCC_FLAGS "-gencode arch=compute_52,code=sm_52;-std=c++11;-DVERBOSE" ) # Nvidia GeForce GTX Titan X
+#list ( APPEND CUDA_NVCC_FLAGS "-gencode arch=compute_35,code=sm_35;-std=c++11;-DVERBOSE" ) # Nvidia Tesla K40
 set ( CUDA_PROPAGATE_HOST_FLAGS OFF )
 
 
 #add_definitions ( -DMEASURE_TIME )
 
 
-FIND_PACKAGE ( OpenCV 3.1 REQUIRED )
+FIND_PACKAGE ( OpenCV REQUIRED )
 IF ( OpenCV_FOUND )
     MESSAGE ( STATUS "OpenCV was found." )
 ELSE ( OpenCV_FOUND )
@@ -32,7 +33,12 @@ ENDIF ( OpenCV_FOUND )
 
 
 INCLUDE_DIRECTORIES ( src
-                      ${OpenCV_INCLUDE_DIR} )
+                      ${OpenCV_INCLUDE_DIR}
+                      ${PROJECT_SOURCE_DIR}/thirdparty/yaml-cpp-0.5.1/include )
+
+LINK_DIRECTORIES (
+    ${PROJECT_SOURCE_DIR}/thirdparty/yaml-cpp-0.5.1/build
+)
 
 file ( GLOB MY_HEADERS src/*.h
                        src/shapes/*.h

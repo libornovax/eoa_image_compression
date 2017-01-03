@@ -7,6 +7,7 @@
 #define CPUFITNESS_H
 
 #include <vector>
+#include <memory>
 
 
 class Chromozome;
