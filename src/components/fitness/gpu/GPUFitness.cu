@@ -13,14 +13,24 @@ namespace eic {
 namespace {
 
     /**
-     * @brief Determines the number of multiprocessors of the current GPU
+     * @brief Determines the number of concurrent blocks we can launch on the GPU
      */
-    int getNumMultiprocessors ()
+    int getNumConcurentBlocks ()
     {
-        cudaDeviceProp device_properties;
-        CHECK_ERROR(cudaGetDeviceProperties(&device_properties, 0));
+        static int num_concurrent_blocks = 0;
 
-        return device_properties.multiProcessorCount;
+        if (num_concurrent_blocks == 0)
+        {
+            // The number of block we can launch at once is restricted by the memory requirements of the block
+            cudaDeviceProp device_properties;
+            CHECK_ERROR(cudaGetDeviceProperties(&device_properties, 0));
+
+            // One multiprocessor sometimes has enough memory to accomodate multiple blocks
+            int mp_blocks = device_properties.sharedMemPerMultiprocessor / device_properties.sharedMemPerBlock;
+            num_concurrent_blocks = device_properties.multiProcessorCount * mp_blocks;
+        }
+
+        return num_concurrent_blocks;
     }
 
 
@@ -79,13 +89,13 @@ namespace {
         // -- FITNESS COMPUTING KERNEL -- //
         // Each rendering can run only on one multiprocessor because of the shared memory size - we have
         // to split the whole population into several kernel calls
-        int num_multiprocessors = getNumMultiprocessors();
-        int num_iterations = ceil(double(population_size) / num_multiprocessors);
+        int num_concurrent_blocks = getNumConcurentBlocks();
+        int num_iterations = ceil(double(population_size) / num_concurrent_blocks);
 
         for (int i = 0; i < num_iterations; ++i)
         {
-            int offset     = i * num_multiprocessors;
-            int end        = min(offset+num_multiprocessors, population_size);
+            int offset     = i * num_concurrent_blocks;
+            int end        = min(offset+num_concurrent_blocks, population_size);
             int num_blocks = end - offset;
 
             populationFitness<<< num_blocks, THREADS_PER_BLOCK, CANVAS_MEM_SIZE >>>(
@@ -119,13 +129,13 @@ namespace {
         // -- FITNESS COMPUTING KERNEL -- //
         // Each rendering can run only on one multiprocessor because of the shared memory size - we have
         // to split the whole population into several kernel calls
-        int num_multiprocessors = getNumMultiprocessors();
-        int num_iterations = ceil(double(population_size) / num_multiprocessors);
+        int num_concurrent_blocks = getNumConcurentBlocks();
+        int num_iterations = ceil(double(population_size) / num_concurrent_blocks);
 
         for (int i = 0; i < num_iterations; ++i)
         {
-            int offset     = i * num_multiprocessors;
-            int end        = min(offset+num_multiprocessors, population_size);
+            int offset     = i * num_concurrent_blocks;
+            int end        = min(offset+num_concurrent_blocks, population_size);
             int num_blocks = end - offset;
 
             populationFitness<<< num_blocks, THREADS_PER_BLOCK, CANVAS_MEM_SIZE >>>(
@@ -249,6 +259,8 @@ bool initializeGPU ()
         std::cout << "Max grid size:                  " << device_properties.maxGridSize[0] << std::endl;
         std::cout << "Shared mem per block:           " << device_properties.sharedMemPerBlock << std::endl;
         std::cout << "Shared mem per multiprocessor:  " << device_properties.sharedMemPerMultiprocessor << std::endl;
+        std::cout << "--------------------------------------------------------------" << std::endl;
+        std::cout << "Num concurreng blocks:          " << getNumConcurentBlocks() << std::endl;
         std::cout << "--------------------------------------------------------------" << std::endl;
 
         return true;

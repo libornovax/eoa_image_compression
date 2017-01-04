@@ -33,9 +33,7 @@
 #endif
 
 
-// Because we cannot determine the number of cuda cores from device propertied, we need to set this by hand.
-// This number should equal num_cuda_cores/num_multiprocessors
-// For GeForce GTX Titan X we get 3072 / 24 = 128
+// Because we cannot determine the number of cuda cores from device properties, we need to set this by hand.
 #define THREADS_PER_BLOCK 128
 
 
