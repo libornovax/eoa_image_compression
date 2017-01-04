@@ -25,6 +25,43 @@ namespace {
 
 
     /**
+     * @brief Create the description vector of the whole population (will be then copied to GPU)
+     * @param chromozomes Vector of chromozomes in the population
+     * @param description_length The total length of the population description vector
+     * @param chromozome_length Number of shapes in one chromozome
+     */
+    std::vector<int> createPopulationDescription (const std::vector<std::shared_ptr<Chromozome>> &chromozomes, int description_length, int chromozome_length)
+    {
+        std::vector<int> population(description_length, 0);
+
+        for (int i = 0; i < chromozomes.size(); ++i)
+        {
+            // Index of the first element of this chromozome in the whole population vector
+            int population_idx = i * (5 + chromozome_length*DESC_LEN);
+
+            if (chromozomes[i]->roiActive())
+            {
+                // Write and activate the ROI for this chromozome
+                population[population_idx] = 1;
+                population[population_idx + 1] = chromozomes[i]->getROI().x;
+                population[population_idx + 2] = chromozomes[i]->getROI().y;
+                population[population_idx + 3] = chromozomes[i]->getROI().width;
+                population[population_idx + 4] = chromozomes[i]->getROI().height;
+            }
+
+            // Write all shapes
+            for (int j = 0; j < chromozome_length; j++)
+            {
+                int population_shape_idx = population_idx + 5 + (chromozome_length-j-1)*DESC_LEN;
+                chromozomes[i]->operator[](j)->writeDescription(&(population[population_shape_idx]));
+            }
+        }
+
+        return population;
+    }
+
+
+    /**
      * @brief Launches a fitness computing kernel, which also copies out the rendered images
      * This kernel is slower because it must copy all images out of the GPU, but we have no choice if we want
      * to display the rendered images. Therefore this function should not be called too often
@@ -105,84 +142,65 @@ void computeFitnessGPU (const std::vector<std::shared_ptr<Chromozome>> &chromozo
 
     assert(chromozomes.size() > 0);
 
-    // Create population description from the chromozome list - each chromozome is encoded into an array
-    // of integers
     int population_size    = chromozomes.size();
     int chromozome_length  = chromozomes[0]->size();
     int description_length = population_size * (5 + chromozome_length*DESC_LEN);  // The 5 is for fitness ROI
 
-    std::vector<int> population(description_length, 0);
-    for (int i = 0; i < population_size; ++i)
-    {
-        int population_idx = i * (5 + chromozome_length*DESC_LEN);
 
-        if (chromozomes[i]->_roi_active)
-        {
-            // Write and activate the ROI for this chromozome
-            population[population_idx] = 1;
-            population[population_idx + 1] = chromozomes[i]->_roi.x;
-            population[population_idx + 2] = chromozomes[i]->_roi.y;
-            population[population_idx + 3] = chromozomes[i]->_roi.width;
-            population[population_idx + 4] = chromozomes[i]->_roi.height;
-        }
-
-        // Write all shapes
-        for (int j = 0; j < chromozome_length; j++)
-        {
-            int population_shape_idx = population_idx + 5 + (chromozome_length-j-1)*DESC_LEN;
-            chromozomes[i]->operator[](j)->writeDescription(&(population[population_shape_idx]));
-        }
-    }
-
+    // Create population description from the chromozome list
+    // Each chromozome is encoded into an array of integers, which are appended together to create one long
+    // population description vector, which can then be easily transfered to GPU
+    std::vector<int> population = createPopulationDescription(chromozomes, description_length,
+                                                              chromozome_length);
     // Copy the population description to GPU
     int *g_population; cudaMalloc((void**)&g_population, description_length*sizeof(int));
-    CHECK_ERROR(cudaMemcpy(g_population, population.data(), description_length*sizeof(int), cudaMemcpyHostToDevice));
-
+    CHECK_ERROR(cudaMemcpy(g_population, population.data(), description_length*sizeof(int),
+                           cudaMemcpyHostToDevice));
 
     // Copy the target to GPU
-    cv::Mat target = chromozomes[0]->getTarget()->blurred_image;
+    cv::Mat target  = chromozomes[0]->getTarget()->blurred_image;
     int target_size = 3*target.rows*target.cols;
     uchar *g_target; cudaMalloc((void**)&g_target, target_size*sizeof(uchar));
     CHECK_ERROR(cudaMemcpy(g_target, target.ptr<uchar>(), target_size*sizeof(uchar), cudaMemcpyHostToDevice));
+
     // Copy the weights to GPU
-    cv::Mat weights = chromozomes[0]->getTarget()->weights;
     float *g_weights; cudaMalloc((void**)&g_weights, target_size/3*sizeof(float));
-    CHECK_ERROR(cudaMemcpy(g_weights, weights.ptr<float>(), target_size/3*sizeof(float), cudaMemcpyHostToDevice));
+    CHECK_ERROR(cudaMemcpy(g_weights, chromozomes[0]->getTarget()->weights.ptr<float>(),
+                           target_size/3*sizeof(float), cudaMemcpyHostToDevice));
 
     // Allocate memory for output fitness values
     float *g_out_fitness; cudaMalloc((void**)&g_out_fitness, population_size*sizeof(float));
 
 
-
+    // -- LAUNCH THE CUDA KERNELS -- //
     if (write_channels)
     {
-        computeAndWriteChannels(population_size, chromozome_length, target, g_target, g_weights, g_population, g_out_fitness, chromozomes);
+        // Launch a kernel, which copies out the rendered images
+        computeAndWriteChannels(population_size, chromozome_length, target, g_target, g_weights, g_population,
+                                g_out_fitness, chromozomes);
     }
     else
     {
-        computeOnly(population_size, chromozome_length, target, g_target, g_weights, g_population, g_out_fitness);
+        // Launch a kernel, which only computes fitness
+        computeOnly(population_size, chromozome_length, target, g_target, g_weights, g_population,
+                    g_out_fitness);
     }
 
 
-
-
+    // Copy the fitness values from the GPU
     float out_fitness[population_size];
     CHECK_ERROR(cudaMemcpy(out_fitness, g_out_fitness, population_size*sizeof(float), cudaMemcpyDeviceToHost));
-
+    // Copy the fitness values into the chromozomes
     for (int i = 0; i < population_size; ++i)
     {
         chromozomes[i]->_fitness = out_fitness[i];
         chromozomes[i]->_dirty = false;
-//        std::cout << "[" << i << "] GPU fitness: " << out_fitness[i] << std::endl;
     }
-
 
     cudaFree(g_target);
     cudaFree(g_weights);
     cudaFree(g_out_fitness);
     cudaFree(g_population);
-
-//    exit(EXIT_SUCCESS);
 }
 
 

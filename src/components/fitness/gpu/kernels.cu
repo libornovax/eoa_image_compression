@@ -99,23 +99,28 @@ namespace {
     }
 
 
+    /**
+     * @brief Renderes all shapes into the given grid cell
+     * @param s_canvas Canvas of the grid cell
+     * @param width Width of the grid cell
+     * @param height Height of the grid cell
+     * @param tl_x Top left x coordinate of the grid cell in the whole image
+     * @param tl_y Top left y coordinate of the grid cell in the whole image
+     * @param g_shape_desc Pointer to the description of shapes in the chromozome
+     * @param chromozome_length Length of the chromozome
+     */
     __device__
-    void renderCell (int *s_canvas, const int width, const int height, const int tl_x, const int tl_y, const int *g_shape_desc, const int chromozome_length)
+    void renderCell (int *s_canvas, const int width, const int height, const int tl_x, const int tl_y,
+                     const int *g_shape_desc, const int chromozome_length)
     {
         for (int i = 0; i < chromozome_length; ++i)
         {
             // Render each shape
             if (ShapeType(g_shape_desc[0]) == ShapeType::CIRCLE)
             {
-                // Circle has the following representation
-                // [0] = ShapeType::CIRCLE
-                // [1] = R
-                // [2] = G
-                // [3] = B
-                // [4] = alpha
-                // [5] = center.x
-                // [6] = center.y
-                // [7] = radius
+                // Circle has the following representation:
+                // [0] = ShapeType::CIRCLE, [1] = R, [2] = G, [3] = B, [4] = alpha, [5] = center.x,
+                // [6] = center.y, [7] = radius
 
                 // Check if circle intersects current cell - in that case render it
                 if (g_shape_desc[5]+g_shape_desc[7] >= tl_x &&
@@ -139,8 +144,23 @@ namespace {
     }
 
 
+    /**
+     * @brief Compute fitness function sum in the current (given) grid cell
+     * @param s_canvas Canvas of the current grid cell with plotted shapes
+     * @param cell_width
+     * @param cell_height
+     * @param tl_x
+     * @param tl_y
+     * @param g_target Target image matrix
+     * @param g_weights Matrix of weights
+     * @param target_width
+     * @param target_height
+     * @param s_fitness Output variable for the fitness
+     */
     __device__
-    void fitnessCell (int *s_canvas, const int cell_width, const int cell_height, const int tl_x, const int tl_y, const __uint8_t *g_target, const float *g_weights, const int target_width, const int target_height, float *s_fitness)
+    void fitnessCell (int *s_canvas, const int cell_width, const int cell_height, const int tl_x,
+                      const int tl_y, const __uint8_t *g_target, const float *g_weights,
+                      const int target_width, const int target_height, float *s_fitness)
     {
         // TODO: Add ROI!
 
@@ -166,13 +186,27 @@ namespace {
     }
 
 
+    /**
+     * @brief Copies the current (given) cell to the output canvas
+     * @param s_canvas Current rendered grid cell
+     * @param cell_width
+     * @param cell_height
+     * @param tl_x
+     * @param tl_y
+     * @param g_canvas Output canvas
+     * @param target_width Width of the output canvas (same as target width)
+     * @param target_height Height of the output canvas (same as target height)
+     */
     __device__
-    void copyCell (int *s_canvas, const int cell_width, const int cell_height, const int tl_x, const int tl_y, int *g_canvas, const int target_width, const int target_height)
+    void copyCell (int *s_canvas, const int cell_width, const int cell_height, const int tl_x, const int tl_y,
+                   int *g_canvas, const int target_width, const int target_height)
     {
         for (int i = threadIdx.x; i < cell_width*cell_height; i += blockDim.x)
         {
             int row = i / cell_width;
             int col = i - row*cell_width;
+
+            // Copy RGB channels on the pixel
             g_canvas[3*(tl_y+row)*target_width + 3*(tl_x+col) + 0] = s_canvas[3*row*cell_width + 3*col + 0];
             g_canvas[3*(tl_y+row)*target_width + 3*(tl_x+col) + 1] = s_canvas[3*row*cell_width + 3*col + 1];
             g_canvas[3*(tl_y+row)*target_width + 3*(tl_x+col) + 2] = s_canvas[3*row*cell_width + 3*col + 2];
@@ -205,14 +239,17 @@ void populationFitness (__uint8_t *g_target, float *g_weights, int width, int he
     // Chromozome id that is being rendered is given by the block id
     unsigned int ch_id = offset + blockIdx.x;
 
-    // Plot each shape in the chromozome
+    // Get the pointer to the memory, where the chromozome that is being processed by this block is
     int *g_chromozome = g_population + ch_id*(chromozome_length*DESC_LEN+5);
-    int *g_shape_desc = g_chromozome + 5;
+    int *g_shape_desc = g_chromozome + 5;  // First 5 numbers are ROI
 
+    // Get the pointer to the canvas, which corresponds to the currently rendered chromozome
     int *g_canvas = g_all_canvas + (3*width*height * ch_id);
 
+
     // Split the rendering to a grid of cells of size CANVAS_DIMENSION x CANVAS_DIMENSION
-    // Because the whole image does not fit into the shared memory we have to render it in pieces
+    // We have to do this because the whole image does not fit into the shared memory - we have to render it
+    // in pieces, which can fit
     int cols = ceil(float(width) / CANVAS_DIMENSION);
     int rows = ceil(float(height) / CANVAS_DIMENSION);
 
@@ -223,18 +260,20 @@ void populationFitness (__uint8_t *g_target, float *g_weights, int width, int he
             // Render this cell
             int tl_x = j*CANVAS_DIMENSION;
             int tl_y = i*CANVAS_DIMENSION;
-            int br_x = min(tl_x+CANVAS_DIMENSION, width);
-            int br_y = min(tl_y+CANVAS_DIMENSION, height);
-            int cell_width = br_x-tl_x;
-            int cell_height = br_y-tl_y;
+            int cell_width = min(tl_x+CANVAS_DIMENSION, width)-tl_x;
+            int cell_height = min(tl_y+CANVAS_DIMENSION, height)-tl_y;
 
+            // Set the canvas to 0 - remove previously rendered shapes
             clearCanvas(s_canvas);
 
+            // Render this cell into the canvas
             renderCell(s_canvas, cell_width, cell_height, tl_x, tl_y, g_shape_desc, chromozome_length);
 
             // Compute fitness on this part of the image
-            fitnessCell(s_canvas, cell_width, cell_height, tl_x, tl_y, g_target, g_weights, width, height, s_fitness);
+            fitnessCell(s_canvas, cell_width, cell_height, tl_x, tl_y, g_target, g_weights, width, height,
+                        s_fitness);
 
+            // Copy the rendered image to the global memory - the output
             copyCell(s_canvas, cell_width, cell_height, tl_x, tl_y, g_canvas, width, height);
         }
     }
@@ -268,12 +307,14 @@ void populationFitness (__uint8_t *g_target, float *g_weights, int width, int he
     // Chromozome id that is being rendered is given by the block id
     unsigned int ch_id = offset + blockIdx.x;
 
-    // Plot each shape in the chromozome
+    // Get the pointer to the memory, where the chromozome that is being processed by this block is
     int *g_chromozome = g_population + ch_id*(chromozome_length*DESC_LEN+5);
-    int *g_shape_desc = g_chromozome + 5;
+    int *g_shape_desc = g_chromozome + 5;  // First 5 numbers are ROI
+
 
     // Split the rendering to a grid of cells of size CANVAS_DIMENSION x CANVAS_DIMENSION
-    // Because the whole image does not fit into the shared memory we have to render it in pieces
+    // We have to do this because the whole image does not fit into the shared memory - we have to render it
+    // in pieces, which can fit
     int cols = ceil(float(width) / CANVAS_DIMENSION);
     int rows = ceil(float(height) / CANVAS_DIMENSION);
 
@@ -282,19 +323,20 @@ void populationFitness (__uint8_t *g_target, float *g_weights, int width, int he
         for (int j = 0; j < cols; ++j)
         {
             // Render this cell
-            int tl_x = j*CANVAS_DIMENSION;
-            int tl_y = i*CANVAS_DIMENSION;
-            int br_x = min(tl_x+CANVAS_DIMENSION, width);
-            int br_y = min(tl_y+CANVAS_DIMENSION, height);
-            int cell_width = br_x-tl_x;
-            int cell_height = br_y-tl_y;
+            int tl_x = j*CANVAS_DIMENSION;  // top left x
+            int tl_y = i*CANVAS_DIMENSION;  // top left y
+            int cell_width = min(tl_x+CANVAS_DIMENSION, width)-tl_x;
+            int cell_height = min(tl_y+CANVAS_DIMENSION, height)-tl_y;
 
+            // Set the canvas to 0 - remove previously rendered shapes
             clearCanvas(s_canvas);
 
+            // Render this cell into the canvas
             renderCell(s_canvas, cell_width, cell_height, tl_x, tl_y, g_shape_desc, chromozome_length);
 
             // Compute fitness on this part of the image
-            fitnessCell(s_canvas, cell_width, cell_height, tl_x, tl_y, g_target, g_weights, width, height, s_fitness);
+            fitnessCell(s_canvas, cell_width, cell_height, tl_x, tl_y, g_target, g_weights, width, height,
+                        s_fitness);
         }
     }
 

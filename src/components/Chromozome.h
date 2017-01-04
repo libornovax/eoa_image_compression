@@ -100,6 +100,8 @@ public:
     cv::Mat asImage ();
 
     std::vector<cv::Mat>& channels ();
+    bool roiActive () const;
+    const cv::Rect& getROI() const;
 
     /**
      * @brief Accept method from the visitor design pattern

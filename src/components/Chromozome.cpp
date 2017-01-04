@@ -182,6 +182,18 @@ std::vector<cv::Mat>& Chromozome::channels ()
 }
 
 
+bool Chromozome::roiActive () const
+{
+    return this->_roi_active;
+}
+
+
+const cv::Rect& Chromozome::getROI () const
+{
+    return this->_roi;
+}
+
+
 void Chromozome::accept (IVisitor &visitor)
 {
     visitor.visit(*this);
