@@ -15,8 +15,12 @@ namespace eic {
 __global__
 void populationFitness (__uint8_t *g_target, float *g_weights, int width, int height, int *g_population,
                         int offset, int population_size, int chromozome_length,
-                        float *g_out_fitness, int *g_canvas);
+                        float *g_out_fitness, int *g_all_canvas);
 
+__global__
+void populationFitness (__uint8_t *g_target, float *g_weights, int width, int height, int *g_population,
+                        int offset, int population_size, int chromozome_length,
+                        float *g_out_fitness);
 
 }
 

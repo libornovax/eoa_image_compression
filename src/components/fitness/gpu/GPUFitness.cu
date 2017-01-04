@@ -81,7 +81,7 @@ void computeFitnessGPU (const std::vector<std::shared_ptr<Chromozome>> &chromozo
     float *g_out_fitness; cudaMalloc((void**)&g_out_fitness, population_size*sizeof(float));
 
 
-    int* g_canvas; cudaMalloc((void**)&g_canvas, target_size*sizeof(int));
+    int* g_all_canvas; cudaMalloc((void**)&g_all_canvas, population_size*target_size*sizeof(int));
 
 
     // Each rendering can run only on one multiprocessor!!! Because of the shared memory - we have to split
@@ -96,20 +96,13 @@ void computeFitnessGPU (const std::vector<std::shared_ptr<Chromozome>> &chromozo
         int num_blocks = end-offset;
         populationFitness<<< num_blocks, THREADS_PER_BLOCK, SHARED_MEM_SIZE >>>(
             g_target, g_weights, target.cols, target.rows, g_population, offset, population_size,
-            chromozome_length, g_out_fitness, g_canvas
+            chromozome_length, g_out_fitness, g_all_canvas
         );
     }
 
 
 
-//    cv::Mat canvas(target.size(), CV_32SC3);
-//    CHECK_ERROR(cudaMemcpy(canvas.ptr<int>(), g_canvas, target_size*sizeof(int), cudaMemcpyDeviceToHost));
 
-////    std::cout << canvas << std::endl;
-
-//    canvas.convertTo(canvas, CV_8UC3);
-//    cv::cvtColor(canvas, canvas, CV_RGB2BGR);
-//    cv::imwrite("render_gpu.png", canvas);
 
     float out_fitness[population_size];
     CHECK_ERROR(cudaMemcpy(out_fitness, g_out_fitness, population_size*sizeof(float), cudaMemcpyDeviceToHost));
@@ -119,6 +112,14 @@ void computeFitnessGPU (const std::vector<std::shared_ptr<Chromozome>> &chromozo
         chromozomes[i]->_fitness = out_fitness[i];
         chromozomes[i]->_dirty = false;
         std::cout << "[" << i << "] GPU fitness: " << out_fitness[i] << std::endl;
+
+        // Copy the rendered channels from the GPU
+        cv::Mat canvas(target.size(), CV_32SC3);
+        CHECK_ERROR(cudaMemcpy(canvas.ptr<int>(), g_all_canvas+i*target_size, target_size*sizeof(int), cudaMemcpyDeviceToHost));
+
+        canvas.convertTo(canvas, CV_8UC3);
+        cv::cvtColor(canvas, canvas, CV_RGB2BGR);
+        cv::imwrite(std::to_string(i) + "_render_gpu.png", canvas);
     }
 
 
@@ -126,7 +127,7 @@ void computeFitnessGPU (const std::vector<std::shared_ptr<Chromozome>> &chromozo
     cudaFree(g_weights);
     cudaFree(g_out_fitness);
     cudaFree(g_population);
-    cudaFree(g_canvas);
+    cudaFree(g_all_canvas);
 
 //    exit(EXIT_SUCCESS);
 }
