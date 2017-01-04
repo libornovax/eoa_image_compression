@@ -19,6 +19,10 @@
 #include "components/Config.h"
 #include "components/fitness/Fitness.h"
 
+int gpu_ms_total = 0;
+int cpu_ms_total = 0;
+int evals        = 0;
+
 
 void runCompression ()
 {
