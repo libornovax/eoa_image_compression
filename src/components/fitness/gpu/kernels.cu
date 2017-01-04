@@ -109,7 +109,6 @@ namespace {
         int nept = ceil(float(bb_width*bb_height) / blockDim.x);
 
         // Traverse the bounding box and render the pixels, which are inside of the circle
-//        for (int i = threadIdx.x; i < bb_width*bb_height; i += blockDim.x)
         for (int i = threadIdx.x*nept; i < threadIdx.x*nept+nept; ++i)
         {
             if (i < bb_width*bb_height)
@@ -274,7 +273,6 @@ namespace {
         // Number of elements to be processed per thread
         int nept = ceil(float(cell_width*cell_height) / blockDim.x);
 
-//        for (int i = threadIdx.x; i < cell_width*cell_height; i += blockDim.x)
         for (int i = threadIdx.x*nept; i < threadIdx.x*nept+nept; ++i)
         {
             if (i < cell_width*cell_height)

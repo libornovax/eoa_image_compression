@@ -148,6 +148,8 @@ void computeFitnessGPU (const std::vector<std::shared_ptr<Chromozome>> &chromozo
     int chromozome_length  = chromozomes[0]->size();
     int description_length = population_size * (6 + chromozome_length*DESC_LEN);  // The 6 is for fitness ROI
 
+    assert(CHROMOZOME_MEM_SIZE >= chromozome_length*DESC_LEN);
+
 
     // Create population description from the chromozome list
     // Each chromozome is encoded into an array of integers, which are appended together to create one long
