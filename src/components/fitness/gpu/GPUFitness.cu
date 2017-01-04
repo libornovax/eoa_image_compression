@@ -24,7 +24,14 @@ namespace {
     }
 
 
-    void computeAndWriteChannels (int population_size, int chromozome_length, const cv::Mat &target, uchar *g_target, float *g_weights, int *g_population, float *g_out_fitness, const std::vector<std::shared_ptr<Chromozome>> &chromozomes)
+    /**
+     * @brief Launches a fitness computing kernel, which also copies out the rendered images
+     * This kernel is slower because it must copy all images out of the GPU, but we have no choice if we want
+     * to display the rendered images. Therefore this function should not be called too often
+     */
+    void computeAndWriteChannels (int population_size, int chromozome_length, const cv::Mat &target,
+                                  uchar *g_target, float *g_weights, int *g_population, float *g_out_fitness,
+                                  const std::vector<std::shared_ptr<Chromozome>> &chromozomes)
     {
         // Allocate memory on GPU for the output images
         int target_size = 3*target.rows*target.cols;
@@ -63,6 +70,11 @@ namespace {
     }
 
 
+    /**
+     * @brief Calls a fitness computing kernel, which only computes fitness on the GPU
+     * The kernel called from here does not copy any data from the gpu and does not keep the rendered images
+     * in the GPU memory
+     */
     void computeOnly (int population_size, int chromozome_length, const cv::Mat &target, uchar *g_target, float *g_weights, int *g_population, float *g_out_fitness)
     {
         // -- FITNESS COMPUTING KERNEL -- //
