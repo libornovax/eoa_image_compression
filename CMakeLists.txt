@@ -13,7 +13,7 @@ project ( eoa_image_compression )
 set ( EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/bin )
 set ( CMAKE_CXX_FLAGS "-g -std=c++11 -O3" )
 #set ( CMAKE_CXX_FLAGS "-g -std=c++11" )
-set ( DEBUG_MODE ON )
+#set ( DEBUG_MODE ON )
 
 find_package ( CUDA REQUIRED )
 list ( APPEND CUDA_NVCC_FLAGS "-gencode arch=compute_52,code=sm_52;-std=c++11;-DVERBOSE" ) # Nvidia GeForce GTX Titan X
