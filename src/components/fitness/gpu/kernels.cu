@@ -317,7 +317,7 @@ void populationFitness (__uint8_t *g_target, float *g_weights, int width, int he
 
     // Copy the chromozome into the shared memory - we want faster access during rendering. Since we will be
     // reading the chromozome multiple times this should pay off
-    __shared__ int s_shape_desc[CHROMOZOME_MEM_SIZE];
+    __shared__ int s_shape_desc[CHROMOZOME_MEM_SIZE/sizeof(int)];
     copyChromozome(g_shape_desc, s_shape_desc, chromozome_length);
 
     // Get the pointer to the canvas, which corresponds to the currently rendered chromozome
@@ -393,7 +393,7 @@ void populationFitness (__uint8_t *g_target, float *g_weights, int width, int he
 
     // Copy the chromozome into the shared memory - we want faster access during rendering. Since we will be
     // reading the chromozome multiple times this should pay off
-    __shared__ int s_shape_desc[CHROMOZOME_MEM_SIZE];
+    __shared__ int s_shape_desc[CHROMOZOME_MEM_SIZE/sizeof(int)];
     copyChromozome(g_shape_desc, s_shape_desc, chromozome_length);
 
 

@@ -21,7 +21,7 @@ list ( APPEND CUDA_NVCC_FLAGS "-gencode arch=compute_52,code=sm_52;-std=c++11;-D
 set ( CUDA_PROPAGATE_HOST_FLAGS OFF )
 
 
-#add_definitions ( -DMEASURE_TIME )
+add_definitions ( -DMEASURE_TIME )
 
 
 FIND_PACKAGE ( OpenCV REQUIRED )
