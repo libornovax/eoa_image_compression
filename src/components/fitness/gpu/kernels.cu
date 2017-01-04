@@ -48,6 +48,25 @@ namespace {
 
 
     /**
+     * @brief Copy the whole chromozome (only the shape description part) to the shared memory
+     */
+    __device__
+    void copyChromozome (int *g_shape_desc, int *s_shape_desc, int chromozome_length)
+    {
+        // Number of elements to be processed per thread
+        int nept = ceil(float(chromozome_length*DESC_LEN) / blockDim.x);
+
+        for (int i = threadIdx.x*nept; i < threadIdx.x*nept+nept; ++i)
+        {
+            // Copy the value over
+            if (i < chromozome_length*DESC_LEN) s_shape_desc[i] = g_shape_desc[i];
+        }
+
+        __syncthreads();
+    }
+
+
+    /**
      * @brief Renders a transparent circle or its part onto the given canvas
      * @param s_canvas Canvas of size CANVAS_DIMENSION
      * @param canvas_width Width of the canvas in pixels
@@ -121,38 +140,38 @@ namespace {
      * @param height Height of the grid cell
      * @param tl_x Top left x coordinate of the grid cell in the whole image
      * @param tl_y Top left y coordinate of the grid cell in the whole image
-     * @param g_shape_desc Pointer to the description of shapes in the chromozome
+     * @param s_shape_desc Pointer to the description of shapes in the chromozome
      * @param chromozome_length Length of the chromozome
      */
     __device__
     void renderCell (int *s_canvas, const int width, const int height, const int tl_x, const int tl_y,
-                     const int *g_shape_desc, const int chromozome_length)
+                     const int *s_shape_desc, const int chromozome_length)
     {
         for (int i = 0; i < chromozome_length; ++i)
         {
             // Render each shape
-            if (ShapeType(g_shape_desc[0]) == ShapeType::CIRCLE)
+            if (ShapeType(s_shape_desc[0]) == ShapeType::CIRCLE)
             {
                 // Circle has the following representation:
                 // [0] = ShapeType::CIRCLE, [1] = R, [2] = G, [3] = B, [4] = alpha, [5] = center.x,
                 // [6] = center.y, [7] = radius
 
                 // Check if circle intersects current cell - in that case render it
-                if (g_shape_desc[5]+g_shape_desc[7] >= tl_x &&
-                        g_shape_desc[5]-g_shape_desc[7] < tl_x+width &&
-                        g_shape_desc[6]+g_shape_desc[7] >= tl_y &&
-                        g_shape_desc[6]-g_shape_desc[7] < tl_y+height)
+                if (s_shape_desc[5]+s_shape_desc[7] >= tl_x &&
+                        s_shape_desc[5]-s_shape_desc[7] < tl_x+width &&
+                        s_shape_desc[6]+s_shape_desc[7] >= tl_y &&
+                        s_shape_desc[6]-s_shape_desc[7] < tl_y+height)
                 {
-                    float alpha = float(g_shape_desc[4]) / 100;
+                    float alpha = float(s_shape_desc[4]) / 100;
 
 #ifdef RENDER_AVERAGE
                     renderCircle(s_canvas, width, height,
-                                 alpha*g_shape_desc[1], alpha*g_shape_desc[2], alpha*g_shape_desc[3],
-                                 g_shape_desc[4], g_shape_desc[5]-tl_x, g_shape_desc[6]-tl_y, g_shape_desc[7]);
+                                 alpha*s_shape_desc[1], alpha*s_shape_desc[2], alpha*s_shape_desc[3],
+                                 s_shape_desc[4], s_shape_desc[5]-tl_x, s_shape_desc[6]-tl_y, s_shape_desc[7]);
 #else
                     renderCircle(s_canvas, width, height,
-                                 alpha*g_shape_desc[1], alpha*g_shape_desc[2], alpha*g_shape_desc[3],
-                                 1-alpha, g_shape_desc[5]-tl_x, g_shape_desc[6]-tl_y, g_shape_desc[7]);
+                                 alpha*s_shape_desc[1], alpha*s_shape_desc[2], alpha*s_shape_desc[3],
+                                 1-alpha, s_shape_desc[5]-tl_x, s_shape_desc[6]-tl_y, s_shape_desc[7]);
 #endif
                 }
             }
@@ -160,7 +179,7 @@ namespace {
             // Wait for the whole shape to be rendered
             __syncthreads();
 
-            g_shape_desc += DESC_LEN;
+            s_shape_desc += DESC_LEN;
         }
     }
 
@@ -296,6 +315,11 @@ void populationFitness (__uint8_t *g_target, float *g_weights, int width, int he
     __shared__ int s_roi[6];
     if (threadIdx.x < 6) s_roi[threadIdx.x] = g_chromozome[threadIdx.x];
 
+    // Copy the chromozome into the shared memory - we want faster access during rendering. Since we will be
+    // reading the chromozome multiple times this should pay off
+    __shared__ int s_shape_desc[CHROMOZOME_MEM_SIZE];
+    copyChromozome(g_shape_desc, s_shape_desc, chromozome_length);
+
     // Get the pointer to the canvas, which corresponds to the currently rendered chromozome
     int *g_canvas = g_all_canvas + (3*width*height * ch_id);
 
@@ -320,7 +344,7 @@ void populationFitness (__uint8_t *g_target, float *g_weights, int width, int he
             clearCanvas(s_canvas);
 
             // Render this cell into the canvas
-            renderCell(s_canvas, cell_width, cell_height, tl_x, tl_y, g_shape_desc, chromozome_length);
+            renderCell(s_canvas, cell_width, cell_height, tl_x, tl_y, s_shape_desc, chromozome_length);
 
             // Compute fitness on this part of the image
             fitnessCell(s_canvas, cell_width, cell_height, tl_x, tl_y, g_target, g_weights, width, height,
@@ -367,6 +391,11 @@ void populationFitness (__uint8_t *g_target, float *g_weights, int width, int he
     __shared__ int s_roi[6];
     if (threadIdx.x < 6) s_roi[threadIdx.x] = g_chromozome[threadIdx.x];
 
+    // Copy the chromozome into the shared memory - we want faster access during rendering. Since we will be
+    // reading the chromozome multiple times this should pay off
+    __shared__ int s_shape_desc[CHROMOZOME_MEM_SIZE];
+    copyChromozome(g_shape_desc, s_shape_desc, chromozome_length);
+
 
     // Split the rendering to a grid of cells of size CANVAS_DIMENSION x CANVAS_DIMENSION
     // We have to do this because the whole image does not fit into the shared memory - we have to render it
@@ -388,7 +417,7 @@ void populationFitness (__uint8_t *g_target, float *g_weights, int width, int he
             clearCanvas(s_canvas);
 
             // Render this cell into the canvas
-            renderCell(s_canvas, cell_width, cell_height, tl_x, tl_y, g_shape_desc, chromozome_length);
+            renderCell(s_canvas, cell_width, cell_height, tl_x, tl_y, s_shape_desc, chromozome_length);
 
             // Compute fitness on this part of the image
             fitnessCell(s_canvas, cell_width, cell_height, tl_x, tl_y, g_target, g_weights, width, height,

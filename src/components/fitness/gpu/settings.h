@@ -15,16 +15,21 @@
 
 
 // SHARED MEMORY SIZE
+// Shared memory will be split between canvas and chromozome representation
 #ifdef RENDER_AVERAGE
     // Limit for CUDA capability >= 2.0 is 48kB
-    // One pixel: 4*sizeof(int) = 16B, Dimensions of rendering window 50x50 = 2500, 2500*16 = 40000
-    #define CANVAS_DIMENSION 50
-    #define SHARED_MEM_SIZE 40000
+    // One pixel: 4*sizeof(int) = 16B, Dimensions of rendering window 46x46 = 2116, 2116*16 = 33856
+    #define CANVAS_DIMENSION 46
+    #define CANVAS_MEM_SIZE 33856
+    // Chromozome of length 250 * DESC_LEN * sizeof(int) = 10000
+    #define CHROMOZOME_MEM_SIZE 10000
 #else
     // Limit for CUDA capability >= 2.0 is 48kB
-    // One pixel: 3*sizeof(int) = 12B, Dimensions of rendering window 60x60 = 3600, 3600*12 = 43200
-    #define CANVAS_DIMENSION 60
-    #define SHARED_MEM_SIZE 43200
+    // One pixel: 3*sizeof(int) = 12B, Dimensions of rendering window 55x55 = 3025, 3025*12 = 36300
+    #define CANVAS_DIMENSION 55
+    #define CANVAS_MEM_SIZE 36300
+    // Chromozome of length 250 * DESC_LEN * sizeof(int) = 10000
+    #define CHROMOZOME_MEM_SIZE 10000
 #endif
 
 

@@ -88,7 +88,7 @@ namespace {
             int end        = min(offset+num_multiprocessors, population_size);
             int num_blocks = end - offset;
 
-            populationFitness<<< num_blocks, THREADS_PER_BLOCK, SHARED_MEM_SIZE >>>(
+            populationFitness<<< num_blocks, THREADS_PER_BLOCK, CANVAS_MEM_SIZE >>>(
                 g_target, g_weights, target.cols, target.rows, g_population, offset, population_size,
                 chromozome_length, g_out_fitness, g_all_canvas
             );
@@ -128,7 +128,7 @@ namespace {
             int end        = min(offset+num_multiprocessors, population_size);
             int num_blocks = end - offset;
 
-            populationFitness<<< num_blocks, THREADS_PER_BLOCK, SHARED_MEM_SIZE >>>(
+            populationFitness<<< num_blocks, THREADS_PER_BLOCK, CANVAS_MEM_SIZE >>>(
                 g_target, g_weights, target.cols, target.rows, g_population, offset, population_size,
                 chromozome_length, g_out_fitness
             );
