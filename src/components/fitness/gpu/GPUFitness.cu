@@ -30,14 +30,15 @@ namespace {
      * @param description_length The total length of the population description vector
      * @param chromozome_length Number of shapes in one chromozome
      */
-    std::vector<int> createPopulationDescription (const std::vector<std::shared_ptr<Chromozome>> &chromozomes, int description_length, int chromozome_length)
+    std::vector<int> createPopulationDescription (const std::vector<std::shared_ptr<Chromozome>> &chromozomes,
+                                                  int description_length, int chromozome_length)
     {
         std::vector<int> population(description_length, 0);
 
         for (int i = 0; i < chromozomes.size(); ++i)
         {
             // Index of the first element of this chromozome in the whole population vector
-            int population_idx = i * (5 + chromozome_length*DESC_LEN);
+            int population_idx = i * (6 + chromozome_length*DESC_LEN);
 
             if (chromozomes[i]->roiActive())
             {
@@ -45,14 +46,15 @@ namespace {
                 population[population_idx] = 1;
                 population[population_idx + 1] = chromozomes[i]->getROI().x;
                 population[population_idx + 2] = chromozomes[i]->getROI().y;
-                population[population_idx + 3] = chromozomes[i]->getROI().width;
-                population[population_idx + 4] = chromozomes[i]->getROI().height;
+                population[population_idx + 3] = chromozomes[i]->getROI().x + chromozomes[i]->getROI().width;
+                population[population_idx + 4] = chromozomes[i]->getROI().y + chromozomes[i]->getROI().height;
+                population[population_idx + 5] = 1 + chromozomes[i]->getTarget()->image_size.area() / chromozomes[i]->getROI().area();
             }
 
             // Write all shapes
             for (int j = 0; j < chromozome_length; j++)
             {
-                int population_shape_idx = population_idx + 5 + (chromozome_length-j-1)*DESC_LEN;
+                int population_shape_idx = population_idx + 6 + (chromozome_length-j-1)*DESC_LEN;
                 chromozomes[i]->operator[](j)->writeDescription(&(population[population_shape_idx]));
             }
         }
@@ -144,7 +146,7 @@ void computeFitnessGPU (const std::vector<std::shared_ptr<Chromozome>> &chromozo
 
     int population_size    = chromozomes.size();
     int chromozome_length  = chromozomes[0]->size();
-    int description_length = population_size * (5 + chromozome_length*DESC_LEN);  // The 5 is for fitness ROI
+    int description_length = population_size * (6 + chromozome_length*DESC_LEN);  // The 6 is for fitness ROI
 
 
     // Create population description from the chromozome list

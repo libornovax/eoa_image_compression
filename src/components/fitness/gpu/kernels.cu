@@ -155,15 +155,14 @@ namespace {
      * @param g_weights Matrix of weights
      * @param target_width
      * @param target_height
+     * @param s_roi Description of the region of interest (has 5 values)
      * @param s_fitness Output variable for the fitness
      */
     __device__
     void fitnessCell (int *s_canvas, const int cell_width, const int cell_height, const int tl_x,
                       const int tl_y, const __uint8_t *g_target, const float *g_weights,
-                      const int target_width, const int target_height, float *s_fitness)
+                      const int target_width, const int target_height, int *s_roi, float *s_fitness)
     {
-        // TODO: Add ROI!
-
         float my_fitness = 0.0f;
 
         for (int i = threadIdx.x; i < cell_width*cell_height; i += blockDim.x)
@@ -174,12 +173,21 @@ namespace {
             int tx = x + tl_x;
             int ty = y + tl_y;
 
+            float weight = g_weights[ty*target_width+tx];
+
+            // Check the ROI
+            if (s_roi[0] == 1 && tx >= s_roi[1] && tx < s_roi[3] && ty >= s_roi[2] && ty < s_roi[4])
+            {
+                // Pixel inside ROI
+                weight *= s_roi[5];
+            }
+
             float diff = (s_canvas[y*3*cell_width+3*x]-g_target[ty*3*target_width+3*tx]);
-            my_fitness += g_weights[ty*target_width+tx] * diff*diff;
+            my_fitness += weight * diff*diff;
             diff = (s_canvas[y*3*cell_width+3*x+1]-g_target[ty*3*target_width+3*tx+1]);
-            my_fitness += g_weights[ty*target_width+tx] * diff*diff;
+            my_fitness += weight * diff*diff;
             diff = (s_canvas[y*3*cell_width+3*x+2]-g_target[ty*3*target_width+3*tx+2]);
-            my_fitness += g_weights[ty*target_width+tx] * diff*diff;
+            my_fitness += weight * diff*diff;
         }
 
         atomicAdd(s_fitness, my_fitness);
@@ -235,13 +243,16 @@ void populationFitness (__uint8_t *g_target, float *g_weights, int width, int he
     __shared__ float s_fitness[1];
     if (threadIdx.x == 0) s_fitness[0] = 0.0f;
 
-
     // Chromozome id that is being rendered is given by the block id
     unsigned int ch_id = offset + blockIdx.x;
 
     // Get the pointer to the memory, where the chromozome that is being processed by this block is
-    int *g_chromozome = g_population + ch_id*(chromozome_length*DESC_LEN+5);
-    int *g_shape_desc = g_chromozome + 5;  // First 5 numbers are ROI
+    int *g_chromozome = g_population + ch_id*(chromozome_length*DESC_LEN+6);
+    int *g_shape_desc = g_chromozome + 6;  // First 6 numbers are ROI
+
+    // Region of interest - we do not want to read it from the global memory all the time
+    __shared__ int s_roi[6];
+    if (threadIdx.x < 6) s_roi[threadIdx.x] = g_chromozome[threadIdx.x];
 
     // Get the pointer to the canvas, which corresponds to the currently rendered chromozome
     int *g_canvas = g_all_canvas + (3*width*height * ch_id);
@@ -271,7 +282,7 @@ void populationFitness (__uint8_t *g_target, float *g_weights, int width, int he
 
             // Compute fitness on this part of the image
             fitnessCell(s_canvas, cell_width, cell_height, tl_x, tl_y, g_target, g_weights, width, height,
-                        s_fitness);
+                        s_roi, s_fitness);
 
             // Copy the rendered image to the global memory - the output
             copyCell(s_canvas, cell_width, cell_height, tl_x, tl_y, g_canvas, width, height);
@@ -303,13 +314,16 @@ void populationFitness (__uint8_t *g_target, float *g_weights, int width, int he
     __shared__ float s_fitness[1];
     if (threadIdx.x == 0) s_fitness[0] = 0.0f;
 
-
     // Chromozome id that is being rendered is given by the block id
     unsigned int ch_id = offset + blockIdx.x;
 
     // Get the pointer to the memory, where the chromozome that is being processed by this block is
-    int *g_chromozome = g_population + ch_id*(chromozome_length*DESC_LEN+5);
-    int *g_shape_desc = g_chromozome + 5;  // First 5 numbers are ROI
+    int *g_chromozome = g_population + ch_id*(chromozome_length*DESC_LEN+6);
+    int *g_shape_desc = g_chromozome + 6;  // First 6 numbers are ROI
+
+    // Region of interest - we do not want to read it from the global memory all the time
+    __shared__ int s_roi[6];
+    if (threadIdx.x < 6) s_roi[threadIdx.x] = g_chromozome[threadIdx.x];
 
 
     // Split the rendering to a grid of cells of size CANVAS_DIMENSION x CANVAS_DIMENSION
@@ -336,7 +350,7 @@ void populationFitness (__uint8_t *g_target, float *g_weights, int width, int he
 
             // Compute fitness on this part of the image
             fitnessCell(s_canvas, cell_width, cell_height, tl_x, tl_y, g_target, g_weights, width, height,
-                        s_fitness);
+                        s_roi, s_fitness);
         }
     }
 

@@ -37,7 +37,6 @@ namespace {
 }
 
 
-//template<typename CH>
 void computeFitnessCPU (const std::vector<std::shared_ptr<Chromozome>> &chromozomes, bool write_channels)
 {
     for (const std::shared_ptr<Chromozome> &ch: chromozomes)
@@ -47,7 +46,6 @@ void computeFitnessCPU (const std::vector<std::shared_ptr<Chromozome>> &chromozo
 }
 
 
-//template<typename CH>
 void computeFitnessCPU (const std::shared_ptr<Chromozome> &ch, bool write_channels)
 {
     // Render and compute fitness
