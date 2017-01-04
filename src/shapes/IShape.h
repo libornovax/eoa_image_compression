@@ -70,6 +70,13 @@ public:
     virtual int getA () const final;
     virtual SizeGroup getSizeGroup () const final;
 
+#ifdef USE_GPU
+    /**
+     * @brief Writes a float description of the shape into the given array. Max length DESC_LEN!
+     */
+    virtual void writeDescription (int *desc_array) const;
+#endif
+
 
 protected:
 

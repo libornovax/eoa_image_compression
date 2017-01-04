@@ -17,10 +17,15 @@
 #include "algorithms/SteadyStateEA.h"
 #include "algorithms/InterleavedEA.h"
 #include "components/Config.h"
+#include "components/fitness/Fitness.h"
 
 
 void runCompression ()
 {
+#ifdef USE_GPU
+    eic::initializeGPU();
+#endif
+
     cv::Mat image         = cv::imread(eic::Config::getParams().path_image, CV_LOAD_IMAGE_COLOR);
     cv::Mat image_weights = cv::imread(eic::Config::getParams().path_image_weights, CV_LOAD_IMAGE_GRAYSCALE);
 
@@ -79,6 +84,7 @@ void runCompression ()
 
 
     // Show the final approximated image
+    eic::computeFitness(result, true);
     cv::Mat approximation = result->asImage();
 
     cv::imwrite(eic::Config::getParams().path_out + "/approximation.png", approximation);

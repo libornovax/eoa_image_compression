@@ -7,6 +7,7 @@
 #include "components/Config.h"
 #include "components/utils.h"
 #include "shapes/Circle.h"
+#include "components/fitness/Fitness.h"
 
 
 namespace eic {
@@ -28,13 +29,17 @@ std::shared_ptr<Chromozome> InterleavedEA::run ()
     // deactivate the rois
     for (auto ch: this->_population) ch->activateROI();
 
+    // ROI activation makes chromozomes dirty - we need to recompute fitness
+    computeFitness(this->_population, true);
+
+
     // Run the evolution
     for (int e = 0; e < Config::getParams().ea.num_epochs; ++e)
     {
         this->_stats.add(e, this->_best_chromozome->getFitness(), this->_worst_chromozome->getFitness(),
                          ClassicEA::_meanFitness(this->_population),ClassicEA::_stddevFitness(this->_population));
 
-        if ((e < 1000 && e % 50 == 0) || (e >= 1000 && e % 100 == 0))
+        if (e % POPULATION_SAVE_FREQUENCY == 0)
         {
             this->_saveCurrentPopulation(e);
             this->_stats.save();
@@ -46,6 +51,7 @@ std::shared_ptr<Chromozome> InterleavedEA::run ()
         {
             std::cout << "DEACTIVATING REGIONS OF INTEREST OF CHROMOZOMES" << std::endl;
             for (auto ch: this->_population) ch->deactivateROI();
+            computeFitness(this->_population, true);
         }
 
 
@@ -54,12 +60,12 @@ std::shared_ptr<Chromozome> InterleavedEA::run ()
         {
             // This is a hill climbing epoch
             std::cout << "[" << e << "] Hill climber epoch" << std::endl;
-            this->_hillClimberEpoch();
+            this->_hillClimberEpoch(e);
         }
         else
         {
             // This is a steady state evolution epoch
-            this->_steadyStateEpoch();
+            this->_steadyStateEpoch(e);
         }
 
 
@@ -76,7 +82,7 @@ std::shared_ptr<Chromozome> InterleavedEA::run ()
 
 // -----------------------------------------  PROTECTED METHODS  ----------------------------------------- //
 
-void InterleavedEA::_hillClimberEpoch ()
+void InterleavedEA::_hillClimberEpoch (int epoch)
 {
     // Run the whole population through hill climbing algorithm. The HillClimberPool modifies the population
     // in place - it does not create a new one!
@@ -86,6 +92,10 @@ void InterleavedEA::_hillClimberEpoch ()
     }
 
     this->_hcp.waitToFinish();
+
+    // Compute fitness of all chromozomes
+    if ((epoch+1) % POPULATION_SAVE_FREQUENCY == 0) computeFitness(this->_population, true);
+    else computeFitness(this->_population);
 }
 
 

@@ -8,7 +8,7 @@
 
 #include <opencv2/core/core.hpp>
 #include <iostream>
-#include "IVisitor.h"
+#include "components/IVisitor.h"
 
 
 namespace eic {

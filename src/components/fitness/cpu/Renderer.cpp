@@ -2,7 +2,7 @@
 
 #include <chrono>
 #include <opencv2/imgproc/imgproc.hpp>
-#include "Chromozome.h"
+#include "components/Chromozome.h"
 #include "shapes/Circle.h"
 
 
@@ -150,16 +150,9 @@ Renderer::Renderer (const cv::Size &image_size)
 
 
 const std::vector<cv::Mat> Renderer::render (Chromozome &ch)
-{    
-#ifdef MEASURE_TIME
-    auto start = std::chrono::high_resolution_clock::now();
-#endif
+{
     // Triger rendering of the chromozome -> visit it
     ch.accept(*this);
-#ifdef MEASURE_TIME
-    auto end = std::chrono::high_resolution_clock::now();
-    std::cout << "Rendering time: " << std::chrono::duration_cast<std::chrono::milliseconds>(end-start).count() << " ms" << std::endl;
-#endif
 
     return this->_getRenderedChannels();
 }

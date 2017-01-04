@@ -43,6 +43,10 @@ public:
     virtual int getRadius () const final;
     virtual cv::Point getCenter () const override final;
 
+#ifdef USE_GPU
+    virtual void writeDescription (int *desc_array) const override final;
+#endif
+
     /**
      * @brief Min and max radius of a circle belonging to the given circle type
      * @param image_size

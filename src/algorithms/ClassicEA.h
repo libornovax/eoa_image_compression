@@ -10,6 +10,9 @@
 #include "entities/Stats.h"
 #include "components/Chromozome.h"
 
+// How often will the whole population be saved
+#define POPULATION_SAVE_FREQUENCY 50
+
 
 namespace eic {
 

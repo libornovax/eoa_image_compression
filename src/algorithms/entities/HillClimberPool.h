@@ -64,6 +64,8 @@ private:
     std::vector<std::thread> _worker_pool;
     // Number of currently running workers
     std::atomic<int> _num_running_workers;
+    // Number of workers that are currently processing something
+    std::atomic<int> _num_processing_workers;
     // Input queue of chromozomes
     std::deque<std::shared_ptr<Chromozome>> _queue;
     // Maximum size of the input queue
@@ -74,6 +76,8 @@ private:
     std::condition_variable _cv_full;
     std::condition_variable _cv_empty;
     std::atomic<bool> _shut_down;
+    // Signal that one chromozome has been processed (for waitToFinish())
+    std::condition_variable _cv_one_done;
 
 };
 

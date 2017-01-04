@@ -2,6 +2,7 @@
 
 #include <iostream>
 #include "components/RGen.h"
+#include "components/Config.h"
 
 
 namespace eic {
@@ -93,6 +94,18 @@ cv::Point Circle::getCenter() const
 {
     return this->_center;
 }
+
+
+#ifdef USE_GPU
+void Circle::writeDescription (int *desc_array) const
+{
+    desc_array[0] = int(ShapeType::CIRCLE);
+    IShape::writeDescription(desc_array);  // RGBa
+    desc_array[5] = this->_center.x;
+    desc_array[6] = this->_center.y;
+    desc_array[7] = this->_radius;
+}
+#endif
 
 
 std::pair<int, int> Circle::radiusBounds (const cv::Size &image_size, SizeGroup sg)

@@ -5,6 +5,7 @@
 #include "shapes/Circle.h"
 #include "components/Config.h"
 #include "components/utils.h"
+#include "components/fitness/Fitness.h"
 
 
 namespace eic {
@@ -21,7 +22,7 @@ std::shared_ptr<Chromozome> HillClimber::run (const std::shared_ptr<Chromozome> 
     assert(chromozome != nullptr);
 
     // Initialize the best chromozome with the current one
-    this->_best_chromozome = chromozome;
+    this->_best_chromozome = chromozome; computeFitness(this->_best_chromozome, true);
 
     if (this->_save_and_print)
     {
@@ -30,9 +31,8 @@ std::shared_ptr<Chromozome> HillClimber::run (const std::shared_ptr<Chromozome> 
     }
 
 
+    // -- RUN THE HILL CLIMBER -- //
     Mutator mut(chromozome->getTarget()->image_size);
-    int last_save = 0;
-
     for (int i = 0; i < Config::getParams().hill_climber.num_iterations; ++i)
     {
         if (this->_save_and_print)
@@ -42,38 +42,36 @@ std::shared_ptr<Chromozome> HillClimber::run (const std::shared_ptr<Chromozome> 
         }
 
         // Generate n mutated chromozomes and select the best one from them - Steepest Ascent Hill Climb
-        double min_fitness = this->_best_chromozome->getFitness();
-        std::shared_ptr<Chromozome> best;
+        std::vector<std::shared_ptr<Chromozome>> chromozomes(Config::getParams().hill_climber.pool_size);
         for (int c = 0; c < Config::getParams().hill_climber.pool_size; ++c)
         {
-            auto cloned_chromozome = this->_best_chromozome->clone();
-            cloned_chromozome->accept(mut);
+            chromozomes[c] = this->_best_chromozome->clone();
+            chromozomes[c]->accept(mut);
+        }
 
-            if (cloned_chromozome->getFitness() < min_fitness)
+        // Compute fitness of all chromozomes
+        computeFitness(chromozomes);
+
+        for (int c = 0; c < Config::getParams().hill_climber.pool_size; ++c)
+        {
+            if (chromozomes[c]->getFitness() < this->_best_chromozome->getFitness())
             {
                 // This one is better - save it
-                min_fitness = cloned_chromozome->getFitness();
-                best = cloned_chromozome;
+                this->_best_chromozome = chromozomes[c];
+
+                if (this->_save_and_print)
+                {
+                    std::cout << "[" << i << "] Lowest difference: " << this->_best_chromozome->getFitness() << " (" << this->_best_chromozome->size() << ")" << std::endl;
+                }
             }
         }
 
-        if (best != nullptr)
+        if (this->_save_and_print && i % 200 == 0)
         {
-            // Replace the best chromozome, this one is better
-            this->_best_chromozome = best;
-
-            if (this->_save_and_print)
-            {
-                std::cout << "[" << i << "] Lowest difference: " << best->getFitness() << " (" << best->size() << ")" << std::endl;
-
-                // Save the current image
-                if (i-last_save > 200)
-                {
-                    last_save = i;
-                    cv::Mat image = this->_best_chromozome->asImage();
-                    cv::imwrite(eic::Config::getParams().path_out + "/approx_" + std::to_string(i) + ".png", image);
-                }
-            }
+            // Save the current best image
+            computeFitness(this->_best_chromozome, true);  // Render the image channels
+            cv::Mat image = this->_best_chromozome->asImage();
+            cv::imwrite(eic::Config::getParams().path_out + "/approx_" + std::to_string(i) + ".png", image);
         }
     }
 
