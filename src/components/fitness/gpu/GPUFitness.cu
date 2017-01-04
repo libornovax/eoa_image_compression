@@ -88,22 +88,10 @@ namespace {
         int* g_all_canvas; cudaMalloc((void**)&g_all_canvas, population_size*target_size*sizeof(int));
 
         // -- FITNESS COMPUTING KERNEL -- //
-        // Each rendering can run only on one multiprocessor because of the shared memory size - we have
-        // to split the whole population into several kernel calls
-        int num_concurrent_blocks = getNumConcurentBlocks();
-        int num_iterations = ceil(double(population_size) / num_concurrent_blocks);
-
-        for (int i = 0; i < num_iterations; ++i)
-        {
-            int offset     = i * num_concurrent_blocks;
-            int end        = min(offset+num_concurrent_blocks, population_size);
-            int num_blocks = end - offset;
-
-            populationFitness<<< num_blocks, THREADS_PER_BLOCK, CANVAS_MEM_SIZE >>>(
-                g_target, g_weights, target.cols, target.rows, g_population, offset, population_size,
-                chromozome_length, g_out_fitness, g_all_canvas
-            );
-        }
+        populationFitness<<< population_size, THREADS_PER_BLOCK, CANVAS_MEM_SIZE >>>(
+            g_target, g_weights, target.cols, target.rows, g_population, population_size,
+            chromozome_length, g_out_fitness, g_all_canvas
+        );
 
         for (int i = 0; i < population_size; ++i)
         {
@@ -117,34 +105,6 @@ namespace {
         }
 
         cudaFree(g_all_canvas);
-    }
-
-
-    /**
-     * @brief Calls a fitness computing kernel, which only computes fitness on the GPU
-     * The kernel called from here does not copy any data from the gpu and does not keep the rendered images
-     * in the GPU memory
-     */
-    void computeOnly (int population_size, int chromozome_length, const cv::Mat &target, uchar *g_target,
-                      float *g_weights, int *g_population, float *g_out_fitness)
-    {
-        // -- FITNESS COMPUTING KERNEL -- //
-        // Each rendering can run only on one multiprocessor because of the shared memory size - we have
-        // to split the whole population into several kernel calls
-        int num_concurrent_blocks = getNumConcurentBlocks();
-        int num_iterations = ceil(double(population_size) / num_concurrent_blocks);
-
-        for (int i = 0; i < num_iterations; ++i)
-        {
-            int offset     = i * num_concurrent_blocks;
-            int end        = min(offset+num_concurrent_blocks, population_size);
-            int num_blocks = end - offset;
-
-            populationFitness<<< num_blocks, THREADS_PER_BLOCK, CANVAS_MEM_SIZE >>>(
-                g_target, g_weights, target.cols, target.rows, g_population, offset, population_size,
-                chromozome_length, g_out_fitness
-            );
-        }
     }
 }
 
@@ -198,8 +158,12 @@ void computeFitnessGPU (const std::vector<std::shared_ptr<Chromozome>> &chromozo
     else
     {
         // Launch a kernel, which only computes fitness
-        computeOnly(population_size, chromozome_length, target, g_target, g_weights, g_population,
-                    g_out_fitness);
+        // The kernel called from here does not copy any data from the gpu and does not keep the rendered
+        // images in the GPU memory
+        populationFitness<<< population_size, THREADS_PER_BLOCK, CANVAS_MEM_SIZE >>>(
+            g_target, g_weights, target.cols, target.rows, g_population, population_size,
+            chromozome_length, g_out_fitness
+        );
     }
 
 

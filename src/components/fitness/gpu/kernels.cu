@@ -304,8 +304,7 @@ namespace {
 
 __global__
 void populationFitness (__uint8_t *g_target, float *g_weights, int width, int height, int *g_population,
-                        int offset, int population_size, int chromozome_length,
-                        float *g_out_fitness, int *g_all_canvas)
+                        int population_size, int chromozome_length, float *g_out_fitness, int *g_all_canvas)
 {
     // VERSION THAT WRITES OUT THE RENDERED IMAGES
 
@@ -317,7 +316,7 @@ void populationFitness (__uint8_t *g_target, float *g_weights, int width, int he
     if (threadIdx.x == 0) s_fitness[0] = 0.0f;
 
     // Chromozome id that is being rendered is given by the block id
-    unsigned int ch_id = offset + blockIdx.x;
+    unsigned int ch_id = blockIdx.x;
 
     // Get the pointer to the memory, where the chromozome that is being processed by this block is
     int *g_chromozome = g_population + ch_id*(chromozome_length*DESC_LEN+6);
@@ -380,8 +379,7 @@ void populationFitness (__uint8_t *g_target, float *g_weights, int width, int he
 
 __global__
 void populationFitness (__uint8_t *g_target, float *g_weights, int width, int height, int *g_population,
-                        int offset, int population_size, int chromozome_length,
-                        float *g_out_fitness)
+                        int population_size, int chromozome_length, float *g_out_fitness)
 {
     // VERSION THAT DOES NOT WRITE OUT THE RENDERED IMAGES -> MUCH FASTER!
 
@@ -393,7 +391,7 @@ void populationFitness (__uint8_t *g_target, float *g_weights, int width, int he
     if (threadIdx.x == 0) s_fitness[0] = 0.0f;
 
     // Chromozome id that is being rendered is given by the block id
-    unsigned int ch_id = offset + blockIdx.x;
+    unsigned int ch_id = blockIdx.x;
 
     // Get the pointer to the memory, where the chromozome that is being processed by this block is
     int *g_chromozome = g_population + ch_id*(chromozome_length*DESC_LEN+6);
