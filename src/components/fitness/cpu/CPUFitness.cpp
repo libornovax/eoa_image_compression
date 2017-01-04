@@ -44,11 +44,6 @@ void computeFitnessCPU (const std::vector<std::shared_ptr<Chromozome>> &chromozo
     {
         computeFitnessCPU(ch, write_channels);
     }
-
-    for (int i = 0; i < chromozomes.size(); ++i)
-    {
-        std::cout << "[" << i << "] CPU fitness: " << chromozomes[i]->_fitness << std::endl;
-    }
 }
 
 
@@ -72,24 +67,17 @@ void computeFitnessCPU (const std::shared_ptr<Chromozome> &ch, bool write_channe
             double roi_weight = double(ch->_target->image_size.area()) / ch->_roi.area();
             // ROI is activated, include error from the ROI as well
             fitness += roi_weight * computeDifference(ch->_target->blurred_channels[i](ch->_roi),
-                                                      channels[i](ch->_roi),
-                                                      ch->_target->weights(ch->_roi));
+                                                      channels[i](ch->_roi), ch->_target->weights(ch->_roi));
         }
-        fitness += computeDifference(ch->_target->blurred_channels[i],
-                                     channels[i], ch->_target->weights);
+        fitness += computeDifference(ch->_target->blurred_channels[i], channels[i], ch->_target->weights);
     }
-
-    cv::Mat image;
-    cv::merge(channels, image);
-    cv::cvtColor(image, image, CV_RGB2BGR);
-    cv::imwrite("render_cpu.png", image);
 
     if (write_channels)
     {
         // Copy also the rendered channels
         ch->_channels = channels;
     }
-    std::cout << "CPU fitness: " << fitness << std::endl;
+
     ch->_fitness = fitness;
     ch->_dirty = false;
 }

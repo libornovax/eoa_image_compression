@@ -176,6 +176,12 @@ cv::Mat Chromozome::asImage ()
 }
 
 
+std::vector<cv::Mat>& Chromozome::channels ()
+{
+    return this->_channels;
+}
+
+
 void Chromozome::accept (IVisitor &visitor)
 {
     visitor.visit(*this);

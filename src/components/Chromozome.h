@@ -99,6 +99,8 @@ public:
      */
     cv::Mat asImage ();
 
+    std::vector<cv::Mat>& channels ();
+
     /**
      * @brief Accept method from the visitor design pattern
      */

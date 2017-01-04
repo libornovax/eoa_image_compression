@@ -23,6 +23,66 @@ namespace {
         return device_properties.multiProcessorCount;
     }
 
+
+    void computeAndWriteChannels (int population_size, int chromozome_length, const cv::Mat &target, uchar *g_target, float *g_weights, int *g_population, float *g_out_fitness, const std::vector<std::shared_ptr<Chromozome>> &chromozomes)
+    {
+        // Allocate memory on GPU for the output images
+        int target_size = 3*target.rows*target.cols;
+        int* g_all_canvas; cudaMalloc((void**)&g_all_canvas, population_size*target_size*sizeof(int));
+
+        // -- FITNESS COMPUTING KERNEL -- //
+        // Each rendering can run only on one multiprocessor because of the shared memory size - we have
+        // to split the whole population into several kernel calls
+        int num_multiprocessors = getNumMultiprocessors();
+        int num_iterations = ceil(double(population_size) / num_multiprocessors);
+
+        for (int i = 0; i < num_iterations; ++i)
+        {
+            int offset     = i * num_multiprocessors;
+            int end        = min(offset+num_multiprocessors, population_size);
+            int num_blocks = end - offset;
+
+            populationFitness<<< num_blocks, THREADS_PER_BLOCK, SHARED_MEM_SIZE >>>(
+                g_target, g_weights, target.cols, target.rows, g_population, offset, population_size,
+                chromozome_length, g_out_fitness, g_all_canvas
+            );
+        }
+
+        for (int i = 0; i < population_size; ++i)
+        {
+            // Copy the rendered channels from the GPU
+            cv::Mat image(target.size(), CV_32SC3);
+            CHECK_ERROR(cudaMemcpy(image.ptr<int>(), g_all_canvas+i*target_size, target_size*sizeof(int),
+                                   cudaMemcpyDeviceToHost));
+
+            image.convertTo(image, CV_8UC3);
+            cv::split(image, chromozomes[i]->channels());
+        }
+
+        cudaFree(g_all_canvas);
+    }
+
+
+    void computeOnly (int population_size, int chromozome_length, const cv::Mat &target, uchar *g_target, float *g_weights, int *g_population, float *g_out_fitness)
+    {
+        // -- FITNESS COMPUTING KERNEL -- //
+        // Each rendering can run only on one multiprocessor because of the shared memory size - we have
+        // to split the whole population into several kernel calls
+        int num_multiprocessors = getNumMultiprocessors();
+        int num_iterations = ceil(double(population_size) / num_multiprocessors);
+
+        for (int i = 0; i < num_iterations; ++i)
+        {
+            int offset     = i * num_multiprocessors;
+            int end        = min(offset+num_multiprocessors, population_size);
+            int num_blocks = end - offset;
+
+            populationFitness<<< num_blocks, THREADS_PER_BLOCK, SHARED_MEM_SIZE >>>(
+                g_target, g_weights, target.cols, target.rows, g_population, offset, population_size,
+                chromozome_length, g_out_fitness
+            );
+        }
+    }
 }
 
 
@@ -81,25 +141,15 @@ void computeFitnessGPU (const std::vector<std::shared_ptr<Chromozome>> &chromozo
     float *g_out_fitness; cudaMalloc((void**)&g_out_fitness, population_size*sizeof(float));
 
 
-    int* g_all_canvas; cudaMalloc((void**)&g_all_canvas, population_size*target_size*sizeof(int));
 
-
-    // Each rendering can run only on one multiprocessor!!! Because of the shared memory - we have to split
-    // the whole population to several kernel calls
-    int num_multiprocessors = getNumMultiprocessors();
-    int num_iterations = ceil(double(population_size) / num_multiprocessors);
-    for (int i = 0; i < num_iterations; ++i)
+    if (write_channels)
     {
-        int offset = i * num_multiprocessors;
-        int end    = min(offset+num_multiprocessors, population_size);
-
-        int num_blocks = end-offset;
-        populationFitness<<< num_blocks, THREADS_PER_BLOCK, SHARED_MEM_SIZE >>>(
-            g_target, g_weights, target.cols, target.rows, g_population, offset, population_size,
-            chromozome_length, g_out_fitness, g_all_canvas
-        );
+        computeAndWriteChannels(population_size, chromozome_length, target, g_target, g_weights, g_population, g_out_fitness, chromozomes);
     }
-
+    else
+    {
+        computeOnly(population_size, chromozome_length, target, g_target, g_weights, g_population, g_out_fitness);
+    }
 
 
 
@@ -111,15 +161,7 @@ void computeFitnessGPU (const std::vector<std::shared_ptr<Chromozome>> &chromozo
     {
         chromozomes[i]->_fitness = out_fitness[i];
         chromozomes[i]->_dirty = false;
-        std::cout << "[" << i << "] GPU fitness: " << out_fitness[i] << std::endl;
-
-        // Copy the rendered channels from the GPU
-        cv::Mat canvas(target.size(), CV_32SC3);
-        CHECK_ERROR(cudaMemcpy(canvas.ptr<int>(), g_all_canvas+i*target_size, target_size*sizeof(int), cudaMemcpyDeviceToHost));
-
-        canvas.convertTo(canvas, CV_8UC3);
-        cv::cvtColor(canvas, canvas, CV_RGB2BGR);
-        cv::imwrite(std::to_string(i) + "_render_gpu.png", canvas);
+//        std::cout << "[" << i << "] GPU fitness: " << out_fitness[i] << std::endl;
     }
 
 
@@ -127,7 +169,6 @@ void computeFitnessGPU (const std::vector<std::shared_ptr<Chromozome>> &chromozo
     cudaFree(g_weights);
     cudaFree(g_out_fitness);
     cudaFree(g_population);
-    cudaFree(g_all_canvas);
 
 //    exit(EXIT_SUCCESS);
 }
