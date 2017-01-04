@@ -96,10 +96,15 @@ void HillClimberPool::_launch ()
 
     this->_shut_down = false;
 
+#ifdef USE_GPU
+    // When using GPU we can only launch one thread because they would be fighting for the GPU sources
+    unsigned int num_threads = 1;
+#else
     // Determine the number of cores on this machine
-    unsigned int num_cores = std::thread::hardware_concurrency();
-    std::cout << "-- This machine has " << num_cores << " concurent threads" << std::endl;
-    for (int i = 0; i < num_cores; ++i)
+    unsigned int num_threads = std::thread::hardware_concurrency();
+    std::cout << "-- This machine has " << num_threads << " concurent threads" << std::endl;
+#endif
+    for (int i = 0; i < num_threads; ++i)
     {
         this->_worker_pool.emplace_back(&HillClimberPool::_workerThread, this);
     }
