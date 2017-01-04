@@ -105,29 +105,36 @@ namespace {
         const int bb_width = bb_br_x-bb_tl_x;
         const int bb_height = bb_br_y-bb_tl_y;
 
-        // Traverse the bounding box and render the pixels, which are inside of the circle
-        for (int i = threadIdx.x; i < bb_width*bb_height; i += blockDim.x)
-        {
-            // Get the x and y coordinates of the pixel in the canvas
-            int y = int(i / bb_width);
-            int x = (i - (y * bb_width));
-            x += bb_tl_x; y += bb_tl_y;
+        // Number of elements to be processed per thread
+        int nept = ceil(float(bb_width*bb_height) / blockDim.x);
 
-            // Check if this point is inside of the circle
-            if ((x-center_x)*(x-center_x) + (y-center_y)*(y-center_y) <= radius_sq)
+        // Traverse the bounding box and render the pixels, which are inside of the circle
+//        for (int i = threadIdx.x; i < bb_width*bb_height; i += blockDim.x)
+        for (int i = threadIdx.x*nept; i < threadIdx.x*nept+nept; ++i)
+        {
+            if (i < bb_width*bb_height)
             {
+                // Get the x and y coordinates of the pixel in the canvas
+                int y = int(i / bb_width);
+                int x = (i - (y * bb_width));
+                x += bb_tl_x; y += bb_tl_y;
+
+                // Check if this point is inside of the circle
+                if ((x-center_x)*(x-center_x) + (y-center_y)*(y-center_y) <= radius_sq)
+                {
 #ifdef RENDER_AVERAGE
-                int pixel_idx = 4*canvas_width*y + 4*x;
-                s_canvas[pixel_idx + 0] = s_canvas[pixel_idx + 0] + r;
-                s_canvas[pixel_idx + 1] = s_canvas[pixel_idx + 1] + g;
-                s_canvas[pixel_idx + 2] = s_canvas[pixel_idx + 2] + b;
-                s_canvas[pixel_idx + 3] = s_canvas[pixel_idx + 3] + a;
+                    int pixel_idx = 4*canvas_width*y + 4*x;
+                    s_canvas[pixel_idx + 0] = s_canvas[pixel_idx + 0] + r;
+                    s_canvas[pixel_idx + 1] = s_canvas[pixel_idx + 1] + g;
+                    s_canvas[pixel_idx + 2] = s_canvas[pixel_idx + 2] + b;
+                    s_canvas[pixel_idx + 3] = s_canvas[pixel_idx + 3] + a;
 #else
-                int pixel_idx = 3*canvas_width*y + 3*x;
-                s_canvas[pixel_idx + 0] = alpha_inv*s_canvas[pixel_idx + 0] + r;
-                s_canvas[pixel_idx + 1] = alpha_inv*s_canvas[pixel_idx + 1] + g;
-                s_canvas[pixel_idx + 2] = alpha_inv*s_canvas[pixel_idx + 2] + b;
+                    int pixel_idx = 3*canvas_width*y + 3*x;
+                    s_canvas[pixel_idx + 0] = alpha_inv*s_canvas[pixel_idx + 0] + r;
+                    s_canvas[pixel_idx + 1] = alpha_inv*s_canvas[pixel_idx + 1] + g;
+                    s_canvas[pixel_idx + 2] = alpha_inv*s_canvas[pixel_idx + 2] + b;
 #endif
+                }
             }
         }
     }
@@ -264,21 +271,28 @@ namespace {
     void copyCell (int *s_canvas, const int cell_width, const int cell_height, const int tl_x, const int tl_y,
                    int *g_canvas, const int target_width, const int target_height)
     {
-        for (int i = threadIdx.x; i < cell_width*cell_height; i += blockDim.x)
-        {
-            int row = i / cell_width;
-            int col = i - row*cell_width;
+        // Number of elements to be processed per thread
+        int nept = ceil(float(cell_width*cell_height) / blockDim.x);
 
-            // Copy RGB channels on the pixel
+//        for (int i = threadIdx.x; i < cell_width*cell_height; i += blockDim.x)
+        for (int i = threadIdx.x*nept; i < threadIdx.x*nept+nept; ++i)
+        {
+            if (i < cell_width*cell_height)
+            {
+                int row = i / cell_width;
+                int col = i - row*cell_width;
+
+                // Copy RGB channels on the pixel
 #ifdef RENDER_AVERAGE
-            g_canvas[3*(tl_y+row)*target_width + 3*(tl_x+col) + 0] = s_canvas[4*row*cell_width + 4*col + 0];
-            g_canvas[3*(tl_y+row)*target_width + 3*(tl_x+col) + 1] = s_canvas[4*row*cell_width + 4*col + 1];
-            g_canvas[3*(tl_y+row)*target_width + 3*(tl_x+col) + 2] = s_canvas[4*row*cell_width + 4*col + 2];
+                g_canvas[3*(tl_y+row)*target_width + 3*(tl_x+col) + 0] = s_canvas[4*row*cell_width + 4*col + 0];
+                g_canvas[3*(tl_y+row)*target_width + 3*(tl_x+col) + 1] = s_canvas[4*row*cell_width + 4*col + 1];
+                g_canvas[3*(tl_y+row)*target_width + 3*(tl_x+col) + 2] = s_canvas[4*row*cell_width + 4*col + 2];
 #else
-            g_canvas[3*(tl_y+row)*target_width + 3*(tl_x+col) + 0] = s_canvas[3*row*cell_width + 3*col + 0];
-            g_canvas[3*(tl_y+row)*target_width + 3*(tl_x+col) + 1] = s_canvas[3*row*cell_width + 3*col + 1];
-            g_canvas[3*(tl_y+row)*target_width + 3*(tl_x+col) + 2] = s_canvas[3*row*cell_width + 3*col + 2];
+                g_canvas[3*(tl_y+row)*target_width + 3*(tl_x+col) + 0] = s_canvas[3*row*cell_width + 3*col + 0];
+                g_canvas[3*(tl_y+row)*target_width + 3*(tl_x+col) + 1] = s_canvas[3*row*cell_width + 3*col + 1];
+                g_canvas[3*(tl_y+row)*target_width + 3*(tl_x+col) + 2] = s_canvas[3*row*cell_width + 3*col + 2];
 #endif
+            }
         }
     }
 
