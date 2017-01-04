@@ -210,11 +210,11 @@ namespace {
             s_canvas[y*4*cell_width+4*x+1] /= sum_alpha;
             s_canvas[y*4*cell_width+4*x+2] /= sum_alpha;
 
-            float diff = (s_canvas[y*4*cell_width+4*x]-g_target[ty*4*target_width+4*tx]);
+            float diff = (s_canvas[y*4*cell_width+4*x]-g_target[ty*3*target_width+3*tx]);
             my_fitness += weight * diff*diff;
-            diff = (s_canvas[y*4*cell_width+4*x+1]-g_target[ty*4*target_width+4*tx+1]);
+            diff = (s_canvas[y*4*cell_width+4*x+1]-g_target[ty*3*target_width+3*tx+1]);
             my_fitness += weight * diff*diff;
-            diff = (s_canvas[y*4*cell_width+4*x+2]-g_target[ty*4*target_width+4*tx+2]);
+            diff = (s_canvas[y*4*cell_width+4*x+2]-g_target[ty*3*target_width+3*tx+2]);
             my_fitness += weight * diff*diff;
 #else
             float diff = (s_canvas[y*3*cell_width+3*x]-g_target[ty*3*target_width+3*tx]);
