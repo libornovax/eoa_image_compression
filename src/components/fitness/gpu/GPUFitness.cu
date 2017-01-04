@@ -58,7 +58,8 @@ namespace {
                 population[population_idx + 2] = chromozomes[i]->getROI().y;
                 population[population_idx + 3] = chromozomes[i]->getROI().x + chromozomes[i]->getROI().width;
                 population[population_idx + 4] = chromozomes[i]->getROI().y + chromozomes[i]->getROI().height;
-                population[population_idx + 5] = 1 + chromozomes[i]->getTarget()->image_size.area() / chromozomes[i]->getROI().area();
+                population[population_idx + 5] = 1 + chromozomes[i]->getTarget()->image_size.area()
+                        / chromozomes[i]->getROI().area();
             }
 
             // Write all shapes
@@ -124,7 +125,8 @@ namespace {
      * The kernel called from here does not copy any data from the gpu and does not keep the rendered images
      * in the GPU memory
      */
-    void computeOnly (int population_size, int chromozome_length, const cv::Mat &target, uchar *g_target, float *g_weights, int *g_population, float *g_out_fitness)
+    void computeOnly (int population_size, int chromozome_length, const cv::Mat &target, uchar *g_target,
+                      float *g_weights, int *g_population, float *g_out_fitness)
     {
         // -- FITNESS COMPUTING KERNEL -- //
         // Each rendering can run only on one multiprocessor because of the shared memory size - we have
