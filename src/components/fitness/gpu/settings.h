@@ -15,10 +15,17 @@
 
 
 // SHARED MEMORY SIZE
-// Limit for CUDA capability >= 2.0 is 48kB
-// One pixel: 3*sizeof(int) = 12B, Dimensions of rendering window 60x60 = 3600, 3600*12 = 43200
-#define CANVAS_DIMENSION 60
-#define SHARED_MEM_SIZE 43200
+#ifdef RENDER_AVERAGE
+    // Limit for CUDA capability >= 2.0 is 48kB
+    // One pixel: 4*sizeof(int) = 16B, Dimensions of rendering window 50x50 = 2500, 2500*16 = 40000
+    #define CANVAS_DIMENSION 50
+    #define SHARED_MEM_SIZE 40000
+#else
+    // Limit for CUDA capability >= 2.0 is 48kB
+    // One pixel: 3*sizeof(int) = 12B, Dimensions of rendering window 60x60 = 3600, 3600*12 = 43200
+    #define CANVAS_DIMENSION 60
+    #define SHARED_MEM_SIZE 43200
+#endif
 
 
 // Because we cannot determine the number of cuda cores from device propertied, we need to set this by hand.

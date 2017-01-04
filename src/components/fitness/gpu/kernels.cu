@@ -31,9 +31,10 @@ namespace {
             if (i < CANVAS_DIMENSION*CANVAS_DIMENSION)
             {
 #ifdef RENDER_AVERAGE
-                s_canvas[3*i + 0] = 1;
-                s_canvas[3*i + 1] = 1;
-                s_canvas[3*i + 2] = 1;
+                s_canvas[4*i + 0] = 1;
+                s_canvas[4*i + 1] = 1;
+                s_canvas[4*i + 2] = 1;
+                s_canvas[4*i + 3] = 1;
 #else
                 s_canvas[3*i + 0] = 0;
                 s_canvas[3*i + 1] = 0;
@@ -60,9 +61,15 @@ namespace {
      * @param radius Radius of the circle
      */
     __device__
+#ifdef RENDER_AVERAGE
+    void renderCircle (int *s_canvas, const int canvas_width, const int canvas_height, const int r,
+                       const int g, const int b, const int a, const int center_x,
+                       const int center_y, const int radius)
+#else
     void renderCircle (int *s_canvas, const int canvas_width, const int canvas_height, const int r,
                        const int g, const int b, const float alpha_inv, const int center_x,
                        const int center_y, const int radius)
+#endif
     {
         // The circle is rendered as follows - a bounding box around the circle is determined and for each
         // pixel inside of the bounding box we determine whether it is inside of the circle or not. If yes,
@@ -90,10 +97,18 @@ namespace {
             // Check if this point is inside of the circle
             if ((x-center_x)*(x-center_x) + (y-center_y)*(y-center_y) <= radius_sq)
             {
+#ifdef RENDER_AVERAGE
+                int pixel_idx = 4*canvas_width*y + 4*x;
+                s_canvas[pixel_idx + 0] = s_canvas[pixel_idx + 0] + r;
+                s_canvas[pixel_idx + 1] = s_canvas[pixel_idx + 1] + g;
+                s_canvas[pixel_idx + 2] = s_canvas[pixel_idx + 2] + b;
+                s_canvas[pixel_idx + 3] = s_canvas[pixel_idx + 3] + a;
+#else
                 int pixel_idx = 3*canvas_width*y + 3*x;
                 s_canvas[pixel_idx + 0] = alpha_inv*s_canvas[pixel_idx + 0] + r;
                 s_canvas[pixel_idx + 1] = alpha_inv*s_canvas[pixel_idx + 1] + g;
                 s_canvas[pixel_idx + 2] = alpha_inv*s_canvas[pixel_idx + 2] + b;
+#endif
             }
         }
     }
@@ -130,9 +145,15 @@ namespace {
                 {
                     float alpha = float(g_shape_desc[4]) / 100;
 
+#ifdef RENDER_AVERAGE
+                    renderCircle(s_canvas, width, height,
+                                 alpha*g_shape_desc[1], alpha*g_shape_desc[2], alpha*g_shape_desc[3],
+                                 g_shape_desc[4], g_shape_desc[5]-tl_x, g_shape_desc[6]-tl_y, g_shape_desc[7]);
+#else
                     renderCircle(s_canvas, width, height,
                                  alpha*g_shape_desc[1], alpha*g_shape_desc[2], alpha*g_shape_desc[3],
                                  1-alpha, g_shape_desc[5]-tl_x, g_shape_desc[6]-tl_y, g_shape_desc[7]);
+#endif
                 }
             }
 
@@ -182,12 +203,27 @@ namespace {
                 weight *= s_roi[5];
             }
 
+#ifdef RENDER_AVERAGE
+            // Divide the sums by the sum of the alpha channel
+            float sum_alpha = float(s_canvas[y*4*cell_width+4*x+3]) / 100.0f;
+            s_canvas[y*4*cell_width+4*x]   /= sum_alpha;
+            s_canvas[y*4*cell_width+4*x+1] /= sum_alpha;
+            s_canvas[y*4*cell_width+4*x+2] /= sum_alpha;
+
+            float diff = (s_canvas[y*4*cell_width+4*x]-g_target[ty*4*target_width+4*tx]);
+            my_fitness += weight * diff*diff;
+            diff = (s_canvas[y*4*cell_width+4*x+1]-g_target[ty*4*target_width+4*tx+1]);
+            my_fitness += weight * diff*diff;
+            diff = (s_canvas[y*4*cell_width+4*x+2]-g_target[ty*4*target_width+4*tx+2]);
+            my_fitness += weight * diff*diff;
+#else
             float diff = (s_canvas[y*3*cell_width+3*x]-g_target[ty*3*target_width+3*tx]);
             my_fitness += weight * diff*diff;
             diff = (s_canvas[y*3*cell_width+3*x+1]-g_target[ty*3*target_width+3*tx+1]);
             my_fitness += weight * diff*diff;
             diff = (s_canvas[y*3*cell_width+3*x+2]-g_target[ty*3*target_width+3*tx+2]);
             my_fitness += weight * diff*diff;
+#endif
         }
 
         atomicAdd(s_fitness, my_fitness);
@@ -215,9 +251,15 @@ namespace {
             int col = i - row*cell_width;
 
             // Copy RGB channels on the pixel
+#ifdef RENDER_AVERAGE
+            g_canvas[3*(tl_y+row)*target_width + 3*(tl_x+col) + 0] = s_canvas[4*row*cell_width + 4*col + 0];
+            g_canvas[3*(tl_y+row)*target_width + 3*(tl_x+col) + 1] = s_canvas[4*row*cell_width + 4*col + 1];
+            g_canvas[3*(tl_y+row)*target_width + 3*(tl_x+col) + 2] = s_canvas[4*row*cell_width + 4*col + 2];
+#else
             g_canvas[3*(tl_y+row)*target_width + 3*(tl_x+col) + 0] = s_canvas[3*row*cell_width + 3*col + 0];
             g_canvas[3*(tl_y+row)*target_width + 3*(tl_x+col) + 1] = s_canvas[3*row*cell_width + 3*col + 1];
             g_canvas[3*(tl_y+row)*target_width + 3*(tl_x+col) + 2] = s_canvas[3*row*cell_width + 3*col + 2];
+#endif
         }
     }
 
