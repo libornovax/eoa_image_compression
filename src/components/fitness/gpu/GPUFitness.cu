@@ -249,7 +249,7 @@ bool initializeGPU ()
         cudaMalloc((void**)&gpu_dummy, sizeof(int));
         cudaFree(gpu_dummy);
 
-        std::cout << "--------------------------------------------------------------" << std::endl;
+        std::cout << "=================================== GPU ====================================" << std::endl;
         std::cout << "Device name:                    " << device_properties.name << std::endl;
         std::cout << "Compute capability:             " << device_properties.major << "." << device_properties.minor << std::endl;
         std::cout << "Total global memory:            " << device_properties.totalGlobalMem << std::endl;
@@ -259,9 +259,13 @@ bool initializeGPU ()
         std::cout << "Max grid size:                  " << device_properties.maxGridSize[0] << std::endl;
         std::cout << "Shared mem per block:           " << device_properties.sharedMemPerBlock << std::endl;
         std::cout << "Shared mem per multiprocessor:  " << device_properties.sharedMemPerMultiprocessor << std::endl;
-        std::cout << "--------------------------------------------------------------" << std::endl;
-        std::cout << "Num concurreng blocks:          " << getNumConcurentBlocks() << std::endl;
-        std::cout << "--------------------------------------------------------------" << std::endl;
+        std::cout << "============================================================================" << std::endl;
+        std::cout << "Num concurrent blocks:          " << getNumConcurentBlocks() << std::endl;
+        std::cout << "THREADS PER BLOCK:              " << THREADS_PER_BLOCK << std::endl;
+        std::cout << "CANVAS MEMORY SIZE:             " << CANVAS_MEM_SIZE << std::endl;
+        std::cout << "CHROMOZOME MEMORY SIZE:         " << CHROMOZOME_MEM_SIZE << std::endl;
+        std::cout << "============================================================================" << std::endl;
+        std::cout << std::endl;
 
         return true;
     }
