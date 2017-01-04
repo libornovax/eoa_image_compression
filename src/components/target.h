@@ -40,7 +40,7 @@ struct Target {
         {
             grayscale_weights.convertTo(external_weights, CV_32FC1);
             double max_val, dummy; cv::minMaxLoc(external_weights, &dummy, &max_val);
-            external_weights *= max_weight/max_val;
+            if (max_val > 0) external_weights *= max_weight/max_val;
             external_weights += 1;
         }
         // Edges
