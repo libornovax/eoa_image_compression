@@ -10,14 +10,14 @@
 ####################################################################################################
 
 # Image that will be approximated with the compression algorithm
-path_image: "/Users/libornovak/Data/eoa_image_compression/images/mona_lisa_face.jpg"
+path_image: "/Users/libornovak/Software/eoa_image_compression/images/Mona_Lisa.bmp"
 
 # Path to a grayscale image, which corresponds to weights of different areas in the image
-path_image_weights: "/Users/libornovak/Data/eoa_image_compression/images/mona_lisa_face_weights.jpg"
+path_image_weights: "/Users/libornovak/Software/eoa_image_compression/images/Mona_Lisa_weights.bmp"
 # The weight to which the 255 value from the weight image will be translated
 max_weight: 1000
 
-# Path to the folder with output and approximaged image
+# Path to the folder with output and approximated image
 path_out: "/Users/libornovak/Data/eoa_image_compression/results/test/"
 
 # Length of the chromozome, that will represent the image (number of shapes)
