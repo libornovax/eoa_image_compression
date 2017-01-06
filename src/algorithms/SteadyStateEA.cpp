@@ -35,8 +35,8 @@ std::shared_ptr<Chromozome> SteadyStateEA::run ()
     // Run the evolution
     for (int e = 0; e < Config::getParams().ea.num_epochs; ++e)
     {
-        this->_stats.add(e, this->_best_chromozome->getFitness(), this->_worst_chromozome->getFitness(),
-                         ClassicEA::_meanFitness(this->_population), ClassicEA::_stddevFitness(this->_population));
+        this->_stats.add(e, this->_best_chromozome->getBasicFitness(),
+                         this->_worst_chromozome->getBasicFitness());
 
         if (e % POPULATION_SAVE_FREQUENCY == 0)
         {

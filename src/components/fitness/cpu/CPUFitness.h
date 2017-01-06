@@ -19,6 +19,8 @@ void computeFitnessCPU (const std::vector<std::shared_ptr<Chromozome>> &chromozo
 
 void computeFitnessCPU (const std::shared_ptr<Chromozome> &ch, bool write_channels=false);
 
+double computeBasicFitnessCPU (Chromozome &ch);
+
 
 }
 

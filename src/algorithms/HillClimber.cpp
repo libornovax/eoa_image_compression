@@ -37,7 +37,7 @@ std::shared_ptr<Chromozome> HillClimber::run (const std::shared_ptr<Chromozome> 
     {
         if (this->_save_and_print)
         {
-            this->_stats.add(i, this->_best_chromozome->getFitness());
+            if (i % 100 == 0) this->_stats.add(i, this->_best_chromozome->getBasicFitness());
             if (i % 100 == 0) this->_stats.save();
         }
 
@@ -66,7 +66,7 @@ std::shared_ptr<Chromozome> HillClimber::run (const std::shared_ptr<Chromozome> 
             }
         }
 
-        if (this->_save_and_print && i % 200 == 0)
+        if (this->_save_and_print && i % 1000 == 0)
         {
             // Save the current best image
             computeFitness(this->_best_chromozome, true);  // Render the image channels

@@ -15,23 +15,40 @@ namespace {
      * @param target Original image
      * @param render Candidate rendered from a chromozome
      * @param weights Weight map of the pixels
+     * @param basic If true, then the weight map will not be used (basic pixel difference)
      * @return Weighted difference
      */
-    double computeDifference (const cv::Mat &target, const cv::Mat &render, const cv::Mat &weights)
+    double computeDifference (const cv::Mat &target, const cv::Mat &render, const cv::Mat &weights,
+                              bool basic=false)
     {
         cv::Mat diff;
-        cv::subtract(target, render, diff, cv::noArray(), CV_32FC1);
-        cv::pow(diff, 2, diff);
 
-        // Apply weight on each image pixel
-        cv::multiply(diff, weights, diff);
+        if (basic)
+        {
+            // Absolute difference
+            cv::Mat render_f; render.convertTo(render_f, CV_32FC1);
+            cv::Mat target_f; target.convertTo(target_f, CV_32FC1);
+            cv::absdiff(target_f, render_f, diff);
 
-        // Tolerate small differences in color - only count as error if the difference is above the set
-        // threshold
-        cv::threshold(diff, diff, 50, 0, CV_THRESH_TOZERO);
+            cv::Scalar total = cv::sum(diff);
+            return total[0];
+        }
+        else
+        {
+            // Squared difference with weights
+            cv::subtract(target, render, diff, cv::noArray(), CV_32FC1);
+            cv::pow(diff, 2, diff);
 
-        cv::Scalar total = cv::sum(diff);
-        return total[0];
+            // Apply weight on each image pixel
+            cv::multiply(diff, weights, diff);
+
+            // Tolerate small differences in color - only count as error if the difference is above the set
+            // threshold
+            cv::threshold(diff, diff, 50, 0, CV_THRESH_TOZERO);
+
+            cv::Scalar total = cv::sum(diff);
+            return total[0];
+        }
     }
 
 }
@@ -70,6 +87,7 @@ void computeFitnessCPU (const std::shared_ptr<Chromozome> &ch, bool write_channe
         fitness += computeDifference(ch->_target->blurred_channels[i], channels[i], ch->_target->weights);
     }
 
+    // Only do this for proper fitness computation
     if (write_channels)
     {
         // Copy also the rendered channels
@@ -78,6 +96,30 @@ void computeFitnessCPU (const std::shared_ptr<Chromozome> &ch, bool write_channe
 
     ch->_fitness = fitness;
     ch->_dirty = false;
+}
+
+
+double computeBasicFitnessCPU (Chromozome &ch)
+{
+    // Render and compute fitness
+    assert(ch.getTarget()->channels.size() == 3);
+    assert(ch.getTarget()->channels[0].size() == ch.getTarget()->channels[1].size() && ch.getTarget()->channels[0].size() == ch.getTarget()->channels[2].size());
+
+    // Render the image
+    Renderer renderer(ch.getTarget()->image_size);
+    std::vector<cv::Mat> channels = renderer.render(ch);
+
+    // Compute pixel-wise difference
+    double fitness = 0;
+    for (size_t i = 0; i < 3; ++i)
+    {
+        fitness += computeDifference(ch.getTarget()->blurred_channels[i], channels[i],
+                                     ch.getTarget()->weights, true);
+    }
+
+    ch.setNotDirty();
+
+    return fitness;
 }
 
 

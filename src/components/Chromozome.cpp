@@ -5,6 +5,7 @@
 #include "Config.h"
 #include "shapes/Circle.h"
 #include "RGen.h"
+#include "fitness/cpu/CPUFitness.h"
 
 
 namespace eic {
@@ -135,9 +136,21 @@ double Chromozome::getFitness ()
 }
 
 
+double Chromozome::getBasicFitness ()
+{
+    return computeBasicFitnessCPU(*this);
+}
+
+
 void Chromozome::setDirty ()
 {
     this->_dirty = true;
+}
+
+
+void Chromozome::setNotDirty ()
+{
+    this->_dirty = false;
 }
 
 

@@ -82,9 +82,16 @@ public:
     double getFitness ();
 
     /**
+     * @brief Compute unweighted fitness without ROIs - only pixel differences (not squared)
+     * @return Basic fitness value
+     */
+    double getBasicFitness ();
+
+    /**
      * @brief Triggers fitness recomputation in the next getFitness() call
      */
     void setDirty ();
+    void setNotDirty ();
 
     const std::shared_ptr<const Target>& getTarget () const;
 
