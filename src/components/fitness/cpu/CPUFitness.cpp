@@ -113,7 +113,7 @@ double computeBasicFitnessCPU (Chromozome &ch)
     double fitness = 0;
     for (size_t i = 0; i < 3; ++i)
     {
-        fitness += computeDifference(ch.getTarget()->blurred_channels[i], channels[i],
+        fitness += computeDifference(ch.getTarget()->channels[i], channels[i],
                                      ch.getTarget()->weights, true);
     }
 
